@@ -1,0 +1,31 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_lbf</title>
+
+<body><h1>gtm_lbf</h1>
+Calculates the output of linear basis functions for a given set of inputs
+
+<p>
+This simply amounts to returning the set of inputs with an 
+extra bias column of ones after the last column in the  
+input set matrix.
+
+<h3>Synopsis</h3>
+<pre>FI = gtm_lbf(X)</pre>
+<h3>Arguments</h3>
+<code>X</code> - 
+the latent variable sample forming the set of
+inputs; K-by-L
+
+<h3>Return</h3>
+<code>FI</code> - 
+the matrix of basis functions output values;
+K-by-(L+1), "+1" for the bias basis function
+
+<h3>See also</h3>
+<code><a href="./gtm_gbf.htm">gtm_gbf</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

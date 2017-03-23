@@ -1,0 +1,117 @@
+function plotMazeRegionSpectrum(filebasemat,fileext,nchannels,channels,chanmat,badchannels,nFFT,nOverlap,WinLength,Fs,NW,percentageBool,samescale,dbscale,removeexp)
+
+if ~exist('trialTypesBool','var') | isempty(trialTypesBool)
+    trialTypesBool = [1  0  1  0  0   0   0   0   0   0   0   0  0];
+                   % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+end
+if ~exist('mazeLocationsBool', 'var') | isempty(mazeLocationsBool)
+    mazeLocationsBool = [0  0  0  1  1  1   1   1   1];
+                      % rp lp dp cp ca rca lca rra lra
+end
+if ~exist('removeexp', 'var') | isempty(removeexp)
+    removeexp = 0;
+end
+if ~exist('percentageBool', 'var') | isempty(percentageBool)
+    percentageBool = 0;
+end
+if ~exist('samescale', 'var') | isempty(samescale)
+    samescale = 0;
+end
+if ~exist('dbscale', 'var') | isempty(dbscale)
+    dbscale = 0;
+end
+
+
+trialTypesBool = [0  0  0  0  0   0   0   0   0   0   0   0  1];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [0  0  0  0  0  0   0   0   0];  
+                  % rp lp dp cp ca rca lca rra lra
+[xpY, xpF] = calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+
+
+trialTypesBool = [1  0  1  0  0   0   0   0   0   0   0   0  0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [1  1  0  0  0  0   0   0   0];  
+                  % rp lp dp cp ca rca lca rra lra
+[wpY, wpF]=calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+
+
+mazeLocationsBool = [0  0  1  0  0  0   0   0   0];  
+                  % rp lp dp cp ca rca lca rra lra
+[dpY, dpF]=calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+
+
+mazeLocationsBool = [0  0  0  1  0  0   0   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+[cpY, cpF]=calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+
+
+mazeLocationsBool = [0  0  0  0  1  0   0   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+[caY, caF]=calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+
+                  
+mazeLocationsBool = [0  0  0  0  0  1   1   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+[rewY, rewF]=calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+               
+
+mazeLocationsBool = [0  0  0  0  0  0   0   1   1];
+                  % rp lp dp cp ca rca lca rra lra
+[retY, retF]=calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+
+keyboard
+
+if percentageBool
+    mazeLocationsBool = [1  1  1  1  1  1   1   1   1];
+                      % rp lp dp cp ca rca lca rra lra
+    [meanY meanF] = calcchanspectrum8(filebasemat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+    if meanF ~= cpF | meanF ~= caF | meanF ~= rewF | meanF ~= retF | meanF ~= xpF | meanF ~= wpF | meanF ~= dpF
+        FREQ_MATS_NOT_SAME
+    end
+    cpY = cpY./meanY;
+    caY = caY./meanY;
+    rewY = rewY./meanY;
+    retY = retY./meanY;
+    xpY = xpY./meanY;
+    wpY = wpY./meanY;
+    dpY = dpY./meanY;
+end
+
+
+figure(1);
+clf;
+figure(2);
+clf;
+
+
+color = [0 1 0];
+lineWidth = 0.01;
+plotchanspectrum(cpF,cpY,chanmat,badchannels,samescale,dbscale,color)
+
+color = [.5 .5 .5];
+lineWidth = 0.01;
+plotchanspectrum(rewF,rewY,chanmat,badchannels,samescale,dbscale,color)
+
+color = [0 0 1];
+lineWidth = 0.01;
+plotchanspectrum(retF,retY,chanmat,badchannels,samescale,dbscale,color)
+
+color = [0.5 0.5 0]; %brown
+lineWidth = 0.01;
+plotchanspectrum(xpF,xpY,chanmat,badchannels,samescale,dbscale,color)
+
+color = [0.5 0.5 1]; %light purple
+lineWidth = 0.01;
+plotchanspectrum(wpF,wpY,chanmat,badchannels,samescale,dbscale,color)
+
+color = [0.5 0 0.5]; %dark purple
+lineWidth = 0.01;
+plotchanspectrum(dpF,dpY,chanmat,badchannels,samescale,dbscale,color)
+
+color = [1 0 0];
+lineWidth = 0.01;
+plotchanspectrum(caF,caY,chanmat,badchannels,samescale,dbscale,color)
+
+
+return

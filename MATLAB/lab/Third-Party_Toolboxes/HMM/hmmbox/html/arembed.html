@@ -1,0 +1,68 @@
+<TITLE>/</TITLE>
+<BODY>
+<A HREF = "index.html">[Index for .]</A>
+<A HREF = "../index.html">[Return to Master Index]</A>
+<H1>arembed</H1>
+<H2>(./arembed.m)</H2>
+<HR><H3>Function Synopsis</H3>
+<pre>[x,y] = arembed(Z,p,m);</pre>
+<HR><H3>Help text</H3>
+<pre>
+  function [x,y] = arembed(Z,p,m);
+  Create embedded data for use in, for example, an AR model
+  Z      univariate time series 
+  p      order of model
+  m      embedding method; 0-ieads; 1-toeplitz (default 0)
+  x      embedded 'inputs'
+  y      targets
+</pre>
+<HR><H3>Cross-Reference Information</H3>This function calls
+<pre><UL>
+<LI><A HREF = "../html/embed.html">embed</A>          ./embed.m</LI>
+</UL></pre>
+This function is called by
+<pre><UL>
+<LI><A HREF = "../html/arwls.html">arwls</A>          ./arwls.m</LI>
+<LI><A HREF = "../html/obsinit.html">obsinit</A>        ./obsinit.m</LI>
+<LI><A HREF = "../html/obslike.html">obslike</A>        ./obslike.m</LI>
+</UL></pre>
+<HR><H3>Listing of function </H3>
+<pre>
+function [x,y] = arembed(Z,p,m);
+
+%  function [x,y] = arembed(Z,p,m);
+%  Create embedded data for use in, for example, an AR model
+%  Z      univariate time series 
+%  p      order of model
+%  m      embedding method; 0-ieads; 1-toeplitz (default 0)
+%  x      embedded 'inputs'
+%  y      targets
+
+if nargin &lt; 2, error('arembed needs at least two arguments'); end
+if nargin &lt; 3 | isempty(m), m=0; end
+
+Z=Z(:)';
+n=length(Z);
+
+if m==0
+  x=<A HREF = ../html/embed.html>embed</A>(Z,p,1);
+  x=x(1:n-p,p:-1:1);   % Reverse columns of x and remove last row
+  y=Z(p+1:1:n)';
+  return
+end
+
+t=toeplitz(Z);
+xt=t(1:n-p+1,n-p+1:n);
+x=xt(2:size(xt,1),:);
+x=x(:,p:-1:1);   % Reverse columns of x
+y=Z(p+1:1:n)';
+
+% Reverse rows of x to get correct time ordering
+x=x(n-p:-1:1,:);   
+
+</pre>
+<HR>
+Produced by <A HREF="">mat2html</A> on Thu Feb  1 11:33:45 2001
+<BR>
+Cross-Directory links are: OFF<BR>
+</BODY>

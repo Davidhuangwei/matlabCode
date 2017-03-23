@@ -1,0 +1,333 @@
+<HTML>
+<! author: Scott Makeig
+           Naval Health Research Center
+           PO Box 85122
+           San Diego CA 92186-5122
+    phone: (619) 553-8414
+    email: scott@salk.edu
+  updated: 04/29-98
+>
+<HEAD>
+<TITLE>Information on ICA / EEG Matlab Package </TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffe5">
+<center>
+<strong><H3>General Information on ICA Matlab package for Psychophysiological Data</H3>
+<br>
+</strong>
+</center>
+<p>
+<strong>Current toolbox version</strong>: 3.4 released 12/22/99
+<br>
+<strong>Written for</strong> Matlab Unix versions: 4.2c and 5.0+ (separate releases).
+<p>
+<strong>Run demonstration:</strong> >> icademo % But first replace the string 'XXX' in icadefs.m
+<br>
+<strong>List of functions:</strong> >> help ica
+<p>
+<! HREF="http://www.pnas.org/cgi/content/full/94/20/10979">
+<A HREF="http://www.cnl.salk.edu/~scott/PNAS.html">
+New PNAS paper on Independent Component Analysis (ICA) applied to ERP data</A>
+<center><em>(View in html, download in Postscript)</em></center>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/icabib.html">
+List of publications on ICA applied to EEG and fMRI data.</A>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/icafaq.html">
+Frequently-asked questions about ICA (icafaq.html).</A>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/ica-download-form.html">
+Download the Matlab ICA/EEG toolbox</A>
+<p>
+<strong>Version History</strong>:
+<p>
+1.0 11-30-96 First release, CNL / Salk Institute 
+(<A HREF="http://www.cnl.salk.edu/~scott">Makeig</A> et al.) 
+<br>
+3.4 12-22-99 Latest release
+<p>
+The ICA/EEG toolbox has now been downloaded over 1500 times by users from 
+many countries and research fields.
+Please email feedback about things that do or don't work, 
+or any suggested improvements. If you improve your working 
+versions of the scripts, please send me a copy or description.
+I will credit your suggestions.
+<p>
+<strong>Some new functions/features in version 3.4:</strong>
+<p>
+<pre>
+** The sign-finding rule for extended-ICA in runica() has been changed to
+   the new version published by Lee, Lewicki and Sejnowski. 
+** runica() option 'extended' has been made more memory efficient (M. Spratling)
+** A 'specgram' preprocessing option has been added to runica() implementing
+   frequency domain spatial decomposition, as suggested by M. Zibulevsky.
+** Function matcorr() now takes a 3rd argument allowing computing
+   correlations without first removing means -- useful for comparing
+   scalp maps, and offers new options for pairing components, including 
+   VAN and Hungarian (thanks to Sigurd Enghoff).
+** Function erpimage() now plots amplitude deviation from baseline (in dB).
+   and can now optionally sort data by phase.
+** Function blockave() now accepts epoch weights.
+** Functions plottopo(), projtopo() and logspec() can now plot rectangular
+   [rows cols] arrays of axes.
+** A new topoimage() function will plot images in a topographic or rectangular
+   arrangement (useful for plotting timef() output over the scalp).
+** Function timef() now computes bootstrap limits using surrogate averages 
+   drawn from the entire epoch unless BASE_BOOT is set to 1 in the script.
+** Function cart2topo() now converts Cartesian xyz channel locations to
+   2-D polar coordinates for use in topoplot() and derivative plotting functions
+** Function pol2sph() now converts 2-D topoplot() style polar channel locations
+   to 3-D spherical coordinates for headplot() and derivatives
+** Function sph2pol() now converts 3-D headplot() style spherical channel locations
+   to 2-D polar coordinates for topoplot() and derivatives
+</pre>
+<p>
+Changes/bug fixes:
+<p>
+<pre>
+** Function timef() now plots the ERP average below the ITC image
+** envtopo() now draws a correct line from the topoplot to clipped data
+** erpimage() bugs have been fixed
+** timef() frequencies are now correct (shifted by 1 bin)
+** crossf() now uses a whole-epoch baseline
+</pre>
+<p>
+Known Bugs:
+<br>
+<pre>
+** In erpimage(), the time-axis tick labels may be missing, and ghost y-scale
+   numbers may appear in printed (but not displayed) figures.
+** In erpimage(), the 'phase' option may not work in MATLAB 5.2 (ok in 5.3).
+</pre>
+<p>
+<b>News of ICA applications to biomedical research</b>
+<p>
+Papers published on decomposition of early and late cognitive event-related 
+potentials (downloads available (html and/or pdf) from www.cnl.salk.edu/~scott):
+<p>
+<blockquote>
+Makeig, S., Westerfield, M., Jung, T-P., Covington, J., Townsend,
+J., Sejnowski, T. J. and Courchesne, E., "Functionally independent 
+components of the late positive event-related potential during visual 
+spatial attention," <b>J. Neurosci</b>, 19:2665-2680, April, 1999.
+<p>
+   Makeig, S., Westerfield, M., Townsend, J., Jung, J., Courchesne, E. 
+   and Sejnowski, T. J. "Functionally independent components of early 
+   event-related potentials in a visual spatial attention task," 
+   <b>Philosophical Transactions</b> of the Royal Society: Biological Sciences, 
+   354:1135-1144, June, 1999.
+</blockquote>
+<p>
+Paper on ICA decomposition of epileptic EEG
+<p>
+<blockquote>
+   Kobayashi K, James CT, Nakahori T, Akiyama T, Gotman J, "Isolation 
+   of epileptiform discharges from unaveraged EEG by independent component 
+   analysis." <b>Clin Neurophysiol</b> 110:1755-1763. Oct, 1999
+</blockquote>
+<p>
+Paper in press on separation of artifacts from EEG data:
+<p>
+<blockquote>
+   Jung, T-P., Makeig, S., Humphries, C., Lee, T-W., McKeown, M. J., 
+   Iragui, V., and Sejnowski, T. J., "Removing electroencephalographic 
+   artifacts by blind source separation," <b>Psychophysiology</b>, in press.
+</blockquote>
+<p>
+Online publication of ICA applied to fMRI data (with movie):
+<p>
+<blockquote>
+   Berns GS, Song AW, Mao H, "Continuous functional magnetic response 
+   imaging reveals dynamic nonlinearities of dose-response functions 
+   for finger opposition." <b>J. Neurosci</b> 19:RC17, July, 1999
+</blockquote>
+<p>
+Report of ICA benefits over PCA for fMRI decomposition:
+<p>
+<blockquote>
+   Biswal BB, Ulmer JL, "Blind source separation of multiple signal sources 
+   of fMRI data sets using independent component analysis. <b>J Comput Assist 
+   Tomogr</b> 23(2):265-71 March, 1999
+</blockquote>
+<p>
+Please send news, questions, bugs/fixes to: 
+<A HREF = "mailto:scott@salk.edu">
+<strong>scott@salk.edu</strong></A>
+<p>
+For further toolbox info:
+<br>
+     <A HREF = "http://www.cnl.salk.edu/~scott/icafaq.html">
+     <strong>http://www.cnl.salk.edu/~scott/icafaq.html</A>
+<br>
+     <A HREF = "http://www.cnl.salk.edu/~scott/ica.readme.html">
+     http://www.cnl.salk.edu/~scott/ica.readme.html</A>
+<br>
+     <A HREF = "http://www.cnl.salk.edu/~scott/icabib.html">
+     http://www.cnl.salk.edu/~scott/icabib.html</strong></A>
+<p>
+<center>
+						<strong>Scott Makeig, CNL / Salk Institute
+                               December 22, 1999</strong>
+</center>
+<br>
+<p>
+P.S. While many of the tools in this toolbox are specialized for 
+electrophysiological research, general interest in ICA is exploding.  
+Some of the ICA applications listed by users who have downloaded 
+the ICA/EEG Matlab toolbox: 
+<blockquote>
+<p>
+    EEG Signal Processing; Nonlinear dynamics in EEG
+<br>
+    Analysis of EEG using the chaos theory
+<br>
+    EEG spatio-temporal analysis; EEG and cognitive processes
+<br>
+    Inverse problems in EEG, MEG;
+<br>
+    Sleep Research, EEG analysis, vigilance analysis;
+<br>
+    Sleep spindles; EEG Microarousals in sleep;
+<br>
+    Alertness monitoring 
+<br>
+    Wavelet analysis of EEG signals
+<br>
+    Autonomic nervous system & EEG, GSR
+<br>
+    Neurofeedback for children EEG
+<br>
+    EEG data from AD and VD patients
+<br>
+    MEG data on speech perception; 
+<br>
+    MEG and EEG; DC-Magnetometry
+<br>
+    MEG, Neural control and neural plasticity
+<br>
+    Auditory Evoked Potentials 
+<br>
+    Cognitive classification using ERPs
+<br>
+    Visual VEP/EEG with depth perception. 
+<br>
+    Single trial evoked potential detection 
+<br>
+    Motor potentials; EMG
+<br>
+    Eye movements
+<br>
+    Classical conditioning
+<br>
+    Auditory evoked response data from cochlear implant users. 
+<br>
+    Acoustic emissions
+<br>
+    PET; PET stimulation data;
+<br>
+    Functional brain imaging research
+<br>
+    fMRI & MEG integration
+<br>
+    fMRI, PET and EEG
+<br>
+    Visual processing using fMRI & MEG
+<br>
+    High Resolution ECG improvements using ICA
+<br>
+    Cardiac electrograms ECG; 
+<br>
+    EEG/EKG data analysis and modelling
+<br>
+    Epilepsy Research
+<br>
+    Brain-computer interface BCI
+<br>
+    Multi-electrode single-unit recordings in the CNS
+<br>
+    Population vectors from multineuron recordings 
+<br>
+    Optical imaging of visual cortex; 
+<br>
+    Separating out vascular motion from optical maps
+<br>
+    Multivariate hormonal dynamics
+<br>
+    Protein bioinformatics
+<br>
+    Nonstatonary astronomical time series
+<br>
+    Speech recognition; Speech in noise;
+<br>
+    Spectroscopic data
+<br>
+    Sound spectrograms
+<br>
+    Image processing and de-noising
+<br>
+    CCD imaging and sound separation
+<br>
+    Ultrasonic research
+<br>
+    Spacecraft fault detection/prediction; machine vibration signals
+<br>
+    In vivo and in vitro pharmacological applications
+<br>
+    Telecommunications; Multichannel transmission
+<br>
+    Control and adaptive systems
+<br>
+    Pattern recognition and learning
+<br>
+    Computational structural molecular biology
+<br>
+    Applied mathematics, ill-posed problems
+<br>
+    Nonlinear brain dynamics; 
+<br>
+    Motor control of Octopus
+<br>
+    Brain transplants, somatosensory plasticity
+<br>
+    New model of the synapses and endocrine factors
+<br>
+    Cognitive Neuroscience - signal and image processing
+<br>
+    Medical image analysis and pattern recognition
+<br>
+    Image processing; Image Denoising
+<br>
+    Hyperspectral visible and infrared data
+<br>
+    Eddy Current Sensors
+<br>
+    Neural Networks, Artificial Intelligence, Agent Based systems
+<br>
+    Statistics; Konnektionismus; neural networks
+<br>
+    Target tracking
+<br>
+    Neuro-fuzzy methods applied to nonlinear systems
+<br>
+    Human Engineering; Neuroengineering; 
+<br>
+    Finanical prediction; Data mining in finance; 
+<br>
+    Biocybernetics
+<br>
+    The world of ODE
+<br>
+    Ionospheric tomography 
+<br>
+    Ecological data analysis
+<br>
+    Hyperspectral geology
+<br>
+    Video understanding
+<br>
+    Sperm dynamics(!)
+<br>
+    Telepathy, etc.(?)
+<br>
+    Fun
+</blockquote>

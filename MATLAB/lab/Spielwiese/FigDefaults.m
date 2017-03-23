@@ -1,0 +1,1 @@
+set(gca,'TickDir','out','FontSize',16)

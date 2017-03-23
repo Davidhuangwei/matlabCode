@@ -1,0 +1,32 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_m2r</title>
+
+<body><h1>gtm_m2r</h1>
+Converts from a mesh-matrix to vector representation
+
+<p>
+Returns a matrix in which each row corresponds to a point 
+on the grid defined by the mesh-matrices X and Y. 
+The enumeration of points goes from the top-left corner of 
+the mesh to the bottom-right, columnwise.
+
+<h3>Synopsis</h3>
+<pre>cXcYcZ = gtm_m2r(X, Y, Z)</pre><pre>cXcYcZ = gtm_m2r(X, Y)</pre><pre>cXcYcZ = gtm_m2r(X)</pre>
+<h3>Arguments</h3>
+<code>X, Y, Z</code> - 
+mesh-matrices for x-, y- and z- coordinates 
+respectively; M-by-N.
+
+<h3>Return</h3>
+<code>cXcYcZ</code> - 
+matrix of rows of tuples; (M*N)-by-k, where 
+k is 1, 2 or 3
+
+<h3>See also</h3>
+<code><a href="./gtm_r2m.htm">gtm_r2m</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

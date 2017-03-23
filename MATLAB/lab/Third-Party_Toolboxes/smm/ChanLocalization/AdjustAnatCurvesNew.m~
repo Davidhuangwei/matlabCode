@@ -1,0 +1,75 @@
+function AdjustAnatCurvesNew()
+
+chanInfoDir = 'ChanInfo/';
+
+while 1
+     anatCurves = LoadVar([chanInfoDir 'AnatCurves.mat'])
+     offset = load([chanInfoDir 'Offset.eeg.mat'])
+    PlotChanLocTools04(0)
+    in = input(['What do you want to do?\n',...
+        'adjust X Offset [xo]\n',...
+        'adjust Y Offset [yo]\n',...
+        'adjust X Scaling [xs]\n',...
+        'adjust Y Scaling [ys]\n'], 's')
+    while change
+        change = 0;
+        switch in
+            case xo
+                newXOffset = input('enter X offset adjustment: ');
+                offset(2)  = offset(2) + newXOffset;
+                change = 1;
+            case yo
+                newYOffset = input('enter Y offset adjustment: ');
+                offset(1)  = offset(1) + newYOffset;
+                change = 1;
+            case xs
+                fprintf('Click on X scaling center point\n')
+                [scaleXCenter scaleYCenter]= ginput(1);
+                scaleFactor = input('Enter X scaling factor: ');
+                anatCurves = (anatCurves-scaleXCenter)*scaleFactor+scaleXCenter;
+                change = 1;
+            case ys
+                 fprintf('Click on Y scaling center point\n')
+                [scaleXCenter scaleYCenter]= ginput(1);
+                scaleFactor = input('Enter Y scaling factor: ');
+                anatCurves = (anatCurves-scaleYCenter)*scaleFactor+scaleYCenter;
+                change = 1;
+            otherwise
+                quit = input('Do you want to quit? y/[n]: ','s');
+                if strcmp(quit,'y')
+                    return
+                end
+        end
+    end
+    save = input('do yo want to save? [y]/n: ','s');
+    if isempty(save) | strcmp(save,'y')
+        fNum = 1;
+        while exist([chanInfoDir 'AnatCurves.mat.old.' num2str(fNum)],'file')...
+                | exist([chanInfoDir 'Offset.eeg.txt.old.' num2str(fNum)],'file')
+            fNum = fNum+1;
+        end
+        eval(['!cp ' chanInfoDir 'AnatCurves.mat ' chanInfoDir 'AnatCurves.mat.old.' num2str(fNum)]);
+        eval(['!cp ' chanInfoDir 'Offset.eeg.txt ' chanInfoDir 'Offset.eeg.txt.old.' num2str(fNum)]);
+        eval(['!cp ' chanInfoDir 'Offset.dat.txt ' chanInfoDir 'Offset.dat.txt.old.' num2str(fNum)]);
+        eval(['!cp ' chanInfoDir 'Offset_NearAveCSD1.csd.txt ' chanInfoDir 'Offset_NearAveCSD1.csd.txt.old.' num2str(fNum)]);
+        eval(['!cp ' chanInfoDir 'Offset_LinNearCSD121.csd.txt ' chanInfoDir 'Offset_LinNearCSD121.csd.txt.old.' num2str(fNum)]);
+        
+        save([chanInfoDir 'AnatCurves.mat' strcmp(fNum)],SaveAsV6,'anatCurves');
+        save([chanInfoDir 'Offset.eeg.txt' strcmp(fNum)],'-ascii','offset');
+        save([chanInfoDir 'Offset.dat.txt' strcmp(fNum)],'-ascii','offset');
+        offset = offset+1;
+        save([chanInfoDir 'Offset_NearAveCSD1.csd.txt' strcmp(fNum)],'-ascii','offset');
+        offset = offset+1;
+        save([chanInfoDir 'Offset_LinNearCSD121.csd.txt' strcmp(fNum)],'-ascii','offset');
+    end
+    quit = input('do yo want to quit? y/[n]: ','s');
+    if strcmp(quit,'y')
+        return
+    end
+end
+return
+
+mazeFiles,ppStimFiles,comStimFiles,sleepFiles)
+
+
+PlotSpikeChanDist(datFiles,'SpikeChanDist',10);

@@ -1,0 +1,37 @@
+path(path,'/spinach/ken/matlab/Spikes');
+path(path,'/spinach/ken/matlab/General');
+path(path,'/spinach/ken/matlab/DogFood');
+path(path,'/spinach/ken/matlab/CrossVal');
+path(path,'/spinach/ken/matlab/mitlib');
+path(path,'/spinach/ken/matlab/svm');
+path(path,'/spinach/ken/matlab/quickprop');
+path(path,'/spinach/ken/matlab/extern');
+path(path,'/spinach/ken/matlab/discrim');
+path(path,'/spinach/ken/matlab/netlab');
+path(path,'/u12/programs/matlab/Hajtoolbox/eeg_anal')
+path(path,'/u12/programs/matlab/Hajtoolbox/place_field')
+path(path,'/u12/programs/matlab/Hajtoolbox/unit_anal');
+path(path,'/u12/programs/matlab/Hajtoolbox/circular');
+path(path,'/spinach/ken/matlab/econometrics');
+path(path,'/spinach/ken/matlab/econometrics/var_bvar');
+path(path,'/spinach/ken/matlab/glmlab');
+path(path,'/spinach/ken/matlab/glmlab/fit');
+path(path,'/spinach/ken/matlab/wave_matlab');
+path(path,'/spinach/ken/matlab/timefreq');
+path(path,'/spinach/ken/matlab/rice-wlet-tools');
+path(path,'/spinach/ken/matlab/gabbiani/bookchap');
+path(path,'/spinach/ken/matlab/dataviz');
+path(path,'/spinach/ken/matlab/statbox');
+path(path,'/spinach/ken/matlab/smoothtoolbox');
+path(path,'/spinach/ken/matlab/smoothing');
+path(path,'/u12/programs/matlab/Hajtoolbox/');
+path(path,'/u12/programs/matlab');
+path(path,'/u12/programs/matlab/FMAToolbox/General');
+path(path,'/u12/antsiro/matlab/General');
+
+addpath /u16/tmp_matlab/Smatlab6/STATS
+addpath /u16/tmp_matlab/Smatlab6/SIGNAL/signal
+addpath /u16/tmp_matlab/Smatlab6/SIGNAL/sptoolgui
+addpath /u16/tmp_matlab/Smatlab6/SIGNAL/sigdemos
+addpath /u16/tmp_matlab/Smatlab6/SIGNAL/fdatoolgui
+

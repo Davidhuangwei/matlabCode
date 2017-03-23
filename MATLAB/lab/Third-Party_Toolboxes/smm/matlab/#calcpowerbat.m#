@@ -1,0 +1,32 @@
+function calcpowerbat(filebasemat,numchannels,channels,DBconversion)
+ 
+[numfiles n] = size(filebasemat);
+for i=1:numfiles
+    filebase = filebasemat(i,:);
+    inname = [filebase '.eeg'];
+    
+nchan = length(channels);
+
+    thetapower = happyfilter(inname,numchannels,channels,6,14,600,601,DBconversion);
+    if (DBconversion),
+        outfilename = [filebase '_6-14_Hz_DB_sm_power.mat']
+    else
+        outfilename = [filebase '_6-14_Hz_sm_power.mat']
+    end
+    save(outfilename, 'thetapower');
+    clear thetapower;
+end
+
+for i=1:numfiles
+    filebase = filebasemat(i,:);
+    inname = [filebase '.eeg'];
+
+    gammapower = happyfilter(inname,numchannels,channels,30,80,300,301,DBconversion);
+    if (DBconversion),
+        outfilename = [filebase '_30-80_Hz_DB_sm_power.mat']
+    else
+        outfilename = [filebase '_30-80_Hz_sm_power.mat']
+    end
+    save(outfilename, 'gammapower');
+    clear gammapower;
+end

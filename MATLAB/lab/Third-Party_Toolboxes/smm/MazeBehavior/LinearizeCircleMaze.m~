@@ -1,0 +1,139 @@
+function LinearizeCircleMaze(filebase)
+% function LinearizeFig8Maze(filebase) 
+% Linearizes the position data for the Circle maze. RL and LR journeys are
+% averaged according to trajectory rather than allocentric spatial
+% coordinates.
+
+figure(1)
+clf
+subplot('position',[0.03 0.53 0.3 0.45])
+set(gca,'xtick',[],'ytick',[]);
+hold on
+
+trialTypesBool = [1  1  1  1   1  1   1   1   1   1   1   1   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [1  1  1  1  1  1   1   1   1];
+                  % rp lp dp cp ca rca lca rra lra
+whldat = LoadMazeTrialTypes(filebase,trialTypesBool,mazeLocationsBool);
+plot(whldat(find(whldat(:,1)~=-1),1),whldat(find(whldat(:,1)~=-1),2),'.','color',[1 1 0])
+
+trialTypesBool = [1  0  1  0  0   0   0   0   0   0   0   0   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [0  0  0  0  0  1   1   1   1];
+                  % rp lp dp cp ca rca lca rra lra
+perimeter = LoadMazeTrialTypes(filebase,trialTypesBool,mazeLocationsBool);
+
+plot(perimeter(find(perimeter(:,1)~=-1),1),perimeter(find(perimeter(:,1)~=-1),2),'.','color',[0 1 1])
+
+perimeterCenter = [mean(perimeter(find(perimeter(:,1)~=-1),1))+30 mean(perimeter(find(perimeter(:,1)~=-1),2))];
+perimeterRadius = mean(sqrt((perimeterCenter(1)-perimeter(find(perimeter(:,1)~=-1),1)).^2 + (perimeterCenter(2)-perimeter(find(perimeter(:,1)~=-1),2)).^2));
+
+plot(get(gca,'xlim'),[perimeterCenter(2) perimeterCenter(2)],'k')
+plot([perimeterCenter(1) perimeterCenter(1)],get(gca,'ylim'),'k')
+
+trialTypesBool = [0  1  1  0   0  1   1   0   0   1   1   0   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+%trialTypesBool = [0  0  1  0  0   0   0   0   0   0   0   0   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [0  0  0  0  0  1   1   1   1];
+                  % rp lp dp cp ca rca lca rra lra
+RLtrials = LoadMazeTrialTypes(filebase,trialTypesBool,mazeLocationsBool);
+trialTypesBool = [1  0  0  1   1  0   0   1   1   0   0   1   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+%trialTypesBool = [1  0  0  0  0   0   0   0   0   0   0   0   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+LRtrials = LoadMazeTrialTypes(filebase,trialTypesBool,mazeLocationsBool);
+plot(RLtrials(find(RLtrials(:,1)~=-1),1),RLtrials(find(RLtrials(:,1)~=-1),2),'r.')
+hold on
+plot(LRtrials(find(LRtrials(:,1)~=-1),1),LRtrials(find(LRtrials(:,1)~=-1),2),'b.')
+
+
+%%%%% Linearize using atan2 %%%%%
+RLangles = atan2(-(perimeterCenter(2)-RLtrials(find(RLtrials(:,1)~=-1),2)), perimeterCenter(1)-RLtrials(find(RLtrials(:,1)~=-1),1));
+LRangles = atan2(perimeterCenter(2)-LRtrials(find(LRtrials(:,1)~=-1),2), perimeterCenter(1)-LRtrials(find(LRtrials(:,1)~=-1),1));
+RLdist = (RLangles + abs(min([RLangles; LRangles]))).*perimeterRadius;
+LRdist = (LRangles + abs(min([RLangles; LRangles]))).*perimeterRadius;
+
+linearTrials = -1*ones(size(whldat,1),1);
+linearTrials(find(RLtrials(:,1)~=-1)) = ;
+linearTrials(find(LRtrials(:,1)~=-1)) = LRdist;
+
+subplot('position',[0.36 0.53 0.63 0.45])
+hold on
+plot(linearTrials(find(RLtrials(:,1)~=-1 | LRtrials(:,1)==-1)),'.r')
+plot(linearTrials(find(LRtrials(:,1)~=-1 | RLtrials(:,1)==-1)),'.b')
+
+
+subplot('position',[0.36 0.04 0.63 0.45])
+hold on
+offset = 0;
+plotSpacing = 10;
+
+trialTypesBool = [0  0  0  0  0   0   0   0   0   0   0   0   1];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [1  1  1  1  1  1   1   1   1];
+                  % rp lp dp cp ca rca lca rra lra
+exploration = LoadMazeTrialTypes(filebase,trialTypesBool,mazeLocationsBool);
+linearExploration = -1*ones(length(whldat),1);
+linearExploration(find(exploration(:,1) ~= -1)) = abs(exploration(find(exploration(:,1) ~= -1),1)-max(exploration(:,1)));
+plot(linearExploration + offset,'.','color',[0.5 0.5 0.5]);
+offset = max(linearExploration) + plotSpacing;
+
+trialTypesBool = [1  1  1  1   1  1   1   1   1   1   1   1   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+%trialTypesBool = [1  0  1  0   0  0   0   0   0   0   0   0   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+quad1 = LoadCircleQuads(filebase,trialTypesBool,[1 0 0 0]);
+linearQuad1 = -1*ones(size(quad1,1),1);
+linearQuad1(quad1(:,1)~=-1) = linearTrials(quad1(:,1)~=-1) - min(linearTrials(quad1(:,1)~=-1));
+plot(linearQuad1 + offset,'b.');
+offset = offset + max(linearQuad1) + plotSpacing;
+
+quad2 = LoadCircleQuads(filebase,trialTypesBool,[0 1 0 0]);
+linearQuad2 = -1*ones(size(quad2,1),1);
+linearQuad2(quad2(:,1)~=-1) = linearTrials(quad2(:,1)~=-1) - min(linearTrials(quad2(:,1)~=-1));
+plot(linearQuad2 + offset,'r.');
+offset = offset + max(linearQuad2) + plotSpacing;
+
+quad3 = LoadCircleQuads(filebase,trialTypesBool,[0 0 1 0]);
+linearQuad3 = -1*ones(size(quad3,1),1);
+linearQuad3(quad3(:,1)~=-1) = linearTrials(quad3(:,1)~=-1) - min(linearTrials(quad3(:,1)~=-1));
+plot(linearQuad3 + offset,'g.');
+offset = offset + max(linearQuad3) + plotSpacing;
+
+quad4 = LoadCircleQuads(filebase,trialTypesBool,[0 0 0 1]);
+linearQuad4 = -1*ones(size(quad4,1),1);
+linearQuad4(quad4(:,1)~=-1) = linearTrials(quad4(:,1)~=-1) - min(linearTrials(quad4(:,1)~=-1));
+plot(linearQuad4 + offset,'k.');
+offset = offset + max(linearQuad4) + plotSpacing;
+
+
+trialTypesBool = [1  1  1  1   1  1   1   1   1   1   1   1   0];
+               % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+mazeLocationsBool = [1  1  1  0  0  0   0   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+delayAreas = LoadMazeTrialTypes(filebase,trialTypesBool,mazeLocationsBool);
+linearDelayAreas = -1*ones(length(whldat),1);
+linearDelayAreas(find(delayAreas(:,1) ~= -1)) = abs(delayAreas(find(delayAreas(:,1) ~= -1),1)-max(delayAreas(:,1)));
+plot(linearDelayAreas + offset,'c.');
+offset = offset + max(linearDelayAreas) + plotSpacing;
+
+
+while 1,
+    i = input('Save to disk? (yes/no):', 's');
+    if strcmp(i,'yes') | strcmp(i,'no'), break; end
+end
+linearRLaverageStruct = struct('exploration', linearExploration,...
+    'delayAreas', linearDelayAreas, 'quad1', linearQuad1, ...
+    'quad2', linearQuad2, 'quad3', linearQuad3, ...
+    'quad4', linearQuad4)
+
+if i(1) == 'y'
+    fprintf('Saving %s\n', [filebase '_LinearizedWhl.mat']); 
+    matlabVersion = version;                                                                                                               
+    if str2num(matlabVersion(1)) > 6
+      save([filebase '_LinearizedWhl.mat'],'-V6','linearRLaverageStruct');
+    else
+      save([filebase '_LinearizedWhl.mat'],'linearRLaverageStruct'); 
+    end
+end

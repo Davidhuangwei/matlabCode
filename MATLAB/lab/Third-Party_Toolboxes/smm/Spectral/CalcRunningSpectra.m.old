@@ -1,0 +1,148 @@
+function CalcRunningSpectra(taskType,fileBaseMat,fileExt,channels,winLength,nOverlap,NW,varargin)
+% function CalcRunningSpectra(taskType,fileBaseMat,fileExt,channels,winLength,nOverlap,NW,trialTypesBool,excludeLocations,minSpeed,spectraDir)
+
+[trialTypesBool,excludeLocations,minSpeed,spectraDir] = DefaultArgs(varargin,{[1 1 1 1 1 1 1 1 1 1 1 1 1],[1 1 1 0 0 0 0 0 0],0,'spectrograms/'});
+
+
+runningYo = [];
+tempYo = [];
+figure(1);
+clf
+hold on;
+
+
+
+interval = [-2000 2000];
+timeStep = [50];
+speeds = [];
+accels = [];
+times = [];
+position = [];
+
+for j=1:size(fileBaseMat,1)
+    fileBase = fileBaseMat(j,:);
+    
+    inName = [spectraDir fileBaseMat(j,:) fileExt 'Win' num2str(winLength) 'Ovrlp' num2str(nOverlap) 'NW' num2str(NW) '_mtpsg_' num2str(channels(1)) '.mat'];
+    fprintf('Loading: %s\n' ,inName)
+    load(inName);
+    
+    winLen = median(diff(to)); % in seconds
+    whlSamp = 39.065;
+    whlWinLen = winLen*whlSamp;
+    
+    hanFilter = hanning(floor(whlWinLen));
+    %hanFilter = hanFilter./mean(hanFilter);
+    
+    drinking = LoadMazeTrialTypes(fileBase, trialTypesBool,excludeLocations);
+    whldata = LoadMazeTrialTypes(fileBase, trialTypesBool,[1 1 1 1 1 1 1 1 1]);
+    [speed accel] = MazeSpeedAccel(whldata);
+    
+    goodTo = [];
+    
+    for i=1:length(to)
+        whlIndexStart = max(1,round(whlSamp.*to(i)+1));
+        whlIndexEnd = min(size(drinking,1),ceil(whlSamp.*to(i)+size(hanFilter,1)));
+        % if: we have enough speed measurements to calculate
+        % he's not in the excluded areas
+        % he's above the minSpeed
+        if size(find(speed(whlIndexStart:whlIndexEnd) > -1),1) > 1/2*size(hanFilter,1) & ... 
+                isempty(find(drinking(whlIndexStart:whlIndexEnd,1) > -1)) & ... 
+                isempty(find(speed(whlIndexStart:whlIndexEnd)<minSpeed & speed(whlIndexStart:whlIndexEnd)~=-1)) 
+            
+            goodTo = [goodTo, i];
+            
+            times = [times, to(i)];
+            position = cat(1,position,whldata(round(to(i)*whlSamp+size(hanFilter,1)/2),:));
+            
+            for k=interval(1):timeStep:interval(2)
+                time = to(i)+k/1000;
+                if round(time*whlSamp+1)>=1 & round(time*whlSamp)+size(hanFilter,1)<=size(speed,1)
+                    speedSeg = speed(round(time*whlSamp+1):round(time*whlSamp)+size(hanFilter,1));
+                    accelSeg = accel(round(time*whlSamp+1):round(time*whlSamp)+size(hanFilter,1));
+                    indexes = speedSeg >= 0;
+                    
+                    position = cat(1,position,whldata(round(time*whlSamp+size(hanFilter,1)/2),:));
+                    if isempty(find(indexes>0))
+
+                        fprintf('error_speed_cant_be_reliably_measured: time=%i, interval=%i\n',to(i),k);
+                        aveSpeed = NaN;
+                        aveAccel = NaN;
+                    else
+                        normHanFilter = hanFilter./mean(hanFilter(indexes)); % normalize the hanning filter
+                        speedSeg = normHanFilter.*speedSeg;
+                        accelSeg = normHanFilter.*accelSeg;
+
+                        aveSpeed = mean(speedSeg(indexes));
+                        aveAccel = mean(accelSeg(indexes));
+                        if k<0
+                            speeds = setfield(speeds,['n' num2str(abs(k))],{length(times)},aveSpeed);
+                            accels = setfield(accels,['n' num2str(abs(k))],{length(times)},aveAccel);
+                        else
+                            speeds = setfield(speeds,['p' num2str(abs(k))],{length(times)},aveSpeed);
+                            accels = setfield(accels,['p' num2str(abs(k))],{length(times)},aveAccel);
+                        end
+                    end
+                end
+            end
+            plot(whldata(whlIndexStart:whlIndexEnd,1),whldata(whlIndexStart:whlIndexEnd,2),'k.');
+            %runningB = runningB+1;
+        end
+    end
+    for chan=1:length(channels)
+        inName = [spectraDir fileBaseMat(j,:) fileExt 'Win' num2str(winLength) 'Ovrlp' num2str(nOverlap) 'NW' num2str(NW) '_mtpsg_' num2str(channels(chan)) '.mat'];
+        load(inName);
+        tempYo = cat(3,tempYo,yo(:,goodTo));
+    end
+
+    runningYo = cat(2,runningYo,tempYo);
+    tempYo = [];
+
+    size(runningYo)
+end
+
+thetaFreqRange = [5 10];
+gammaFreqRange = [65 85];
+
+thetaPowPeak = zeros(size(runningYo,3),size(runningYo,2));
+thetaPowIntg = zeros(size(runningYo,3),size(runningYo,2));
+gammaPowPeak = zeros(size(runningYo,3),size(runningYo,2));
+gammaPowIntg = zeros(size(runningYo,3),size(runningYo,2));
+
+for i=1:size(runningYo,3) %channels
+    for j=1:size(runningYo,2) %trials
+        thetaPowPeak(i,j) = 10.*log10(max(runningYo(find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2)),j,i)));
+        thetaPowIntg(i,j) = 10.*log10(sum(runningYo(find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2)),j,i)));
+        gammaPowPeak(i,j) = 10.*log10(max(runningYo(find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2)),j,i)));
+        gammaPowIntg(i,j) = 10.*log10(sum(runningYo(find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2)),j,i)));
+    end
+end
+yo = 10.*log10(runningYo);
+
+outName = [taskType '_MazeMeas_MinSpeed' num2str(minSpeed) 'Win' num2str(winLength) 'NW' num2str(NW) '.mat'];
+fprintf('Saving: %s\n',outName)
+
+mazeMeasStruct = [];
+mazeMeasStruct = setfield(mazeMeasStruct,'yo',yo);
+mazeMeasStruct = setfield(mazeMeasStruct,'times',times);
+mazeMeasStruct = setfield(mazeMeasStruct,'speed',speeds);
+mazeMeasStruct = setfield(mazeMeasStruct,'accel',accels);
+mazeMeasStruct = setfield(mazeMeasStruct,'position',position);
+mazeMeasStruct = setfield(mazeMeasStruct,'thetaPowPeak',thetaPowPeak);
+mazeMeasStruct = setfield(mazeMeasStruct,'thetaPowIntg',thetaPowIntg);
+mazeMeasStruct = setfield(mazeMeasStruct,'gammaPowPeak',gammaPowPeak);
+mazeMeasStruct = setfield(mazeMeasStruct,'gammaPowIntg',gammaPowIntg);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','channels',channels);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','fo',fo);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','NW',NW);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','winLength',winLength);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','nOverlap',nOverlap);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','minSpeed',minSpeed);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','trialTypesBool',trialTypesBool);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','excludeLocations',excludeLocations);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','fileBaseMat',fileBaseMat);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','fileExt',fileExt);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','taskType',taskType);
+mazeMeasStruct = setfield(mazeMeasStruct,'info','fileName',outName);
+
+save(outName, 'mazeMeasStruct');
+return

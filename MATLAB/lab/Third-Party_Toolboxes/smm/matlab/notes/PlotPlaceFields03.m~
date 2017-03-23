@@ -1,0 +1,55 @@
+function PlotPlaceFields03(fileBaseCell,trialTypesBoolStruct)
+trialTypesBoolStruct
+
+nEl = 11;
+maxClu = 6;
+
+trialTypes = fieldnames(trialTypesBoolStruct);
+for n=1:length(trialTypes)
+    figure
+    %set(gcf,'name',trialTypes{n})
+    trialTypesBool = trialTypesBoolStruct.(trialTypes{n});
+    %trialTypesBool = [1 1 1 1 1 1 1 1 1 1 1 1 1];
+    %trialTypesBool = [1 0 1 0 0 0 0 0 0 0 0 0 0];
+    %trialTypesBool = [0 0 1 0 0 0 1 0 0 0 1 0 0]; %RLAll
+    %trialTypesBool = [1 0 0 0 1 0 0 0 1 0 0 0 0]; %LRAll
+    %trialTypesBool = [0 1 0 0 0 1 0 0 0 1 0 0 0]; %RRAll
+    %trialTypesBool = [0 0 0 1 0 0 0 1 0 0 0 1 0]; %LLAll
+    %trialTypesBool = [1 0 1 0 1 0 1 0 1 0 1 0 0]; %AllCorrect
+    %trialTypesBool = [0 1 0 1 0 1 0 1 0 1 0 1 0]; %AllIncorrect
+    
+    mazeLocBool = [1 1 1 1 1 1 1 1 1];
+    for m = 1:length(fileBaseCell)
+        fileBase = fileBaseCell{m}
+        cd(fileBase);
+        pos = LoadMazeTrialTypes([fileBase],trialTypesBool,mazeLocBool);
+        cluLoc = load([fileBase '.cluloc']);
+        cellType = LoadCellTypes([fileBase '.type']);
+        neuronQuality = LoadVar([fileBase '.NeuronQuality.mat']);
+        for k=1:nEl
+            res = load([fileBase '.res.' num2str(k)]);
+            clu = load([fileBase '.clu.' num2str(k)]);
+
+            for j=2:clu(1)-1
+                selRes = res(find(clu==j)-1);
+                %subplot(maxClu,nEl,(j-2)*nEl+k)
+                %keyboard
+                [PlaceMap(m,k,j,:,:), OccupancyMap(m,k,j,:,:)] = PlaceField(selRes,pos);
+            end
+        end
+        cd ..
+    end
+    for k=1:nEl
+        for j=2:maxClu+1
+            subplot(maxClu,nEl,(j-2)*nEl+k)
+            PFPlot(squeeze(sum(PlaceMap(:,k,j,:,:))), squeeze(sum(OccupancyMap(:,k,j,:,:))));
+            set(gca,'xtick',[],'ytick',[])
+            title(['ch' num2str(cluLoc(cluLoc(:,1)==k & cluLoc(:,2)==j,3)) ...
+                ',' cellType{cell2mat(cellType(:,1))==k & cell2mat(cellType(:,2))==j,3} ...
+                ',' num2str(neuronQuality(k).eDist(j-1))]);
+            if k==1 & j==maxClu+1
+                xlabel(trialTypes{n})
+            end
+        end
+    end
+end

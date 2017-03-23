@@ -1,0 +1,13 @@
+% function outText = OverwriteCheck(oldFile)
+% If file exists must 
+function outText = OverwriteCheck(oldFile)
+
+if exist(oldFile,'file')
+    outText = [];
+    while ~strcmp(outText,'y') & ~strcmp(outText,'n')
+        outText = outTextput(['FILE EXISTS: ' oldFile ' - Overwrite? y/n'],'s');
+    end
+else
+    outText = 'y';
+end
+;

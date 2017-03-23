@@ -1,0 +1,258 @@
+load NT7N4.txt -ascii;
+Y = NT7N4;
+
+NX = [16];
+C = [1];
+OPT1 = 1;
+PER = .20;
+OPT2 = 1;
+NUMSIM = 50000;
+SEED=1000;
+
+varNames = char(...
+    'WPBRpp3',...
+    'WPBRpp4',...
+    'WPBUpp3',...
+    'WPBUpp4',...
+    'WPFRpp3',...
+    'WPFRpp4',...
+    'WPFUpp3',...
+    'WPFUpp4');
+
+factorNames = ['DIR';'SEM';'HEM'];
+levelNames = char(...
+    'BF',...
+    'RU',...
+    'LR');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+varNum = size(varNames,1);
+facNum = size(factorNames,1);
+levelNum = zeros(facNum,1);
+
+for i = 1:facNum
+    for k = 1:size(levelNames,2)
+        if ~isempty(levelNames(i,k)) 
+            levelNum(i)=levelNum +1;
+        end;
+    end;
+end;
+
+if varNum ~= prod(levelNum)
+    error('Number of variables must equal product of factor levels.');
+end;
+
+if facNum > 6
+    error('No more than six factors.  You''d go insane trying to interpet that many levels of interactions.');
+end;
+
+facCombs = zeros(facNum,facNum);
+for i = 1:facNum
+    facCombs(i,1)=i;
+    contrastName = char(contrastName, [factorNames(i,:) ' MAIN EFFECT']);
+    contrast = [contrast 
+    
+    
+    
+end;
+
+if facNum > 1
+    for i1 = 1:(facNum-1)
+        for i2 = (i1 + 1):facNum
+            facCombs = [facCombs; zeros(1,facNum)];
+            facCombs(size(facCombs,1),1) = i1;
+            facCombs(size(facCombs,1),2) = i2;
+            contrastName = char(contrastName, [factorNames(i1,:) ' * ' factorNames(i2,:) ' INTERACTION EFFECT']);
+        end;
+    end;
+end;
+
+
+if facNum > 2
+    for i1 = 1:(facNum-2)
+        for i2 = (i1 + 1):(facNum-1)
+            for i3 = (i2 + 1):facNum
+                facCombs = [facCombs; zeros(1,facNum)];
+                facCombs(size(facCombs,1),1) = i1;
+                facCombs(size(facCombs,1),2) = i2;
+                facCombs(size(facCombs,1),3) = i3;
+                contrastName = char(contrastName, [factorNames(i1,:) ' * ' factorNames(i2,:) ' * ' factorNames(i3,:) ' INTERACTION EFFECT']);
+            end;
+        end;
+    end;
+end;
+
+
+if facNum > 3
+    for i1 = 1:(facNum-3)
+        for i2 = (i1 + 1):(facNum-2)
+            for i3 = (i2 + 1):(facNum-1)
+                for i4 = (i3 + 1):facNum
+                    facCombs = [facCombs; zeros(1,facNum)];
+                    facCombs(size(facCombs,1),1) = i1;
+                    facCombs(size(facCombs,1),2) = i2;
+                    facCombs(size(facCombs,1),3) = i3;
+                    facCombs(size(facCombs,1),4) = i4;
+                    contrastName = char(contrastName, [factorNames(i1,:) ' * ' factorNames(i2,:) ' * ' factorNames(i3,:) ' * ' factorNames(i4,:) ' INTERACTION EFFECT']);
+                end;
+            end;
+        end;
+    end;
+end;
+
+
+if facNum > 4
+    for i1 = 1:(facNum-4)
+        for i2 = (i1 + 1):(facNum-3)
+            for i3 = (i2 + 1):(facNum-2)
+                for i4 = (i3 + 1):(facNum-1)
+                    for i5 = (i4 + 1):facNum
+                        facCombs = [facCombs; zeros(1,facNum)];
+                        facCombs(size(facCombs,1),1) = i1;
+                        facCombs(size(facCombs,1),2) = i2;
+                        facCombs(size(facCombs,1),3) = i3;
+                        facCombs(size(facCombs,1),4) = i4;
+                        facCombs(size(facCombs,1),5) = i5;
+                        contrastName = char(contrastName, [factorNames(i1,:) ' * ' factorNames(i2,:) ' * ' factorNames(i3,:) ' * ' factorNames(i4,:) ' * ' factorNames(i5,:) ' INTERACTION EFFECT']);
+                    end;
+                end;
+            end;
+        end;
+    end;
+end;
+
+
+if facNum > 5
+    for i1 = 1:(facNum-5)
+        for i2 = (i1 + 1):(facNum-4)
+            
+            for i3 = (i2 + 1):(facNum-3)
+                for i4 = (i3 + 1):(facNum-2)
+                    for i5 = (i4 + 1):(facNum-1)
+                        for i6 = (i5 + 1):facNum
+                            facCombs = [facCombs; zeros(1,facNum)];
+                            facCombs(size(facCombs,1),1) = i1;
+                            facCombs(size(facCombs,1),2) = i2;
+                            facCombs(size(facCombs,1),3) = i3;
+                            facCombs(size(facCombs,1),4) = i4;
+                            facCombs(size(facCombs,1),5) = i5;
+                            facCombs(size(facCombs,1),6) = i6;
+                            contrastName = char(contrastName, [factorNames(i1,:) ' * ' factorNames(i2,:) ' * ' factorNames(i3,:) ' * ' factorNames(i4,:) ' * ' factorNames(i5,:) ' * ' factorNames(i6,:) ' INTERACTION EFFECT']);
+                        end;
+                    end;
+                end;
+            end;
+        end;
+    end;
+end;
+
+disp('WELCH-JAMES APPROXIMATE DF SOLUTION');
+if OPT1==0
+    disp('LEAST SQUARES MEANS & VARIANCES');
+end;
+if OPT1==1
+    disp('TRIMMED MEANS & WINSORIZED VARIANCES');
+end;
+if OPT1==1
+    disp(['PERCENTAGE OF TRIMMING: ' sprintf('%4.2f', PER)]);
+end;
+if OPT2==0
+    disp('F DISTRIBUTION CRITICAL VALUE');
+end;
+if OPT2==1
+    disp('BOOTSTRAP CRITICAL VALUE FOR SINGLE TEST STATISTIC');
+end;
+if OPT2==1
+    disp(['NUMBER OF BOOTSTRAP SAMPLES: ' sprintf('%4.0f',NUMSIM)]);
+    disp(['STARTING SEED: ' sprintf('%15.0f',SEED)]);
+end;
+
+U = [1 -1 -1 1 -1 1 1 -1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR DIR * SEM * HEM INTERACTION EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+U = [1 1 -1 -1 -1 -1 1 1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR DIR * SEM INTERACTION EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+U = [1 -1 1 -1 -1 1 -1 1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR DIR * HEM INTERACTION EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+U = [1 -1 -1 1 1 -1 -1 1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR SEM * HEM INTERACTION EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+U = [1 1 1 1 -1 -1 -1 -1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR DIR MAIN EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+U = [1 1 -1 -1 1 1 -1 -1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR SEM MAIN EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+U = [1 -1 1 -1 1 -1 1 -1]';
+disp(' ');
+disp(' ');
+disp('TEST FOR HEM MAIN EFFECT - ADF SOLUTION');
+[MUHAT, SIGMA, RESULTS]=WJGLMml(Y, NX, C, U, OPT1, PER, OPT2, NUMSIM, SEED);
+disp(U');
+disp(['TEST STATISTIC: ' sprintf('%10.4f', RESULTS(1))]);
+disp(['NUMERATOR DF: ' sprintf('%10.4f', RESULTS(2))]);
+disp(['DENOMINATOR DF: ' sprintf('%10.4f', RESULTS(3))]);
+disp(['P-VALUE: ' sprintf('%10.4f', RESULTS(4))]);
+
+line = [];
+for i = 1:size(cnames,1)
+    line = [line '    ' cnames(i,:)];
+end;
+disp(['Trimmed Cell Means: ']);
+disp(line);
+disp(MUHAT');
+disp(['Sigma Matrix: ']);
+disp(SIGMA);
+
+bar(MUHAT);

@@ -1,0 +1,1 @@
+function z_data = z_transform(data)z_data = zeros(size(data));for i = 1:size(data,2)	meandata  = mean(data(:,i));	stddata  = std(data(:,i));	z_data(:,i) = (data(:,i) - meandata*ones(length(data(:,i)),1))/stddata;end;

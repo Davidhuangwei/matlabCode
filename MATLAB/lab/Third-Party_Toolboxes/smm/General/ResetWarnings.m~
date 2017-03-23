@@ -1,0 +1,6 @@
+function prevWarnSettings = ResetWarnings(warnSettings)
+
+for j=1:length(warnSettings)
+    prevWarnSettings(j) = warning(warnSettings(j).state, warnSettings(j).identifier);
+end
+return

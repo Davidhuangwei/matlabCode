@@ -1,0 +1,102 @@
+% function CalcRunningSpectraTime01(saveDir,fileBaseCell,fileExt,nChan,winLength,midPointsBool,varargin)
+% chanInfoDir = 'ChanInfo/';
+% [trialTypesBool,excludeLocations,minSpeed,batchModeBool,plotAxis] = ...
+%     DefaultArgs(varargin,{[1 1 1 1 1 1 1 1 1 1 1 1 0],[1 1 1 0 0 0 0 0 0],10,1,subplot(2,2,1)});
+function CalcRemSpectraTime01(saveDir,fileBaseCell,fileExt,winLength,varargin)
+[maxNTimes,figHandleCell,subPlotLoc,batchModeBool] = ...
+    DefaultArgs(varargin,{NaN,1,{},{2,2,1},1});
+
+% try
+    currDir = pwd;
+    eegSamp = 1250;
+    infoStruct = [];
+    infoStruct = setfield(infoStruct,'eegSamp',eegSamp);
+    infoStruct = setfield(infoStruct,'winLength',winLength);
+    infoStruct = setfield(infoStruct,'fileExt',fileExt);
+    infoStruct = setfield(infoStruct,'maxNTimes',maxNTimes);
+    infoStruct = setfield(infoStruct,mfilename,mfilename);
+    infoStruct = setfield(infoStruct,'saveDir',saveDir);
+    
+    for j=1:length(fileBaseCell)
+%         try
+            fileBase = fileBaseCell{j};
+            infoStruct = setfield(infoStruct,'fileBase',fileBase);
+            
+            if exist([saveDir '/infoStruct.mat'],'file')
+                infoStruct = MergeStructs(LoadVar([saveDir '/infoStruct.mat']),infoStruct);
+            end
+
+            fprintf('Processing: %s; %s%s\n',mfilename,fileBase,fileExt);
+            cd(currDir)
+            cd(fileBase);
+            
+             if plotBool
+                if ~isempty(figHandleCell)
+                    figure(figHandleCell{j})
+                end
+                subplot(subPlotLoc{:});
+                hold on;
+            end--
+
+            time = [];
+            eegSegTime = [];
+            
+            remTimes = LoadVar('RemTimes.mat');
+            for k=1:size(remTimes,1)
+                eegSegTime = [eegSegTime remTimes(k,1)*eegSamp:winLength:remTimes(k,2)*eegSamp-winLength];
+            end
+
+            %              try
+            if ~isempty(eegSegTime)
+                allEegSegTime = eegSegTime;
+                if ~isnan(maxNTimes) & (length(eegSegTime) > maxNTimes)
+                    keptTime = logical(zeros(size(eegSegTime)));
+                    keptTime(randsample(length(eegSegTime),maxNTimes)) = 1;
+                    eegSegTime = eegSegTime(keptTime);
+                    if midPointsBool
+                        mazeLocName = mazeLocName(keptTime);
+                    end
+                else
+                    keptTime = logical(ones(size(eegSegTime)));
+                end
+
+                time = (eegSegTime+winLength/2)/eegSamp; % in seconds at middle of eegSeg
+            end
+%             catch
+%                 errorText = ['WARNING:  ' date '  ' mfilename '  call=('...
+%                     saveDir '\n'];
+%                 ReportError(errorText,~batchModeBool)
+%             end
+
+            fprintf('Saving: %s, %i trials\n',saveDir,length(time))
+            
+            if ~exist(saveDir,'dir')
+                mkdir(saveDir)
+            end
+
+            save([saveDir '/infoStruct.mat'],SaveAsV6,'infoStruct');
+            save([saveDir '/time.mat'],SaveAsV6,'time');
+            save([saveDir '/eegSegTime.mat'],SaveAsV6,'eegSegTime');
+            save([saveDir '/allEegSegTime.mat'],SaveAsV6,'allEegSegTime');
+            save([saveDir '/keptTime.mat'],SaveAsV6,'keptTime');
+            if midPointsBool
+                save([saveDir '/mazeLocName.mat'],SaveAsV6,'mazeLocName');
+            end
+
+            cd(currDir)
+            
+%         catch
+%             errorText = ['ERROR:  ' date '  ' mfilename '  call=('...
+%                 saveDir  '\n'];
+%             ReportError(errorText,~batchModeBool)
+%             cd(currDir)
+%         end
+    end
+% catch
+%     errorText = ['ERROR:  ' date '  ' mfilename '  saveDir=('...
+%         saveDir '\n'];
+%     ReportError(errorText,~batchModeBool)
+% end
+cd(currDir)
+return
+

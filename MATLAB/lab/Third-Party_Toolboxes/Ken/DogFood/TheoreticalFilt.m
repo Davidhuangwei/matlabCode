@@ -1,0 +1,33 @@
+% TheoreticalFilt(order, power)
+%
+% Makes a theoretical filter with frequency responce f^1
+% order should be odd
+
+function Filt = TheoreticalFilt(order, power)
+
+if nargin<2
+	ran = 1:order;
+	center = (order+1)/2;
+	n= ran-center;
+	Filt = -2*n.^-2;
+	Filt(2:2:(order-1)) = 0;
+	Filt(center) = pi^2/2;
+else
+	Filt = zeros(order, 1);
+	center = (order+1)/2;
+	for m = 1:order
+		n=m-center;
+		Filt(m) =str2num(maple(...
+			strcat(...
+				'evalf(Re(hypergeom([',...
+				num2str(power+1),...
+				'], [',...
+				num2str(power+2),...
+				'], (',...
+				int2str(n),...
+				')*i*Pi)))'...
+			)...
+		));
+		
+	end;
+end;

@@ -1,0 +1,199 @@
+% function PlotUnitRateScats04(analDirs,spectAnalDir,statsAnalFunc,...
+%     analRoutine,varargin)
+% [saveDir,screenHeight, xyFactor] = DefaultArgs(varargin,...
+%     {'/u12/smm/public_html/NewFigs/REMPaper/UnitAnal05/',10.5,1.1});
+function PlotUnitRateScats04(analDirs,spectAnalDir,statsAnalFunc,...
+    analRoutine,varargin)
+[reportFigBool,saveDir,screenHeight, xyFactor] = DefaultArgs(varargin,...
+    {1,'/u12/smm/public_html/NewFigs/REMPaper/UnitAnal06/',10.5,1.1});
+
+prevWarnSettings = SetWarnings({'off','LoadDesigVar:fileNotFound';...
+   'off', 'MATLAB:divideByZero'});
+
+cwd = pwd;
+
+rates = [];
+for j=1:length(analDirs)
+    cd(analDirs{j})
+    selChan = Struct2CellArray(LoadVar('ChanInfo/SelChan.eeg.mat'),[],1);
+    load(['TrialDesig/' statsAnalFunc '/' analRoutine '.mat'])
+    cellLayers = LoadCellLayers([fileBaseCell{1} '/' fileBaseCell{1} '.cellLayer']);
+    cellTypes = LoadCellTypes([fileBaseCell{1} '/' fileBaseCell{1} '.type']);
+    
+    tempRate = Struct2CellArray(MeanDesigVar(1,fileBaseCell,spectAnalDir,...
+        ['unitRate'],trialDesig),[],1);
+    for k=1:size(tempRate,1)
+        if isempty(rates)
+            rates = tempRate;
+        end
+        if ~isstruct(rates{k,end})
+            rates{k,end} = struct([]);
+        end
+        % sort cells by layer/type
+        rates{k,end} = UnionStructMatCat(1,rates{k,end},SortRates2LayerTypes(squeeze(tempRate{k,end}),cellLayers,cellTypes));
+    end
+    size(tempRate{1,2})
+end
+cd(cwd)
+
+% 2 axis scatter plot
+cellLayers = selChan(:,1);
+cellTypes = {'w' 'n' 'x'}
+if reportFigBool
+    close all
+end
+
+keyboard
+colNamesCell{1} = {''};
+colNamesCell{2} = {''};
+colNamesCell{3} = cellLayers;
+colNamesCell{4} = cellTypes;
+colNamesCell{5} = rates(:,1);
+
+rateCell = CellArray2Struct(rates);
+rateCell = Struct2CellArray(rateCell,[],1);
+rateCell = cat(2,repmat({''},size(rateCell(:,[1 2]))),rateCell(:,[2 3]),...
+    rateCell(:,[1 4]));
+
+figName = 'UnitRates';
+
+UnitBoxPlotHelper(rateCell,{'UnitRate'; ' raw'},colNamesCell,figName)
+tempRateCell = UnitLog10Helper(rateCell);
+UnitBoxPlotHelper(tempRateCell,{'UnitRate'; ' log10'},colNamesCell,figName)
+tempRateCell = UnitWInCellHelper(rateCell);
+UnitBoxPlotHelper(tempRateCell,{'UnitRate'; ' w/in Cell'},colNamesCell,figName)
+tempRateCell = UnitWInCellHelper(UnitLog10Helper(rateCell));
+UnitBoxPlotHelper(tempRateCell,{'UnitRate log10'; ' w/in Cell'},colNamesCell,figName)
+
+
+junk = UnitLog10Helper(rateCell)
+junk = UnitWInCellHelper(junk)
+junk = UnitWInCellHelper(rateCell)
+UnitBoxPlotHelper(junk,1,[],[],colNamesCell)
+junk = UnitCellRateThreshHelper(rateCell,7,rateCell,[],0);
+junk = UnitCellRateThreshHelper(rateCell,7,rateCell,[],1);
+UnitBoxPlotHelper(junk,1,[],[],colNamesCell)
+
+
+figure
+set(gcf,'units','inches')
+set(gcf,'position',[0.5,0.5,screenHeight/length(cellLayers)*length(cellTypes)*xyFactor,screenHeight])
+set(gcf,'paperposition',get(gcf,'position'))
+minVal = 0;
+maxVal = 1;
+for m=1:length(cellLayers)
+    for n=1:length(cellTypes)
+            subplot(length(cellLayers),length(cellTypes),(m-1)*length(cellTypes)+n)
+            hold on
+            catPlot = [];
+            catGroup = {};
+            titleText = {};
+            if n==1 & m==1
+                titleText = cat(2,titleText,'Unit Firing Rates');
+            end
+
+            for p=1:size(rates,1)
+                if isfield(rates{p,end},cellLayers{m}) & isfield(rates{p,end}.(cellLayers{m}),cellTypes{n})
+                    catPlot = cat(1,catPlot,rates{p,end}.(cellLayers{m}).(cellTypes{n}));
+                    catGroup = cat(1,catGroup,repMat({[rates{p,1:end-1}]},size(rates{p,end}.(cellLayers{m}).(cellTypes{n}))));
+                    if p==1
+                    titleText = cat(2,titleText,['n=' num2str(size(rates{1,end}.(cellLayers{m}).(cellTypes{n}),1))]);
+                    end
+                end
+            end
+            boxplot(catPlot,catGroup)
+            ylabel('')
+            title(titleText);
+                if n==1
+                    ylabel([cellLayers{m} ])
+                end
+                if m==length(cellLayers)
+                    xlabel(cellTypes{n})
+                end
+%         set(gca,'xlim',[minVal maxVal],'ylim',[minVal maxVal])
+    end
+end
+
+figure
+set(gcf,'units','inches')
+set(gcf,'position',[0.5,0.5,screenHeight/length(cellLayers)*length(cellTypes)*xyFactor,screenHeight])
+set(gcf,'paperposition',get(gcf,'position'))
+minVal = 0;
+maxVal = 1;
+%cellLayers = fieldnames(rates{1,end});
+for m=1:length(cellLayers)
+    %cellTypes = rates{1,end}.(cellLayers{m});
+    for n=1:length(cellTypes)
+            subplot(length(cellLayers),length(cellTypes),(m-1)*length(cellTypes)+n)
+            hold on
+        if isfield(rates{1,end},cellLayers{m}) & isfield(rates{1,end}.(cellLayers{m}),cellTypes{n})
+            plot(rates{1,end}.(cellLayers{m}).(cellTypes{n}),...
+                rates{2,end}.(cellLayers{m}).(cellTypes{n}),'.')
+            minVal = min([rates{1,end}.(cellLayers{m}).(cellTypes{n});...
+                rates{2,end}.(cellLayers{m}).(cellTypes{n})]);
+            maxVal = max([rates{1,end}.(cellLayers{m}).(cellTypes{n});...
+                rates{2,end}.(cellLayers{m}).(cellTypes{n})]);
+            minVal = minVal-.1*(maxVal-minVal);
+            maxVal = maxVal+.1*(maxVal-minVal);
+            plot([minVal maxVal],[minVal maxVal])
+            title(['n=' num2str(size(rates{1,end}.(cellLayers{m}).(cellTypes{n}),1))])
+        end 
+        if n==1 & m==1
+            title('Unit Firing Rates')
+        end
+        if n==1
+            ylabel({cellLayers{m},rates{2,1}})
+        end
+        if m==length(cellLayers)
+            xlabel({rates{1,1},cellTypes{n}})
+        end
+        set(gca,'xlim',[minVal maxVal],'ylim',[minVal maxVal])
+    end
+end
+
+figure
+set(gcf,'units','inches')
+set(gcf,'position',[0.5,0.5,screenHeight/length(cellLayers)*length(cellTypes)*xyFactor,screenHeight])
+set(gcf,'paperposition',get(gcf,'position'))
+minVal = 0;
+maxVal = 1;
+for m=1:length(cellLayers)
+    for n=1:length(cellTypes)
+            subplot(length(cellLayers),length(cellTypes),(m-1)*length(cellTypes)+n)
+            hold on
+            catPlot = [];
+            catGroup = {};
+            titleText = {};
+            if n==1 & m==1
+                titleText = cat(2,titleText,'Unit Firing Rates');
+            end
+
+            for p=1:size(rates,1)
+                if isfield(rates{p,end},cellLayers{m}) & isfield(rates{p,end}.(cellLayers{m}),cellTypes{n})
+                    catPlot = cat(1,catPlot,rates{p,end}.(cellLayers{m}).(cellTypes{n}));
+                    catGroup = cat(1,catGroup,repMat({[rates{p,1:end-1}]},size(rates{p,end}.(cellLayers{m}).(cellTypes{n}))));
+                    if p==1
+                    titleText = cat(2,titleText,['n=' num2str(size(rates{1,end}.(cellLayers{m}).(cellTypes{n}),1))]);
+                    end
+                end
+            end
+            boxplot(log10(catPlot),catGroup)
+            ylabel('')
+            title(titleText);
+                if n==1
+                    ylabel([cellLayers{m} ' (log10)'])
+                end
+                if m==length(cellLayers)
+                    xlabel(cellTypes{n})
+                end
+%         set(gca,'xlim',[minVal maxVal],'ylim',[minVal maxVal])
+    end
+end
+if reportFigBool
+ReportFigSM(1:3,...
+    [saveDir SC(analRoutine)],repMat({['UnitRates']},[3,1]));
+close all
+end
+return
+
+

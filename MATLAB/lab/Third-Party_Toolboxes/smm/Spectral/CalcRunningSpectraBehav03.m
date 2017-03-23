@@ -1,0 +1,157 @@
+% function CalcRunningSpectraBehav01(saveDir,fileBaseCell,fileExt,winLength,varargin)
+% [lags,batchModeBool,plotBool,figHandleCell,subPlotLoc] = ...
+%     DefaultArgs(varargin,{[-1500:50:1500],1,1,NaN,{2,2,1}});
+function CalcRunningSpectraBehav01(saveDir,fileBaseCell,fileExt,winLength,varargin)
+[lags,plotBool,figHandleCell,subPlotLoc,batchModeBool] = ...
+    DefaultArgs(varargin,{[-1500:50:1500],1,{},{2,2,1},1});
+
+% try
+    currDir = pwd;
+
+    whlSamp = 39.065;
+    eegSamp = 1250;
+    whlWinLen = winLength*whlSamp/eegSamp;
+    hanFilter = hanning(floor(whlWinLen));
+
+    infoStruct = [];
+    infoStruct = setfield(infoStruct,'winLength',winLength);
+    infoStruct = setfield(infoStruct,'whlSamp',whlSamp);
+    infoStruct = setfield(infoStruct,'eegSamp',eegSamp);
+    infoStruct = setfield(infoStruct,'lags',lags);
+    infoStruct = setfield(infoStruct,'fileExt',fileExt);
+    infoStruct = setfield(infoStruct,mfilename,mfilename);
+    infoStruct = setfield(infoStruct,'saveDir',saveDir);
+
+
+    for j=1:length(fileBaseCell)
+%         try
+            fileBase = fileBaseCell{j};
+            infoStruct = setfield(infoStruct,'fileBase',fileBase);
+            
+            if exist([saveDir '/infoStruct.mat'],'file')
+                infoStruct = MergeStructs(LoadVar([saveDir '/infoStruct.mat']),infoStruct);
+            end
+
+            fprintf('Processing: %s; %s%s\n',mfilename,fileBase,fileExt);
+            cd(currDir)
+            cd(fileBase);
+
+            if plotBool
+                if ~isempty(figHandleCell)
+                    figure(figHandleCell{j})
+                else
+                    figure
+                end
+                subplot(subPlotLoc{:});
+                hold on;
+            end
+
+            speed = [];
+            accel = [];
+            taskType = {};
+            trialType = [];
+            mazeLocation = [];
+            mazeLocName = [];
+            position = [];
+
+            whlData = LoadMazeTrialTypes(fileBase, [1 1 1 1 1 1 1 1 1 1 1 1 1],[1 1 1 1 1 1 1 1 1]);
+            [speedData accelData] = MazeSpeedAccel(whlData);
+
+            to = LoadVar([saveDir '/eegSegTime.mat']);
+%             try
+                if ~isempty(to)
+                    for i=1:length(to)
+                        whlIndexStart = round(to(i)*whlSamp/eegSamp+1); % in whl samples starting with 1
+                        whlIndexEnd = min(size(whlData,1),whlIndexStart+size(hanFilter,1)-1);
+
+                        [thisTaskType, thisTrialType, thisMazeLoc thisMazeLocName] = GetTrialInfo(fileBase,whlIndexStart:whlIndexEnd);
+                        taskType = cat(1,taskType,{thisTaskType});
+                        trialType = cat(1,trialType,thisTrialType);
+                        mazeLocation = cat(1,mazeLocation,thisMazeLoc);
+                        mazeLocName = cat(1,mazeLocName,{thisMazeLocName});
+
+                        for k=1:length(lags)
+                            lag = lags(k);
+                            whlIndexStart = round(whlSamp*(to(i)/eegSamp+lag/1000)+1);
+                            whlIndexEnd = whlIndexStart+size(hanFilter,1)-1;
+                            % if indexes run off the end of the file
+                            % or not enough whl points to reliably calc speed
+                            if  whlIndexStart<1 | whlIndexEnd>size(speedData,1) | ...
+                                    size(find(speedData(whlIndexStart:whlIndexEnd) > -1),1) < 1/2*size(hanFilter,1)
+                                %fprintf('error_not_enough_position_measurements: time=%i, interval=%i\n',to(i)/eegSamp,lag);
+                                aveSpeed = NaN;
+                                aveAccel = NaN;
+                                positionData = [NaN NaN NaN NaN];
+                            else
+                                speedSeg = speedData(whlIndexStart:whlIndexEnd);
+                                accelSeg = accelData(whlIndexStart:whlIndexEnd);
+                                indexes = speedSeg >= 0;
+
+
+                                if isempty(find(indexes>0))
+                                    %fprintf('error_speed_cant_be_reliably_measured: time=%i, interval=%i\n',to(i)/eegSamp,lag);
+                                    aveSpeed = NaN;
+                                    aveAccel = NaN;
+                                    positionData = [NaN NaN NaN NaN];
+                                else
+                                    normHanFilter = hanFilter./mean(hanFilter(indexes)); % normalize the hanning filter
+                                    speedSeg = normHanFilter.*speedSeg;
+                                    accelSeg = normHanFilter.*accelSeg;
+
+                                    aveSpeed = mean(speedSeg(indexes));
+                                    aveAccel = mean(accelSeg(indexes));
+
+                                    positionData = whlData(floor(whlIndexStart+size(hanFilter,1)/2),:);
+                                end
+                            end
+                            %keyboard
+                            if lag<0
+                                speed = setfield(speed,['n' num2str(abs(lag))],{i,1},aveSpeed);
+                                accel = setfield(accel,['n' num2str(abs(lag))],{i,1},aveAccel);
+                                position = setfield(position,['n' num2str(abs(lag))],{i,1:4},positionData);
+                            else
+                                speed = setfield(speed,['p' num2str(abs(lag))],{i,1},aveSpeed);
+                                accel = setfield(accel,['p' num2str(abs(lag))],{i,1},aveAccel);
+                                position = setfield(position,['p' num2str(abs(lag))],{i,1:4},positionData);
+                            end
+                            if lag==0
+                                if plotBool
+                                    plot(positionData(1),positionData(2),'r.');
+                                end
+                            end
+
+                        end
+                    end
+                end
+%             catch
+%                 errorText = ['WARNING:  ' date '  ' mfilename '  saveDir=('...
+%                     saveDir '\n'];
+%                 ReportError(errorText,~batchModeBool)
+%             end
+
+            fprintf('Saving: %s, %i trials\n',saveDir,length(to))
+
+            save([saveDir '/infoStruct.mat'],SaveAsV6,'infoStruct');
+            save([saveDir '/speed.mat'],SaveAsV6,'speed');
+            save([saveDir '/accel.mat'],SaveAsV6,'accel');
+            save([saveDir '/position.mat'],SaveAsV6,'position');
+            save([saveDir '/taskType.mat'],SaveAsV6,'taskType');
+            save([saveDir '/trialType.mat'],SaveAsV6,'trialType');
+            save([saveDir '/mazeLocation.mat'],SaveAsV6,'mazeLocation');
+            save([saveDir '/mazeLocName.mat'],SaveAsV6,'mazeLocName');
+
+
+            cd(currDir)
+%         catch
+%             errorText = ['ERROR:  ' date '  ' mfilename '  saveDir=('...
+%                 saveDir '\n'];
+%             ReportError(errorText,~batchModeBool)
+%             cd(currDir)
+%         end
+    end
+% catch
+%     errorText = ['ERROR:  ' date '  ' mfilename '  saveDir=('...
+%         saveDir '\n'];
+%     ReportError(errorText,~batchModeBool)
+% end
+return

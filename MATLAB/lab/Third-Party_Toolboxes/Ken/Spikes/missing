@@ -1,0 +1,9 @@
+The following files haven't been documented in ./Contents.m
+ClusteringErrors.m
+ISIGrams.m
+SaveClu.m
+SaveFet.m
+SmoothFiring.m
+SpikePCA.m
+ThetaDetect.m
+hist.m

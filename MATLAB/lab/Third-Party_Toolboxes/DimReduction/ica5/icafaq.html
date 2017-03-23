@@ -1,0 +1,738 @@
+<HTML>
+<! author: Scott Makeig
+           Naval Health Research Center, UCSD Neurosciences,
+           and visitor at CNL/Salk Institute
+    phone: (619) 453-4100x1455
+    email: scott@salk.edu
+  updated: 2-24-98
+>
+<HEAD>
+<TITLE>Frequently Asked Questions about ICA applied to EEG/MEG Data</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffdd">
+<FONT COLOR="#dd6a66">
+<center><h3>
+Frequently Asked Questions about ICA applied to EEG and MEG Data
+</h3>
+<FONT COLOR="#000000">
+<A HREF="http://www.cnl.salk.edu/~scott">
+Scott Makeig</A><br>
+Naval Health Research Center<br>
+University of California San Diego Neurosciences Dept.
+</center>
+<p>
+<! HREF="http://www.pnas.org/cgi/content/full/94/20/10979">
+<IMG SRC="http://www.cnl.salk.edu/~scott/icons/newrot.gif">
+<A HREF="http://www.cnl.salk.edu/~scott/PNAS.html">
+1997 PNAS paper on Independent Component Analysis (ICA) applied to ERP data</A>
+<br>
+<center><em>(html and postscript versions)</em></center>
+<p>
+<IMG SRC="http://www.cnl.salk.edu/~scott/icons/newrot.gif">
+<A HREF="ftp://ftp.cnl.salk.edu/pub/jung/PNASfMRI.ps.Z">
+1998 PNAS paper on Independent Component Analysis (ICA) applied to fMRI data</A>
+<br>
+<center><em>(postscript version)</em></center>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/icabib.html">
+CNL publications on ICA applied to EEG and fMRI data</A>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/ica-download-form.html">
+Download the Matlab package for Independent Component Analysis (ICA)
+of EEG/MEG data</A>
+<p>
+
+<FONT COLOR="#dd6a66">
+<p><strong>
+0. What is ICA?
+<p></strong>
+<FONT COLOR="#000000">
+Independent Component Analysis (ICA) is a signal processing domain that
+is currently receiving increasing attention. In its simplest form, the
+problem is to separate N statistically independent inputs which have
+been mixed linearly in N output channels, without further knowledge
+about their distributions or dynamics. This is also called a problem of
+blind separation. In 1995, Bell & Sejnowski published an elegant neural
+network algorithm which can approximate the solution to this ICA
+problem in many cases. Later in 1995, Makeig, Bell, Jung & Sejnowski
+published a first application of ICA to decomposition of spontaneous
+multi-channel electroencephalographic (EEG) and averaged event-related
+potential (ERP) data sets. A set of Matlab routines developed to
+conveniently apply a much faster version of the ICA algorithm recently
+developed by Tony to EEG or MEG (magnetic EEG) data, and for
+analyzing results of ICA decomposition of ERPs and ERFs (event-related
+fields), is available from
+<A HREF="http://www.cnl.salk.edu/~scott">Scott Makeig's web page.</A>
+For simple ICA kernal code in Matlab, many mathematical details, 
+and alternate approaches, see the papers listed in 
+<A HREF="http://www.cnl.salk.edu/~tony/ica.html">
+Tony Bell's ICA web page</A>. For background on extended-ICA, see
+(<A HREF="http://www.cnl.salk.edu/~tewon/Blind/blind.html">Te-Won Lee's</A> web page.
+<p>
+The FAQs below are divided into theoretical and practical questions.
+<p>
+For information about changes in the current version of the package, see
+<A HREF="http://www.cnl.salk.edu/~scott/ica.readme.html"> ica.readme.html</A>
+<p>
+<FONT COLOR="#ff0000">
+<h3><strong>
+Theoretical Questions 
+</h3></strong>
+<FONT COLOR="#dd6a66">
+<p><strong>
+1. Is the assumption that EEG is a linear mixture of underlying brain
+"sources" correct?
+<p></strong>
+<FONT COLOR="#000000">
+In the EEG frequency range, the mixing of brain fields
+at the scalp electrodes is basically linear. The skull attenuates brain 
+potentials strongly, and "smears" (low-pass filters) them spatially, but 
+this does not affect the linear realtion of potentials in the brain 
+to potential at the scalp. (For example, in the case of a dipolar field, 
+this relation would depend on dipole strength, angle and distance from 
+the sensor).
+<FONT COLOR="#dd6a66">
+<p><strong>
+2. If the activations of the brain "sources" are partially overlapping,
+what does the ICA algorithm do?
+<p></strong>
+<FONT COLOR="#000000">
+         See the answer to the next question...
+<FONT COLOR="#dd6a66">
+<p><strong>
+3. What are brain "sources" of event-related brain responses, anyway?
+<p></strong>
+<FONT COLOR="#000000">
+ This is an important question, with seemingly contradictory answers!
+<p>
+ First, remember:
+<p>
+<FONT COLOR="#ffffdd">____<FONT COLOR="#000000">
+       <em>ICA does not solve the inverse problem.</em>
+<br><FONT COLOR="#ffffdd">________<FONT COLOR="#000000">
+          <em>ICA does not solve the inverse problem.</em>
+<br><FONT COLOR="#ffffdd">____________<FONT COLOR="#000000">
+             <em>ICA does not solve the inverse problem. </em>
+<br><FONT COLOR="#ffffdd">____________________<FONT COLOR="#000000">
+                <em>(In general, nothing can. -Gauss)!</em>
+<FONT COLOR="#000000">
+<p>
+From the viewpoint of ICA, "brain sources" are NOT necessarily "fMRI hot spots"
+NOR "single equivalent dipoles," but rather
+"concurrent electromagnetic activity that is spatially fixed 
+and temporally independent of activity arising in other spatially fixed 
+sources and summed with it in the input data." 
+Networks producing such concurrent activity are defined
+NOT by compact spatial distributions in the brain, but by the
+covarying field measurements they produce at the scalp sensors. In
+general, "sources" of ICA components may be (one or more) distributed
+brain networks rather than "physically compact active brain regions."
+These networks may be functionally linked, forming (possibly transient)
+larger network, or may simply be activated concurrently in the input
+data, by chance as it were. 
+<p>
+<FONT COLOR="#001111">
+The ICA method produces an <em>independent component analysis</em>
+decomposition of the input data rather than an <em>inverse source model</em>
+decomposition! 
+<p>
+<FONT COLOR="#000000">
+Understanding the difference between these two concepts may require
+almost a paradigm shift in the way one thinks about the brain. Is the
+brain a collection of physically discrete neural networks which pass
+information to each other by (occasional) neural impulses, as we send
+letters or email to each other? Or is the brain a dynamically shifting
+collection of interpenetrating, distributed, and possibly transient
+neural networks that communicate via some form(s) of mass action?
+<p>
+The first viewpoint is that of classical anatomy and physiology. The
+second is that of a slowly emerging dynamic systems perspective on
+neuroscience. ICA is a tool for discovering independent sources of
+spatial dependencies in multichannel data. It asks, and answers, a
+different problem than so-called "source localization." The two
+questions are complementary, hence the answers they produce may be 
+complementary parts of "the whole story" of "how brains work."
+<p>
+In truth, brain networks are most probably never wholly autonomous. 
+They are neither physically wholly isolated from one another, nor do
+they act wholly independently! Attempts to solve the inverse problem
+(source localization) may assume the first (at some level). ICA assumes
+the second. Might decomposition algorithms be derived which mediate
+between these two extremes? Probably so, if some intermediate set of
+assumptions were developed! For now, ICA algorithms (the current one is 
+not the last word) open new windows into event-related brain activity,
+whose strengths and limitations are gradually being explored.
+<FONT COLOR="#dd6a66">
+<p><strong>
+4. So, if the activations of some "physically separate brain network"
+are partially overlapping, what does the ICA algorithm do?
+<p></strong>
+<FONT COLOR="#000000">
+If relatively intense, correlated activity in two component occurring at
+one and the same time period is not strongly
+diluted by independent activity (including baseline noise activity) 
+at other times in their activations, 
+ICA may consider the period of correlated activity to reflect the
+emergence of a transitory cooperative source integrating the synchronously active 
+networks. (Note: ICA deals with higher-order spatial dependencies as well
+as correlations). But what, you ask, if these networks "just happen" to be 
+co-active? How is ICA to know about that?? It tells (as best it can) what 
+independent components make up the data (if the data allows such a decomposition).
+The interpretation of the components is up to the user.
+(For some 2-d plots showing the near-independence and near-maximum 
+entropy of ICA components, see an image of 
+<A HREF="http://www.cnl.salk.edu/~scott/scribbles.html">
+pairs of ERP-data activations (after logistic compression)
+plotted against one another (67k)).</A>
+<FONT COLOR="#dd6a66">
+<p><strong>
+5. How do I know if an ICA component originates in one or more than one
+physical regions in the brain?
+<p></strong>
+<FONT COLOR="#000000">
+ICA does not provide information beyond giving the scalp topographies
+of the independent components. One may attempt to perform source
+localization on these maps. In general, fewer active brain networks
+may dominate each component map than in the raw scalp data. Thus, ICA
+may be useful as a preprocessing step prior to attempting source 
+localization (using whatever relevant additional assumptions). We are
+now beginning to test this possibility. 
+<FONT COLOR="#dd6a66">
+<p><strong>
+6. What is the difference between ICA and PCA?
+<p></strong>
+<FONT COLOR="#000000">
+(A very FAQ...)
+PCA (principal component analysis), usually implemented using singular
+value decomposition (SVD), finds an orthogonal basis for its
+given data. The first eigenvector (and its weight, called the first
+principal component) gives the direction (and from this, the scalp
+topography) of maximum variance (between channels) in the data (and the
+size of the data projection onto this direction). If the data is a mixture 
+of linear components (as ICA assumes) this direction will, in general, 
+sum as many of the independent components as possible. 
+<p>
+Raw PCA components have orthogonal
+activations and scalp distributions, while the goal of ICA is to find 
+temporally independent components which may have non-orthogonal 
+(even very similar) scalp distributions. 
+For example, ICA applied to group mean data from a color experiment 
+produced two separate series of components of responses to red and
+blue checkerboards, respectively. These, naturally, had very similar
+(but not identical) scalp maps.
+Thus, PCA and ICA have very different goals, and naturally give
+quite different results in nearly all cases. 
+<p>
+PCA has usually been proposed for EEG analysis essentially as a
+preprocessing stage prior to "rotation" of the spatial filters
+using Varimax, Promax, or some other criterion,
+much like "sphering" is often used to preprocess ICA input data
+in the Bell & Sejnowski (1995) algorithm. The Varimax criterion 
+(maximize the variance of the basis vectors) is indirect at best, and
+retains the undesirable feature that the scalp maps it finds must
+be spatially orthogonal, whereas nearby but functionally differing
+brain areas may produce highly correlated scalp patterns. (Promax is
+a postprocessing stage applied on top of Varimax that relaxes Varimax's 
+orthogonality constraint on the maps slightly).
+<p>
+PCA-based EEG decomposition can be implemented in two ways -- so called
+"temporal" and "spatial" PCA approaches. "Temporal" PCA analysis, 
+such as described by Chapman & McCreary (1994), forces PCA components 
+to have the same time courses of activation in each experimental condition. 
+(Mocks has introduced generalizations that somewhat relax this constraint). 
+"Spatial PCA" and ICA avoid this shortcoming, allowing ICA components to have 
+different time courses in each condition. 
+ICA takes into account higher-order dependencies (and independencies) in the
+component activations, whereas PCA is based on the second-order covariance
+matrix. Spatial PCA assumes orthogonality of the component maps, whereas
+ICA maps are not constrained to be orthogonal ("The brain is not orthogonal").
+<p>
+In sum, ICA as implemented in runica() can be viewed as a new oblique
+rotation method for post-processing of spatial PCA'd (or sphered, or raw) data.
+Introducing ICA in this way may be useful when approaching potential users
+(or reviewers) better versed in PCA decomposition. 
+
+<FONT COLOR="#dd6a66">
+<p><strong>
+7. What are the ICA algorithm's distributional assumptions 
+about the values of the component activations, 
+and how do they affect the output?
+<p></strong>
+<FONT COLOR="#000000">
+This is a complicated question. Bell & Sejnowski (1995) proved that
+their algorithm will solve the independent components problem exactly
+given several assumptions, among them that the c.d.f. (cumulative
+density function) of each of the components matches the nonlinearity
+used in the algorithm. We use the logistic function, but have no
+proof that brain networks have a logistic c.d.f. In practice, 
+the algorithm performs well when the components have
+higher tails (more peak values) than the normal distribution (e.g., they
+are "on" infrequently; technically, their amplitude distributions are 
+super-Gaussian). Amari et al. address the question of why ICA
+algorithms are 'super-efficient' in a recent paper (see Bell's web
+page referenced above). Note the relation between the "sparsity" assumption 
+underlying logistic ICA and the "maximum compactness" assumption used in
+Varimax and Promax.  In runica() v3.0, a new 'extended-ICA' method of identifying 
+with sub-Gaussian component activations has been introduced (see question 9b below).
+<FONT COLOR="#dd6a66">
+<p><strong>
+8. Isn't the EEG known to be Gaussian?
+<p></strong>
+<FONT COLOR="#000000">
+The algorithm will not separate a mixture of Gaussians. However, 
+central limit arguments suggest that the mixture of non-Gaussian 
+components may appear Gaussian, particularly if there are an unlimited 
+number of them (e.g., brain networks with ~1/f temporal and spatial 
+distributions?). 
+<FONT COLOR="#dd6a66">
+<p><strong>
+9. What are the differences between the runica() algorithm in the Makeig
+et al. Matlab package and the original Bell & Sejnowski(1995) algorithm?
+<p></strong>
+<FONT COLOR="#000000">
+The main addition is the added W'*W ("WTW") 'natural gradient' term 
+which avoids matrix inversions during ICA training, greatly reducing 
+the computational load. Tony Bell explains:
+<p><em>
+"Multiplying the gradient by W'*W does not change the minima 
+(since W'*W is positive definite) but alters the gradient to 
+[dW/dt=(I+(1-2y)u')W] so that convergence proceeds at the same 
+rate regardless of the conditioning of the mixing matrix, A. This
+is called equivariance, or natural gradient. The reasons behind
+this are complicated. 
+On <A HREF="http://www.cnl.salk.edu/~tony/ica.html">
+my ICA web page </A>, papers 
+A1, MK and C1 touch on the reasons why, but no-one to my knowledge, 
+has given a simple and intuitive explanation.
+<p>
+(By the way, the variable "block" is just the 'batch size'. If you
+are doing batch learning of 50 presentations at a time, you have to
+calculate 50*I for that term of the learning.)
+<p>
+Now sphereing. If you check the simple MATLAB ica code given on my
+web page, you will see the following ('mixes' being an NxP data matrix
+of P data points, N sensors):
+<center>
+<p>
+  mx=mean(mixes'); c=cov(mixes');
+<br>
+  x=x-mx'*ones(1,P);                  % subtract means from mixes
+<br>
+  wz=2*inv(sqrtm(c));                 % get decorrelating matrix
+<br>
+  x=wz*x;                             % 'sphere' the data
+<p>
+</center>
+Thus we zero-mean the data and decorrelate it so that the new
+covariance matrix <xx'> is equal to 4*I. This is approximately
+the right scaling to 'fit' the logistic sigmoid, which after
+convergence will have an output covariance <uu'> of approximately
+3.7*I. With first and second-order statistics removed, the algorithm
+gets to concentrate on the higher order statistics, which would
+otherwise be partly swamped by 'training noise': fluctuations in
+the second-order statistics being of high amplitude during
+stochastic gradient, relative to the small higher order statistics. 
+Although the natural gradient modification should nullify the need
+for such 'sphereing', in practice we do both because convergence
+is more stable on sphered data, though it's just as fast on unsphered
+data. 
+<p>
+Finally, why sphere like this, instead of PCA or SVD? The form of 
+decorrelation implemented above is called zero-phase decorrelation 
+(or whitening). It is a non-orthogonal symmetrical decorrelator, while
+PCA/SVD is orthogonal. I have observed it to be a much better starting
+point for ICA than PCA/SVD. Check out my paper on very high-dimensional
+ICA (N=256)(paper B3 on my web page), where I compare decorrelators.
+You can see from the examples that ZCA (zero-phase) is much closer to
+the final ICA answers than PCA would be."</em>
+<A HREF="http://www.cnl.salk.edu/~tony">
+-Tony Bell</A></strong>
+<p>
+<FONT COLOR="#000000">
+<p>
+Note: Instead of sphering the data prior to training, one can simply
+initialize the weight matrix to the sphering matrix. In runica() version 3.0,
+this is the default when 'sphering' is turned 'off' -Scott
+In runica() v3.0, we also have reintroduced 
+<strong>online bias adjustments</strong>
+as originally given by Bell & Sejnowski (1995). For skewed (non-symmetrical)
+activation distributions
+(very common in ERP analyses), bias adjustment gives better unmixing
+results (though in simulations using 20 (mostly small) sources and
+6 channels, no advantage for using the bias term was found).
+<p>
+Version 3.0 of runica() also introduced an 
+<strong>optional momentum term</strong> 
+into the weight update loop.
+Though initial simulations did not find an advantage for using this term,
+it could be of use in some cases.
+<FONT COLOR="#dd6a66">
+<p><strong>
+9b. What is extended-ICA and when should it be used?
+<p></strong>
+<FONT COLOR="#000000">
+The logistic nonlinearity used in the runica() algorithm is capable of
+separating component activations that are super-Gaussian (kurtosis>0). 
+These are sparse, with infrequent periods of intense activation. 
+Sources whose activations are (for example) 
+more 'on' than 'off' may have sub-Gaussian
+distributions of activation values. An algorithm for treating these
+has recently been developed using infomax 
+(<A HREF="http://www.cnl.salk.edu/~tewon">Te-Won Lee</A>, 
+Mark Girolami & Terry Sejnowski (submitted)). 
+Te-Won explains:
+<p>
+<em>
+The extended infomax algorithm is an extension
+of the infomax algorithm proposed by Bell and Sejnowksi (1995).
+As noted in Section 4 of their paper, their algorithm
+fails to separate sub-Gaussian sources, i.e. sources with a negative kurtosis
+(normalized 4th order cumulant). Sources with uniform distributions
+are sub-Gaussian, sinusoids have bimodal distributions and their
+kurtosis is negative as well. The extended-infomax algorithm
+is able to blindly separate mixed sub- and super-Gaussian
+source distributions. The same learning rule has been derived by
+Girolami and Fyfe (1997b) by choosing negentropy as a projection
+pursuit index. The general learning rule preserves the simple 
+architecture proposed by Bell and Sejnowski (1995) and is 
+optimized using the natural gradient by Amari (1997).
+The original learning rule with the natural gradient, 
+from Bell and Sejnowski (1995), is:
+<p>
+<center>
+dW ~ ( I - tanh(u)*u')*W
+</center>
+<p>
+where I is the identity matrix, u are the estimated sources u = W*x and
+u' is the transpose of u.
+The extended learning rule (Girolami and Fyfe, ICNN 1997) is:
+<p>
+<center>
+dW ~ ( I - K4*tanh(u)*u' - u*u' )*W
+</center>
+<p>
+where K4 is a diagonal matrix with the sign of the kurtosis of the
+estimated sources, i.e. K4(ii) = sign(kurtosis(u_i)).
+This learning rule can be also derived from the infomax principle (Lee,
+Girolami and Sejnowski, submitted) and used in a simple single-layer 
+feedforward neural network. 
+<p>
+An intuitive explanation for this learning rule is that depending on
+K4 the algorithm switches between two learning rules: one for
+sub-Gaussian and one for super-Gaussian sources. K4 is learned adaptively. 
+Details about the derivation from infomax and its relation to other
+approaches such as negentropy maximization and maximum likelihood
+estimation are in Lee, Girolami and Sejnowski (submitted).
+<p>
+As an example, we show that the learning rule can be used to remove
+artifacts from EEG recordings. In particular, the 60-Hz line noise
+signal has a sub-Gaussian distribution and cannot be separated
+cleanly by the original Bell and Sejnowski algorithm. The extended
+infomax algorithm effectively concentrates the line noise into one
+component. Other artifacts such as eye movements, EKG noise, etc. can
+also be extracted (Jung et al., NIPS 10 in press). 
+<p>
+Furthermore, McKeown et. al. (PNAS 95:803-10, 1998) have used the extended 
+infomax algorithm to investigate task-related human brain activity 
+in fMRI data. By determining the brain regions heavily weighted for
+specific temporally-independent components, they were able to
+specify the spatial distributions of transiently task-related brain
+activations.
+In conclusion, the extended infomax algorithm is a promising
+generalization of ICA for mixed sub-Gaussian and super-Gaussian
+sources.
+</em>
+<p>
+In runica() v3.0, there are two ways of calling 'extended-ICA' using
+the 'extended' keyword. If the following parameter is a positive integer (N),
+a kurtosis estimate is run on the activation waveforms every N training
+blocks. If the resulting vector of signs does not change for a number of
+blocks, the rate of doing (computationally expensive) kurtosis estimates
+is reduced. 
+The number of components separated using the sub-Gaussian nonlinearity
+is given by the number of -1's in the signs vector returned by runica()
+and is indicated at each training step in verbose mode.
+The number of actual sub-Gaussian component activations can also be found by 
+counting the number of negative-kurtosis component activations returned by
+<p>
+<center>
+>> kurt(activations').
+</center>
+<p>
+<p>
+A faster but less flexible method for running extended-ICA is to use
+a negative integer parameter (-N). In this case, the number of putative
+sub-Gaussian components is fixed at N, and online kurtosis estimates are
+not used. If the actual number of separable sub-Gaussian components is not
+N, results may be difficult to interpret.
+<p>
+A prime impetus for using extended-ICA on psychophysiological data is 
+to remove line current noise from EEG recordings. The 60- or 50-Hz component 
+is sub-Gaussian, and can only be efficiently separated using extended-ICA.
+(Jung et al,. 1998).
+Some eye movement components have also been found to be sub-Gaussian.
+<h3><strong>
+Practical Questions 
+</h3></strong>
+<FONT COLOR="#000000">
+<FONT COLOR="#dd6a66">
+<p><strong>
+10. Can the ICA algorithm be applied to magnetic (MEG) as well as electric (EEG) data?
+<p></strong>
+<FONT COLOR="#000000">
+Yes. The relation between brain fields and fields on the scalp is also
+essentially linear, so long as the positions of the sensors and underlying
+brain fields are fixed.
+<FONT COLOR="#dd6a66">
+<p><strong>
+11. How many data channels and time points do I need to run the ICA algorithm?
+<p></strong>
+<FONT COLOR="#000000">
+The runica() version of the ICA algorithm requires very few 
+matrix inversions and so runs very quickly on modern workstations. In
+our experience, the number of time points needed is at least several
+times the number of scalp sensors (data channels). We have decomposed
+data sets with 2 to 144 channels successfully. (If you have data with
+more than 64 channels, we'd like to hear from you!) The maximum number
+of time points is also unlimited. However, see the question following
+-- if you ask ICA to decompose lots of responses at once, your number
+of data channels (and scalp sensors) should exceed the number of
+expected components active in all the input conditions!
+If the component activations returned by runica() are each large at 
+one time point only, then the weight matrix has not trained sufficiently, 
+and you need to retrain using more input data.
+<p>
+Remember that 
+<strong>ICA can only separate components that vary independently
+in its input data</strong>. 
+Thus, two components with overlapping but equivalent
+activations in each input data condition (e.g., each input ERP) should
+not be separated cleanly. To do so, the experimenter would need to add
+conditions in which their amplitudes and/or time courses varied 
+independently. Normally, good experiments are exactly those in which the
+phenomena of interest are made to vary independently, making ICA most
+useful for analyzing data from scientifically sound experiments.
+<FONT COLOR="#dd6a66">
+<p><strong>
+12. What does the ICA algorithm output?
+<p></strong>
+<FONT COLOR="#000000">
+The runica() function outputs two matrices (weights, sphere) which are
+the heart of the matter. The "activations" of the ICA components (i.e.
+their time courses of activation) are the rows of the matrix
+<p>
+<em>
+<center>
+	      activations = weights*sphere*(input_data - row_means)
+</center>
+</em>
+<p>
+Note that these activations are <em>not</em> scaled to the input data units,
+and that their polarities are also not meaningful. Why not? Because the
+projection (reconstruction) of each single ICA component's contribution
+to the original scalp data is produced by first zeroing out all but the
+chosen component (row) in the activation matrix, then multiplying by 
+the inverse weight matrix: 
+<p>
+<em>
+<center>
+   projection = (weights*sphere)^-1*single_activation;
+</center>
+</em>
+<p>
+The rows of this matrix are the time courses of the chosen component at the
+respective scalp sensors, in the original input data units and with the
+same polarity. The original channel means are not included -- to include them,
+<p>
+<em>
+<center>
+   activations = weights*sphere*input_data   % (including row means!)
+        <br>
+   projection = (weights*sphere)^-1*single_activation;
+</center>
+</em>
+<p>
+The "activations" are the time course of activation (strengths) for each
+component. A component "projection" is the actual time course of potential
+variations at each of the electrodes produced by the component.
+The projections, as computed above, sum to the data 
+<strong>including its row means.</strong>
+However, the offsets of the various component projections may not have
+physiological significance.
+<p>
+In the current package, the function compsort() orders the
+activations by the maximum variance of the projected (reconstructed)
+components (unless a starting weight matrix has been passed to the function), 
+and then re-sorts the largest components in order of the within-epoch latency 
+of their maximum activation. 
+Routines icaproj(), plotproj() and chanproj() can be used to compute and/or
+plot the projected components.
+<p>
+<strong>Note:</strong> 
+there is no need to save the weight and sphere matrices separately.
+If desired, weights can be set equal to weights*sphere, and eye(N) can
+then be used by routines asking for a separate sphering matrix.
+
+<FONT COLOR="#dd6a66">
+<p><strong>
+13. Does the ICA algorithm always give the same answer when applied to the same data?
+<p></strong>
+<FONT COLOR="#000000">
+In repeated trainings, the Matlab random number generator, which is
+locked to the system clock, will cause runica() to deliver the data to
+the training algorithm in different random orders. This has little 
+effect on the outcome; components with large projections are unchanged,
+though small components may vary. This is an important reason why
+since runica() v3.0, components are ordered in decreasing order of
+variance accounted for by their projections onto the scalp. In runca() 
+v3.2, component polarity will also be set so that all the activation
+waveforms are RMS positive, producing component maps that reflect the
+actual polarities of their dominant projection onto the scalp (e.g.,
+mostly positive scalp components in red, negative in blue in compmap()).
+<p>
+However, training the algorithm with different amounts of data may produce
+differences in the results. The ICA algorithm "pays attention" to the
+relatively large activity in the data. Adding relatively large responses
+to the training data and retraining may therefore cause the algorithm to
+"pay less attention" to the original training data, resulting in fewer
+components active chiefly in the now relatively smaller response conditions.
+<FONT COLOR="#dd6a66">
+<p><strong>
+14. Can I use the ICA output (weight*sphere) matrix from an evoked response
+decomposition to filter individual EEG traces?
+<p></strong>
+<FONT COLOR="#000000">
+Yes, but remember that the (weight*sphere) matrix is essentially a set
+of spatial filters which in this case were not trained to filter out
+the possibly numerous EEG components that were not present (or were
+strongly attenuated) in the original averaged training data. For
+example, if sufficient averaging succeeded in removing non-phase locked
+alpha activity from an averaged ERP, all the filters resulting from an
+ICA decomposition of this ERP might well allow the alpha activity in
+the single-trial EEG to pass as well as (possibly many) other EEG
+components.
+<FONT COLOR="#dd6a66">
+<p><strong>
+15. If the number of brain "sources" is greater than the number of sensors,
+what will the ICA algorithm do?
+<p></strong>
+<FONT COLOR="#000000">
+<A HREF="http://www.cnl.salk.edu/~scott/icabib.html#INC9606">
+Our head-model simulations</A> show that the presence of relatively large
+numbers of <em>small</em> independent components degrades the accuracy of ICA
+in finding large large independent components "gracefully" (e.g., the
+more or larger the "noise sources" in the simulation, the fewer large
+sources are accurately extracted). Of course, if the number of <em>large</em>
+independent components making up the simulated data is larger than the
+number of sensors, then the ICA results may be poor. This constrains the
+amount of input data to be given the algorithm -- throwing in additional
+(and unrelated) data (e.g., "the kitchen sink") may not leave enough 
+component degrees-of-freedom to separate out phenomena of most interest.
+However, the algorithm has recently been used to usefully decompose 
+as many as 75 31-channel ERPs from <strong>related</strong> conditions.
+<FONT COLOR="#dd6a66">
+<p><strong>
+16. Should the number of outputs equal the number of inputs?
+<p></strong>
+<FONT COLOR="#000000">
+The runica() function allows you to specify the number of output channels,
+which may be smaller than the number of input channels. However, in our
+experience this has not been useful, as the outputs are then forced to
+be (typically noisy) mixtures of underlying sources. A better strategy,
+in our experience, is to set the number of output channels to be equal
+to the number of input channels (this is the default) and then to focus
+on components of interest, in particular ignoring 
+those ICA components whose projections to the scalp are small, or which
+represent phenomena of less experimental interest (e.g., eye movements,
+line noise, etc.).
+<FONT COLOR="#dd6a66">
+<p><strong>
+17. What kinds of data channels can be input?
+<p></strong>
+<FONT COLOR="#000000">
+So long as the assumed independent components will be mixed linearly in
+the data, any kinds of data channels may be input together. For
+example, EEG channels with common mastoid reference <em>plus</em>
+bipolar EOG channels. Mixing MEG and EEG channels should be possible as well.
+<FONT COLOR="#dd6a66">
+<p><strong>
+18. Should I make the input data mean-zero?
+<p></strong>
+<FONT COLOR="#000000">
+Yes, but runica() does this, and saves the channel means removed in the output
+argument datamean. ERP and ERF data normally are baseline-zeroed 
+when they are calculated. In version 3.0, baseline-zeroing each
+epoch in multi-epoch data may be accomplished by:
+<p>
+<center>
+>> data = rmbase(data,frames,basevector);
+</center>
+<p>
+In most ERP data, the sources generating the given response are
+assumed to be inactive during the baseline period. When the channel means 
+of the input data differ significantly from the baseline means, making 
+the data mean-zero prior to ICA training introduces an 'active' 
+DC (square-wave) component 
+<strong>without physiological significance</strong> 
+into the ICA decomposition.
+This problem may may be minimized by appending response epochs without baseline 
+offsets to the input data (example: responses to standard stimuli appended 
+to responses to target stimuli containing large monophasic late waves).
+(Note: a previous idea, symmetrically doubling the input data 
+around the baseline mean zero value, proved flawed, since when multiple 
+skewed source activations are present, this introduces a spurious correlation 
+between them). New ideas are welcome! 
+<FONT COLOR="#dd6a66">
+<p><strong>
+19. Can I decompose data from different sessions collected with different sensor
+montages?
+<p></strong>
+<FONT COLOR="#000000">
+This violates the assumption of spatial stationarity of sources, 
+so is possible only when the sensor placements are very near each other. 
+For example, grand averages of subject groups from different
+experiments all wearing the same electrode cap can be decomposed simultaneously,
+(one such decomposition gave a single set early visual components for both
+experiments). 
+ICA decomposition is "montage-free" in the sense 
+that separate decompositions of the same
+components using different sensor montages will find the same (strongest)
+components. 
+<FONT COLOR="#dd6a66">
+<p><strong>
+20. Can I decompose data averaged across subjects?
+<p></strong>
+<FONT COLOR="#000000">
+Yes. Of course, any averaging procedure is valid only if some physical 
+uniformity assumptions are met (see 20).
+<FONT COLOR="#dd6a66">
+<p><strong>
+21. Does the ICA algorithm work better with clean or noisy data?
+<p></strong>
+<FONT COLOR="#000000">
+Data with more large signal sources than data channels 
+(whether thought of as 'noise' or 'non-noise' sources) 
+cannot all be separated by the ICA algorithm, 
+although ICA may still identify the largest of them accurately. 
+In general, 
+ICA is not a tool designed for pulling small signals out of (true) noise,
+like techniques that rely on detailed models of the signals to be extracted.
+However, very small signals (e.g., a small muscle twitch) can be separated 
+out of much larger EEG activity when the total number of large mixed sources is
+smaller than the number of sensors, and their time course of activation is
+quite unlike other data sources.
+<FONT COLOR="#dd6a66">
+<p><strong>
+22. Where can I learn more about ICA applied to evoked responses?
+<p></strong>
+<FONT COLOR="#000000">
+Papers on ICA applied to psychophysiological data are listed on
+<A HREF="http://www.cnl.salk.edu/~scott/icabib.html"> an ICA bibliography page.</A>
+<p>
+The URL of the present page may be referenced: 
+http://www.cnl.salk.edu/~scott/icafaq.html.
+<p>
+Please contact me with relevant news or questions! 
+<strong>
+<A HREF="mailto:scott@salk.edu">
+Scott Makeig (scott@salk.edu)</A></strong> (Jan. 20, 1998)

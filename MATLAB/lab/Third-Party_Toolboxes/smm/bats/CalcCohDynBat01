@@ -1,0 +1,51 @@
+cd /BEEF01/smm/sm9603_Analysis/3-20-04/analysis
+fileBaseCell = LoadVar('FileInfo/AlterFiles');
+fileExt = '_LinNearCSD121.csd';
+nChan = load(['ChanInfo/NChan' fileExt '.txt']);
+temp = LoadVar(['ChanInfo/SelChan' fileExt '.mat']);
+refChan = temp.ca3Pyr;
+freqRange = [40 120];
+winLength = 0.25;
+CalcCohDyn01(fileBaseCell,fileExt,nChan,refChan,freqRange,winLength)
+
+
+cd /BEEF01/smm/sm9603_Analysis/3-21-04/analysis
+fileBaseCell = LoadVar('FileInfo/AlterFiles');
+fileExt = '_LinNearCSD121.csd';
+nChan = load(['ChanInfo/NChan' fileExt '.txt']);
+temp = LoadVar(['ChanInfo/SelChan' fileExt '.mat']);
+refChan = temp.ca3Pyr;
+freqRange = [40 120];
+winLength = 0.25;
+CalcCohDyn01(fileBaseCell,fileExt,nChan,refChan,freqRange,winLength)
+
+temp = Struct2CellArray(LoadVar(['ChanInfo/SelChan' fileExt '.mat']));
+chanMat = [temp{:,2}]';
+
+
+taskType = 'AlterGood_rdctgw';
+fileBaseCell = LoadVar('FileInfo/AlterFiles');
+fileExt = '.eeg';
+nChan = load(['ChanInfo/NChan' fileExt '.txt']);
+temp = Struct2CellArray(LoadVar(['ChanInfo/SelChan' fileExt '.mat']));
+chanMat = [temp{:,2}]';
+freqRange = [40 120];
+winLength = 312;
+peakBool = 0;
+NW = 1;
+
+temp = Struct2CellArray(LoadVar(['ChanInfo/SelChan' fileExt '.mat']));
+chanMat = [temp{[3 5],2}]';
+
+PlotMazeCoh01(taskType,fileBaseCell,fileNameFormat,fileExt,freqRange,winLength,refChan,chanMat,0,0,1,0,[-3 3]);
+PlotMazeCoh01(taskType,fileBaseCell,fileNameFormat,fileExt,freqRange,winLength,refChan,chanMat,0,0,0,1,[-0.05 0.05]);
+PlotMazePow2(taskType,fileBaseCell,fileNameFormat,fileExt,freqRange,winLength,NW,peakBool,chanMat,0,0,1,0,0,[-3 3]);
+
+
+
+
+
+
+CalcPosCohSum03(taskType,fileBaseCell,fileExt,fileNameFormat,nChan,refChan,winLength,freqRange,1,[],[1 1 1 1 1 1 1 1 1])
+
+

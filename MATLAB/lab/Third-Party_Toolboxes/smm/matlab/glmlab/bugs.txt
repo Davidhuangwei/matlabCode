@@ -1,0 +1,18 @@
+KNOWN BUGS in glmlab v2.3.1
+
+These are a list of problems I already know about.  There is, 
+more than likely, heaps of others.  
+
+* Since MATLAB v5.2, altering the titles in the residual plots places
+  information in the command window about NumLines.  I cannot find how
+  this appears from the code, so perhaps it is a MATLAB problem.
+
+* Had to change npplot as a MATLAB bug was encountered returning the
+  handles.
+
+SUGGESTIONS:
+
+Attach a p-value to the deviance (suggested by: Jean-Marc Fromentin)
+
+Peter Dunn
+30 July 1998

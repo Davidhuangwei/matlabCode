@@ -1,0 +1,273 @@
+This directory contains matlab scripts for fitting a variety of soft and
+hard clustering Gaussian mixture models to data.
+
+Copyright 2002 Oregon Health & Science University
+Author: Cynthia Archer
+Revised: September 25, 2002
+
+train_apca_ec - for hard and soft clustering entropy constrained adaptive PCA
+                (hyperplane) and entropy constrained vector quantizer 
+                (spherical) models. All components have same noise variance.
+                Produces models for a range of noise variances, starting at
+                largest global eigenvalue of data and decreasing five orders
+                of magnitude. 
+
+train_ugmm    - for hard and soft clustering full covariance models
+
+train_lpca_fd - for hard and soft clustering local PCA models (hyperplane) and
+                K-means clustering (spherical models) with fixed dimension.
+                All components have same target dimension
+
+test_apca     - applys any of the above models to new (test) data
+
+For more information on the algorithms see:
+
+Archer and Leen. Adaptive Principal Component Analysis, Technical Report xxx,
+                 Oregon Health & Science University, Department of Computer 
+                 Science and Engineering, 2002
+
+for local PCA (fixed-dimension) models: 
+Kambhatla and Leen. Optimal dimension reduction by local PCA. Neural 
+                 Computation, 9(7):1493-1516, 1997 and
+Tipping and Bishop. Mixture of Probabilistic Principal Component Analyzers. 
+                 Neural Computation, 11(2):442-483, 1999.
+
+for entropy-constrained spherical models:
+Chou, Lookabaugh, and Gray. Entropy-constrained Vector Quantization. IEEE
+                 Transactions on Acoustics, Speech, and Signal Processing,
+                 37(1):31-41, 1989.
+
+
+               Table of models and associated Matlab scripts:
+
+           model                   script             inputs
+full covariance GMM             train_ugmm         mode = 'soft'
+
+hard-clustering full            train_ugmm         mode = 'hard'
+covariance model
+
+Probablistic PCA                train_lpca_fd      data dim > dim > 0
+(Tipping & Bishop)                                 mode = 'soft'
+
+Local PCA                       train_lpca_fd      data dim > dim > 0
+(Kambhatla & Leen)                                 mode = 'hard'
+
+Adaptive PCA                    train_apca_ec      mode = 'apca'
+
+Adaptive PCA GMM                train_apca_ec      mode = 'ppca'
+
+Spherical GMM with              train_apca_ec      mode = 'sgmm'
+fixed component variance
+
+Entropy-constrained VQ          train_apca_ec      mode = 'ecvq'
+(Chou, et. al.)
+
+Spherical GMM with              train_lpca_fd      mode = 'soft'
+variances fit to data                              dim = 0
+
+K-means clustering              train_lpca_fd      mode = 'hard'
+                                                   dim = 0
+
+
+________________________________________________________________________
+
+train_apca_ec
+
+inputs:
+
+filename :   training file name. 
+             file format: number_of_vectors vector_dim
+                        vector 1
+                           :
+                        vector N
+
+validname :  validation file name.
+             same file format as training file; may be same as training file.
+
+mode :       model and clustering type
+             apca - hard clustering adaptive PCA model
+             ecvq - hard clustering vector quantizer model
+             ppca - soft clustering (probabilistic) adaptive PCA model
+             sgmm - soft clustering spherical GMM
+
+numcomp :    maximum number of components 
+             should be several times larger than expected number of clusters
+
+alpha :      rate at which step through noise variances
+             noise new = alpha * noise old
+             start at noise variance = largest global eigenvalue of data
+             stop at initial value divided by 100000 (apca) and by 10000 (ecvq)
+                  or at 0.01, whichever is greater. Floor of 0.01 chosen to 
+                  allow inclusion of noise variance in file names. 
+
+rseed :      integer value used to seed the random number generator
+
+
+outputs:
+
+parmfile :   string the contains the file names of all model parameter files.
+             individual file names are separated by '?'.
+             file names encode model identification
+                 <name>_M<size>_<mode>_n<nois>_d<dim>_r<seed>
+
+             name is root of training file name (extension removed)
+             size is model size (number of components)
+             mode is 'hard' or 'soft' for hard or soft clustering
+             nois is noise variance value
+             dim  is component dimension (0 of ecvq and blank for apca)
+             seed is seed used to initialize random number generator
+
+bestnoise :  noise variance with best validation set cost or likelihood
+             for real-world data, this value does not indicate the model
+             that best conforms to the data structure. 
+bestM     :  model size for model at best noise variance
+
+_____________________________________________________________________________
+
+train_ugmm
+
+inputs:
+
+filename :   training file name. 
+             file format: number_of_vectors vector_dim
+                        vector 1
+                           :
+                        vector N
+
+validname :  validation file name.
+             same file format as training file; may be same as training file.
+
+mode :       clustering type 'hard' or 'soft'
+
+numcomp :    maximum number of components 
+             should be several times larger than expected number of clusters
+
+mlst :       list of model sizes
+             save parameters for models the match sizes in the list
+             all values in mlst must be less than numcomp
+
+rseed :      integer value used to seed the random number generator
+
+
+outputs:
+
+parmfile :   string the contains the file names of all model parameter files.
+             individual file names are separated by '?'.
+             file names encode model identification
+                 <name>_M<size>_<mode>_n<nois>_d<dim>_r<seed>
+
+             name is root of training file name (extension removed)
+             size is model size (number of components)
+             mode is 'hard' or 'soft' for hard or soft clustering
+             nois is 0
+             dim  is data dimension 
+             seed is seed used to initialize random number generator
+
+bestM     :  model size with best validation set cost or likelihood 
+_____________________________________________________________________________
+train_lpca_fd
+
+inputs:
+
+filename :   training file name. 
+             file format: number_of_vectors vector_dim
+                        vector 1
+                           :
+                        vector N
+
+validname :  validation file name.
+             same file format as training file; may be same as training file.
+
+mode :       clustering type 'hard' or 'soft'
+
+dim :        target dimension
+             should be less than full data dimension
+             selection of zero dimension gives K-means clustering (hard) or
+             spherical GMM (soft)
+
+numcomp :    maximum number of components 
+             should be several times larger than expected number of clusters
+
+mlst :       list of model sizes
+             save parameters for models the match sizes in the list
+             all values in mlst must be less than numcomp
+
+rseed :      integer value used to seed the random number generator
+
+
+outputs:
+
+parmfile :   string the contains the file names of all model parameter files.
+             individual file names are separated by '?'.
+             file names encode model identification
+                 <name>_M<size>_<mode>_n<nois>_d<dim>_r<seed>
+
+             name is root of training file name (extension removed)
+             size is model size (number of components)
+             mode is 'hard' or 'soft' for hard or soft clustering
+             nois is 0 (hard) or blank (soft)
+             dim  is target dimension
+             seed is seed used to initialize random number generator
+
+bestM     :  model size with best validation set cost or likelihood 
+_____________________________________________________________________________
+
+test_apca
+
+inputs:
+
+filename :   root of test file name (no extension)
+             test_apca expects to find two files:
+                  <filename>.dat containing test data vectors (required)
+                               file format: number_of_vectors vector_dim
+                                            vector 1
+                                               :
+                                            vector N
+                  <filename>gc.ras containing the generating classes (optional)
+                               file format: number_of_vectors number_of_classes
+                                            class for vector 1
+                                               :
+                                            class for vector N
+             if generating class file is not present, the script will
+             still run and will return -1 for the entropy and normalized
+             mutual information outputs.
+  
+parmname :   model parameter file name (no extension)
+             format defined in write_bestparm script
+             assumes an extension of .par
+ 
+
+outputs:
+
+asgn :       vector containing assignment of data vectors to model components
+             
+C :          modeling cost or likelihood
+D :          distortion part of cost
+H :          discrete entropy part of cost
+
+Hp :         component impurity 
+             conditional entropy of class given model component
+             -1 if no generating class file
+
+Ha :         component abundance
+             conditional entropy of model component given class
+             -1 if no generating class file
+
+nmi :        normalized mutual information
+             mutual information normalized by H(component) + H(class)
+             -1 if no generating class file
+
+___________________________________________________________________________
+
+Other support scripts
+
+read_data      reads data file
+soft_part      perform soft partition of data (posterior probabilities)
+hard_part      perform hard parition of data
+get_cost       calculate modeling cost (likelihood)
+get_leastlike  find model component(s) that have lowest probability on
+               validation data
+update_parm    calculate new parameter values using current data partition
+write_curparm  write current parameter values to output file
+write_bestparm write (saved) best model parameter values to output file
+___________________________________________________________________________

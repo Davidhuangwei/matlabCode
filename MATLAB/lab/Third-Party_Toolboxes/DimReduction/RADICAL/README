@@ -1,0 +1,20 @@
+This is RADICAL release 1.1. 
+
+Changes from last version:
+
+1) A major bug was found and fixed from
+   version 1.0. The whitening matrix was computed incorrectly in previous
+   versions. The program worked correctly for pre-whitened data but not
+   for non-white data. 
+
+2) The speed has been increased about 20% by changes to the vasicekm.m
+   routine.
+
+The following functions are found the RADICAL home
+directory.
+
+RADICAL_2D:        Solves two-dimensional ICA problem.
+RADICAL:           Solves ICA problem in 2 or more dimensions.  
+demo_2d:	   Shows usage of RADICAL_2D with a 2-d example.
+demo_5d:	   Shows usage of RADICAL with a 5-d example.
+

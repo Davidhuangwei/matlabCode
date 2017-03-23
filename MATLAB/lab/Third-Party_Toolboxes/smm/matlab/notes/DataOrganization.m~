@@ -1,0 +1,53 @@
+fileExts = {'.dat','.htm','.m1v'}
+for k=1:length(fileExts)
+    temp = dir(['*' fileExts{k}]);
+    for j=1:length(temp)
+        EvalPrint(['!mv ' temp(j).name ' ' temp(j).name([1:6 9:12 end-3:end])],0)
+    end
+end
+
+fileBaseCell =[];
+temp = dir('../dats/*.dat')
+for j=1:length(temp)
+    fileBaseCell{j,1} = temp(j).name(1:end-4);
+end
+fileBaseCell
+
+mkdir FileInfo
+
+save('FileInfo/AllFiles.mat',SaveAsV6,'fileBaseCell')
+
+for j=1:length(fileBaseCell)
+    EvalPrint(['mkdir ' fileBaseCell{j}],0)
+end
+
+cwd = pwd;
+for j=1:length(fileBaseCell)
+    cd(fileBaseCell{j})
+%     evalText = ['!ln -s ../../dats/' fileBaseCell{j} '.dat .'];
+%     evalText = ['!ln -s ' '/BEEF2/smm/SpikeData/sm9601/2-16-04/' fileBaseCell{j} '/* .'];
+    evalText = ['!ln -s ../../processed/' fileBaseCell{j} '/* .'];
+    EvalPrint(evalText,0)
+    cd(cwd)
+end
+
+for j=1:length(fileBaseCell)
+    evalText = ['!rm ' fileBaseCell{j} '/*'];
+    EvalPrint(evalText,0)
+end
+
+fileExts ={'.led','.spots','.whl'}
+for j=1:length(mazeFiles)
+    for k=1:length(fileExts)
+        evalText = ['!cp ../processed/old/' mazeFiles{j} '/' mazeFiles{j} fileExts{k} ' ../processed/' mazeFiles{j} '/'];
+        EvalPrint(evalText,0)
+    end
+end
+
+fileExts ={'_LinearizedWhl.mat','_whl_indexes.mat'}
+for j=1:length(mazeFiles)
+    for k=1:length(fileExts)
+        evalText = ['!cp old/' mazeFiles{j} '/' mazeFiles{j} fileExts{k} ' ../processed/' mazeFiles{j} '/'];
+        EvalPrint(evalText,1)
+    end
+end

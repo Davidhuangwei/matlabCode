@@ -1,0 +1,38 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_pca</title>
+
+<body><h1>gtm_pca</h1>
+Calculates the principal components of a data set.
+
+<p>
+The principal components equals the eigenvectors of
+the covariance matrix of the data..
+
+<h3>Synopsis</h3>
+<pre>[eVts, eVls] = gtm_pca(T)</pre>
+<h3>Arguments</h3>
+<code>T</code> - 
+the data set for which the principal components	
+are to be calculated. Every row is assumed to 
+be a data point; N-by-D
+
+<h3>Return</h3>
+<code>eVts</code> - 
+an D-by-D matrix in which each column is a
+unit length eigenvector of the covariance matrix 
+of the data, sorted in descending order w.r.t. 
+the corresponding eigenvalues
+
+<p>
+<code>eVls</code> - 
+a D-dimensional vector holding the eigen-
+values of the covariance matrix of the data, 
+sorted in descending order
+
+
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

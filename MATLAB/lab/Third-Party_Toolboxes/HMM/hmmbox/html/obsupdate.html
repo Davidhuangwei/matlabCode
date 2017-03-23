@@ -1,0 +1,115 @@
+<TITLE>/</TITLE>
+<BODY>
+<A HREF = "index.html">[Index for .]</A>
+<A HREF = "../index.html">[Return to Master Index]</A>
+<H1>obsupdate</H1>
+<H2>(./obsupdate.m)</H2>
+<HR><H3>Function Synopsis</H3>
+<pre>[hmm] = obsupdate (X,T,Gamma,Gammasum,hmm,update)</pre>
+<HR><H3>Help text</H3>
+<pre>
+ function [hmm] = obsupdate (X,T,Gamma,Gammasum,hmm,update)
+ 
+ Update observation model
+ 
+ X             observations
+ T             length of series
+ Gamma         p(state given X)
+ Gammasum      Sum of Gamma over all T
+ hmm           hmm data structure
+ update        vector denoting which state obsmodels to update 
+               (default = [1,1,...hmm.K])
+</pre>
+<HR><H3>Cross-Reference Information</H3>This function calls
+<pre><UL>
+<LI><A HREF = "../html/arwls.html">arwls</A>          ./arwls.m</LI>
+<LI><A HREF = "../html/rdiv.html">rdiv</A>           ./rdiv.m</LI>
+<LI><A HREF = "../html/rprod.html">rprod</A>          ./rprod.m</LI>
+</UL></pre>
+This function is called by
+<pre><UL>
+<LI><A HREF = "../html/demar.html">demar</A>          ./demar.m</LI>
+<LI><A HREF = "../html/demgausshmm.html">demgausshmm</A>    ./demgausshmm.m</LI>
+<LI><A HREF = "../html/demlike.html">demlike</A>        ./demlike.m</LI>
+</UL></pre>
+<HR><H3>Listing of function </H3>
+<pre>
+function [hmm] = obsupdate (X,T,Gamma,Gammasum,hmm,update)
+
+% function [hmm] = obsupdate (X,T,Gamma,Gammasum,hmm,update)
+% 
+% Update observation model
+% 
+% X             observations
+% T             length of series
+% Gamma         p(state given X)
+% Gammasum      Sum of Gamma over all T
+% hmm           hmm data structure
+% update        vector denoting which state obsmodels to update 
+%               (default = [1,1,...hmm.K])
+
+if nargin &lt; 6 | isempty(update), update=ones(1,hmm.K); end
+
+p=length(X(1,:));
+N=length(X(:,1));
+N=N/T;
+
+K=hmm.K;
+switch hmm.obsmodel
+  case 'GaussCom',
+    Mu=zeros(K,p);
+    Mu=Gamma'*X;
+    Mu=<A HREF = ../html/rdiv.html>rdiv</A>(Mu,Gammasum');
+    Cov=zeros(p,p);
+    for l=1:K
+      if update(l)
+	hmm.state(l).Mu=Mu(l,:);
+	d=(X-ones(T*N,1)*Mu(l,:));
+	Cov=Cov+<A HREF = ../html/rprod.html>rprod</A>(d,Gamma(:,l))'*d;
+      end
+    end
+    Cov=Cov/(sum(Gammasum));
+    for l=1:K
+      if update(l)
+	hmm.state(l).Cov=Cov;
+      end
+    end
+  case 'Gauss',
+    Mu=zeros(K,p);
+    Mu=Gamma'*X;
+    Mu=<A HREF = ../html/rdiv.html>rdiv</A>(Mu,Gammasum');
+    for l=1:K
+      if update(l)
+	hmm.state(l).Mu=Mu(l,:);
+	d=(X-ones(T*N,1)*Mu(l,:));
+	hmm.state(l).Cov=<A HREF = ../html/rprod.html>rprod</A>(d,Gamma(:,l))'*d;
+	hmm.state(l).Cov=hmm.state(l).Cov/(sum(Gamma(:,l)));
+      end
+    end;
+    % Check covariances (same check as NetLab GMMEM)
+    for l = 1:K
+      if update(l)
+	if min(svd(hmm.state(l).Cov)) &lt; eps
+	  hmm.state(l).Cov = hmm.init_val(l).Cov;
+	end
+      end
+    end    
+  case 'AR',
+    % Do weighted linear regression for each state
+    for l=1:K
+      if update(l)
+	[hmm.state(l).a,hmm.state(l).v] = <A HREF = ../html/arwls.html>arwls</A> (X,1./Gamma(:,l),hmm.state(l).p);
+      end
+    end	
+  case 'LIKE',
+    % The observations are themselves likelihoods
+    % There is no observation model to update
+  otherwise
+    disp('Unknown observation model');
+end
+</pre>
+<HR>
+Produced by <A HREF="">mat2html</A> on Thu Feb  1 11:33:45 2001
+<BR>
+Cross-Directory links are: OFF<BR>
+</BODY>

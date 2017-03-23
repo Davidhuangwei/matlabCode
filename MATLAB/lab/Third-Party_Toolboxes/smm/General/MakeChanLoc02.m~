@@ -1,0 +1,63 @@
+function MakeChanLoc02(fileExt,chanLocVersion)
+
+chanInfoDir = 'ChanInfo/';
+if exist([chanInfoDir 'ChanLoc_' chanLocVersion fileExt '.mat'],'file')
+    chanLoc = LoadVar([chanInfoDir 'ChanLoc_' chanLocVersion fileExt '.mat']);
+else
+    fprintf(['This ChanLoc file does not yet exist: ' chanLocVersion  fileExt '\n'])
+end
+
+while 1
+    CheckChanLoc02(fileExt,chanLocVersion)
+    if exist('chanLoc','var')
+        chanLoc
+    end
+    switch input(['What would you like to do?\n' ...
+            '[a]: Add field \n' ...
+            '[d]: Delete field \n' ...
+            '[r]: Reorder fields \n' ...
+            '[n]: Rename field \n' ...
+            '[c]: Change field \n'],'s')
+        case 'a'
+            fieldName = input('Enter field to add: ','s');
+            chanNums = input('Enter channel nums: ');
+            chanLoc.(fieldName) = chanNums
+        case 'd'
+            fieldName = input('Enter field to remove: ','s');
+            chanLoc = rmfield(chanLoc,fieldName)
+        case 'r'
+            chanLoc
+            fieldOrder = input('Enter new field order: ');
+            chanLoc = orderfields(chanLoc,fieldOrder)
+        case 'n'
+            oldName = input('Enter field do you want to rename: ','s');
+            if isfield(chanLoc,oldName)
+                names = fieldnames(chanLoc);
+                index = find(strcmp(names,oldName));
+        case 'c'
+            fieldName = input('Enter field do you want to change: ','s');
+            if ~isempty(fieldName)
+                while 1
+                    oldChans = input('Enter channel nums you want to change: ');
+                    if ~isempty(oldChans)
+                        newChans = input('Enter new channel nums: ');
+                        indexes = find(chanLoc.(fieldName)==oldChans);
+                        if ~isempty(indexes)
+                            chanLoc.(fieldName)(indexes) = newChans
+                        end
+                    end
+                    if strcmp('n',input('Another change to this field? [y]/n: ','s'))
+                        break;
+                    end
+                end
+            end
+    end
+    if ~strcmp('n',input('Save changes? [y]/n: ','s'))
+        save([chanInfoDir 'ChanLoc_' chanLocVersion fileExt '.mat'],SaveAsV6,'chanLoc');
+    end
+    if strcmp('n',input('Continue? [y]/n: ','s'))
+        break;
+    end
+end
+
+            

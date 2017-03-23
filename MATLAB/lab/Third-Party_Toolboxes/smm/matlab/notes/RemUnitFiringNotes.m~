@@ -1,0 +1,55 @@
+newSamp
+filt = gausswin(newSamp);
+remTime = load('sm9603m2_232_s1_276.sts.REM')/1250;
+sumRes = [];
+for j=1:11
+    res = load(['sm9603m2_232_s1_276.res.' num2str(j)]);
+    clu = load(['sm9603m2_232_s1_276.clu.' num2str(j)]);
+    res = res(res>remTime(1)*20000 & res<remTime(2)*20000 & clu(2:end)>1);
+    res = round((res/20000-remTime(1))*newSamp);
+    resBin = Accumulate(res,1,ceil([(remTime(2)-remTime(1))*newSamp]));
+    if isempty(sumRes)
+        sumRes = ConvTrim(resBin,filt);
+    else
+        sumRes = sumRes + ConvTrim(resBin,filt);
+    end
+end
+
+
+
+newSamp = 4
+filt = gausswin(newSamp*2);
+sumRes = [];
+temp = dir('sm9603m2_232_s1_276.eeg');
+nSamp = temp.bytes/97/2/1250*newSamp
+types = LoadCellTypes('sm9603m2_232_s1_276.type');
+layers = LoadCellLayers('sm9603m2_232_s1_276.cellLayer');
+for j=1:size(types,1)
+    res = load(['sm9603m2_232_s1_276.res.' num2str(types{j,1})]);
+    clu = load(['sm9603m2_232_s1_276.clu.' num2str(types{j,1})]);
+    res = res(clu(2:end)==types{j,2});
+    res = round(res/20000*newSamp);
+    resBin = hist(res,nSamp);
+    if isstruct(sumRes) & IsBranch(sumRes,layers{j,3},types{j,3})
+        sumRes.(layers{j,3}).(types{j,3}) = sumRes.(layers{j,3}).(types{j,3}) + ConvTrim(resBin,filt);
+    else
+        sumRes.(layers{j,3}).(types{j,3}) = ConvTrim(resBin,filt);
+    end
+end
+
+sumResCell = Struct2CellArray(sumRes,[],1);
+for j=1:length(sumResCell)
+    subplot(length(sumResCell)+1,1,j);
+    plot([1:length(sumResCell{j,end})]/newSamp,sumResCell{j,end});
+    ylabel([sumResCell{j,1} ',' sumResCell{j,2}]);
+    set(gca,'xlim',remTime)
+    set(gca,'xtick',round([remTime(1):10:remTime(2)]))
+    grid on
+end
+load('sm9603m2_232_s1_276SelChanWPSpec.eeg.mat');
+subplot(length(sumResCell)+1,1,length(sumResCell)+1);
+imagesc(t,f,10*log10(y(:,:,5))');
+    set(gca,'xlim',remTime)
+    set(gca,'xtick',round([remTime(1):10:remTime(2)]))
+grid on
+

@@ -1,0 +1,39 @@
+function PlotGlmScat01(dirname,inNameNote,depVar,fileExt)
+dirname = 'GlmWholeModel01';
+inNameNote = 'Alter_secondRun_';
+fileExt = '_LinNear.eeg';
+depVar = 'gammaPowIntg60-120Hz';
+load([dirname '/' inNameNote '/' fileExt '/' depVar '.mat'])
+nextFig = 1;
+
+m=1
+plotData = squeeze(model.categMeans{m}(:,1,:)-repmat(mean(model.categMeans{m}(:,1,:)),size(model.categMeans{m}(:,1,:),1),1));
+plotNames = [model.categNames{m}];
+yLimits = [-2 2];
+
+%plotData = log10(model.pVals);
+%plotNames = model.varNames%model.rSqNames
+function ScatPlotHelper(plotData,plotNames)
+
+chanInfoDir = 'ChanInfo/';
+chanMat = LoadVar([chanInfoDir 'ChanMat' fileExt '.mat']);
+chanLoc = LoadVar([chanInfoDir 'ChanLoc' fileExt '.mat']);
+
+
+figure(nextFig)
+clf
+%nextFig = nextFig + 1;
+fields = fieldnames(chanLoc)
+for j=1:size(plotData,1)
+    subplot(1,size(plotData,1),j)
+    hold on
+    for k=1:length(fields)
+        plot(k,plotData(j,chanLoc.(fields{k})),'bo');
+    end
+    title(plotNames{j})
+    set(gca,'xtick',[1:length(fields)],'xticklabel',fields)
+    set(gca,'ylim',yLimits)
+end
+
+return
+

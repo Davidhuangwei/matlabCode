@@ -1,0 +1,35 @@
+% function CpSpectAnalFilesBat(fileBaseCell,fromSpectAnalDir,toSpectAnalDir,regExp)
+% [toFileName testBool] = DefaultArgs(varargin,{[],0});
+% Best used with 
+function CpSpectAnalFilesBat(fileBaseCell,fromSpectAnalDir,toSpectAnalDir,regExp,varargin)
+[toFileName testBool] = DefaultArgs(varargin,{[],0});
+if isempty(toFileName)
+    toText = regExp;
+else
+    toText = toFileName;
+end
+% for j=1:length(analDirs)
+%     for m=1:length(fileBaseNames)
+%         fileBaseCell = LoadVar([analDirs{j} 'FileInfo/' fileBaseNames{m}]);
+        for k=1:length(fileBaseCell)
+            if exist([fileBaseCell{k} '/' toSpectAnalDir '/' toText],'file')
+                fprintf('File Exists: %s\n',[analDirs{j} fileBaseCell{k} '/' toSpectAnalDir '/' toText])
+                intext = 'empty';
+                while ~strcmp(intext,'y') &  ~strcmp(intext,'n') & ~strcmp(intext,'')
+                    intext = input('Overwrite? [n]/y','s')
+                end
+            else
+                intext = 'y';
+            end
+            
+            if ~strcmp(intext,'n')
+                evalText = ['!cp ' analDirs{j} fileBaseCell{k} '/' fromSpectAnalDir '/' regExp ' '...
+                    analDirs{j} fileBaseCell{k} '/' toSpectAnalDir '/'];
+                if ~isempty(toFileName)
+                    evalText = [evalText toFileName];
+                end
+                EvalPrint(evalText,testBool)
+            end
+        end
+%     end
+% end

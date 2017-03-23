@@ -1,0 +1,33 @@
+
+Fri Sep  6 11:44:29 PDT 2002
+
+This dir contains original Matlab functions from the ICA/EEG (now EEGLAB) Matlab toolbox,
+plus many new EEGLAB v4.0 functions. See the EEGLAB tutorial (URL given below).
+
+To use: 
+
+1. Place the matlab functions in a directory ($DIR) and add 
+   $DIR/eeglab4.0 to (Unix) your matlabpath environment variable. 
+   Else, in Matlab >> addpath('full_path_here')
+
+2. Edit file "icadefs.m" to reference the faster binary "ica" function. 
+   This requires a (recommended) separate download from http://sccn.ucsd.edu/eeglab/binica/
+   Also add the path for the EEGLAB tutorial. This requires another (recommended) download 
+   from http://sccn.ucsd.edu/eeglab/
+
+3. Start Matlab. and type >> eeglab
+
+4. Open the main EEGLAB tutorial page (your downloaded eeglabtut.html 
+   else http://sccn.ucsd.edu/eeglab/eeglabtut.html)
+
+5. Please send feedback and suggestions to eeglab@sccn.ucsd.edu
+
+6. In publications, please reference:
+
+   A. Delorme, S. Makeig et al., "EEGLAB: A software toolbox for electrophysiological data 
+   analysis" WWW release: http://sccn.ucsd.edu/eeglab/, Version 4.0 The Salk Institute, 
+   La Jolla and Swartz Center for Computational Neuroscience, Institute for Neural Computation, 
+   University of California San Diego, September, 2002
+ 
+
+Arno Delorme & Scott Makeig

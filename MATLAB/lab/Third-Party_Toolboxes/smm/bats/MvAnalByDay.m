@@ -1,0 +1,34 @@
+
+dayCell = Struct2CellArray(LoadVar('DayStruct.mat'));
+days = unique(dayCell(:,2));
+for j=1:length(days)
+    dayName = days{j}
+    day = dayCell(strcmp(dayCell(:,2),dayName),1);
+    if ~exist(['../' dayName '/analysis/'],'dir')
+        mkdir(['../' dayName '/analysis/'])
+    end
+    if ~exist(['../' dayName '/analysis/FileInfo/'],'dir')
+        mkdir(['../' dayName '/analysis/FileInfo/'])
+    end
+
+    eval(['!cp *Files.mat ../' dayName '/analysis/FileInfo/']);
+    %eval(['!cp ColorMapSean* ../' dayName '/analysis/']);
+    %eval(['!cp CircularColorMap.mat ../' dayName '/analysis/']);
+    eval(['!cp -R ChanInfo ../' dayName '/analysis/']);
+    eval(['!cp dats ../' dayName '/analysis/']);
+    eval(['!cp processed ../' dayName '/analysis/']);
+    eval(['!cp -R TrialDesig ../' dayName '/analysis/']);
+%     ['!cp *Files.mat ../' dayName '/analysis/']
+%     ['!cp ColorMapSean* ../' dayName '/analysis/']
+%     ['!cp CircularColorMap.mat ../' dayName '/analysis/']
+%     ['!cp -R ChanInfo ../' dayName '/analysis/']
+%     ['!cp dats ../' dayName '/analysis/']
+%     ['!cp processed ../' dayName '/analysis/']
+%     ['!cp -R TrialDesig ../' dayName '/analysis/']
+    fileDirs = intersect(dayCell(:,1),day);
+    for k=1:size(fileDirs,1)
+%         ['!mv ' fileDirs(k,:) ' ../' dayName '/analysis/']
+        eval(['!mv ' fileDirs{k,:} ' ../' dayName '/analysis/']);
+    end
+end
+       

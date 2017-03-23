@@ -1,0 +1,377 @@
+function PlotUnitFieldCoh03(analDirs,fileExt,spectAnalDir,statsAnalFunc,...
+    analRoutine,freqLim,trialRateMin,cellRateMin,cohName,ntapers,varargin)
+[freqRangeCell reportFigBool saveDir screenHeight xyFactor] = ...
+    DefaultArgs(varargin,{{[4 12],[40 120]},...
+    1,'/u12/smm/public_html/NewFigs/REMPaper/UnitAnal05/',15,1.5});
+
+prevWarnSettings = SetWarnings({'off','LoadDesigVar:fileNotFound';...
+   'off', 'MATLAB:divideByZero'});
+
+cwd = pwd;
+
+rates = [];
+acgs = [];
+ccgs = [];
+for j=1:length(analDirs)
+    cd(analDirs{j})
+    load(['TrialDesig/' statsAnalFunc '/' analRoutine '.mat'])
+    selChanCell = Struct2CellArray(LoadVar(['ChanInfo/SelChan' fileExt '.mat']));
+        
+    tempRate = Struct2CellArray(MeanDesigUnitThresh(fileBaseCell,spectAnalDir,...
+        ['unitRate'],['unitRate'],trialRateMin,trialDesig),[],1);
+    
+    tempCCG = Struct2CellArray(MeanDesigUnitThresh(fileBaseCell,spectAnalDir,...
+        ['unitFieldCoh_' cohName '_tapers' num2str(ntapers) '.yo'],...
+        ['unitRate'],trialRateMin,trialDesig),[],1);
+
+    for k=1:size(tempCCG,1)
+        cellLayers = LoadCellLayers([fileBaseCell{1} '/' fileBaseCell{1} '.cellLayer']);
+        cellTypes = LoadCellTypes([fileBaseCell{1} '/' fileBaseCell{1} '.type']);
+        if isempty(ccgs)
+            rates = tempRate;
+            acgs = tempCCG;
+            ccgs = tempCCG;
+        end
+        if ~isstruct(ccgs{k,end})
+            rates{k,end} = struct([]);
+            acgs{k,end} = struct([]);
+            ccgs{k,end} = struct([]);
+        end
+        rates{k,end} = UnionStructMatCat(1,rates{k,end},SortRates2LayerTypes(squeeze(tempRate{k,end}),cellLayers,cellTypes));
+        ccgs{k,end} = UnionStructMatCat(1,ccgs{k,end},SortUnitFieldCoh2LayerTypes(squeeze(tempCCG{k,end}),cellLayers,cellTypes,selChanCell));
+    end
+    size(tempCCG{1,2})
+end
+fo = LoadField([fileBaseCell{1} '/' spectAnalDir '/' 'unitFieldCoh_' cohName '_tapers' num2str(ntapers) '.fo']);
+cd(cwd)
+
+cellLayers = selChanCell(:,1);
+cellTypes = {'w' 'n' 'x'};
+
+keyboard
+
+% colNamesCell{1} = cellLayers;
+% colNamesCell{2} = {'w','n'};
+% colNamesCell{3} = cellLayers;
+% colNamesCell{4} = {''};
+% colNamesCell{5} = ccgs(:,1);
+colNamesCell{1} = {''};
+colNamesCell{2} = {'w','n'};
+colNamesCell{3} = cellLayers;
+colNamesCell{4} = cellLayers;
+colNamesCell{5} = ccgs(:,1);
+dataCell = CellArray2Struct(ccgs);
+dataCell = Struct2CellArray(dataCell,[],1);
+% dataCell = cat(2,dataCell(:,[2 3 4]),repmat({''},size(dataCell(:,1))),...
+%     dataCell(:,[1 5]));
+dataCell = cat(2,repmat({''},size(dataCell(:,1))),dataCell(:,[3 4 2]),...
+    dataCell(:,[1 5]));
+
+rateCell = CellArray2Struct(rates);
+rateCell = Struct2CellArray(rateCell,[],1);
+% rateCell = cat(2,rateCell(:,[2 3]),repmat({''},size(rateCell(:,[1 2]))),...
+%     rateCell(:,[1 4]));
+rateCell = cat(2,repmat({''},size(rateCell(:,[1]))),...
+    rateCell(:,[3]),repmat({''},size(rateCell(:,[1]))),...
+    rateCell(:,[2]),rateCell(:,[1 4]));
+
+%%%%%%%%%%%%%%%%% unit Field coh mean %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+infoText = {['Unit Field Coh ' fileExt];...
+    [' tapers=' num2str(ntapers)];...
+    [' trialMinRate=' num2str(trialRateMin)...
+    ' cellMinRate=' num2str(cellRateMin)]}
+figName =  ['unitFieldCoh' ...
+    '_tMin' num2str(trialRateMin) '_cMin'...
+    num2str(cellRateMin) '_' cohName '_'...
+    'tapers' num2str(ntapers)]
+outDir = [saveDir SC(analRoutine) SC('UnitFieldCoh') SC(GenFieldName(fileExt))];
+
+tempDataCell = UnitCellRateThreshHelper(dataCell,cellRateMin,rateCell,0);
+UnitSpectrumPlotHelper(tempDataCell,fo,[0 freqLim],infoText,figName,...
+    colNamesCell,reportFigBool,outDir,[],screenHeight,xyFactor)
+
+
+
+%%%%%%%%%% plot freq ranges %%%%%%%%%%%%%%%%%%%%%%%
+% btw
+for j=1:length(freqRangeCell)
+    freqRange = freqRangeCell{j};
+    
+    infoText = {['Unit Field Coh_btw' fileExt];...
+        [' tapers=' num2str(ntapers) ', ' num2str(freqRange(1)) '-' num2str(freqRange(2)) 'Hz'];...
+        [' trialMinRate=' num2str(trialRateMin)...
+        ' cellMinRate=' num2str(cellRateMin)]}
+    figName =  ['unitFieldCoh_btw_' num2str(freqRange(1)) '-' num2str(freqRange(2)) 'Hz'...
+        '_tMin' num2str(trialRateMin) '_cMin'...
+        num2str(cellRateMin) '_' cohName '_'...
+        'tapers' num2str(ntapers)]
+    outDir = [saveDir SC(analRoutine) SC('UnitFieldCoh') SC(GenFieldName(fileExt))];
+
+    tempDataCell = UnitCellRateThreshHelper(dataCell,cellRateMin,rateCell,0);
+    tempDataCell = UnitMeanHelper(tempDataCell,fo,freqRange);
+    UnitBoxPlotHelper(tempDataCell,infoText,figName,colNamesCell,reportFigBool,outDir)
+end
+
+% wIn
+for j=1:length(freqRangeCell)
+    freqRange = freqRangeCell{j};
+    
+    infoText = {['Unit Field Coh_wIn' fileExt];...
+        [' tapers=' num2str(ntapers) ', ' num2str(freqRange(1)) '-' num2str(freqRange(2)) 'Hz'];...
+        [' trialMinRate=' num2str(trialRateMin)...
+        ' cellMinRate=' num2str(cellRateMin)]}
+    figName =  ['unitFieldCoh_wIn_' num2str(freqRange(1)) '-' num2str(freqRange(2)) 'Hz'...
+        '_tMin' num2str(trialRateMin) '_cMin'...
+        num2str(cellRateMin) '_' cohName '_'...
+        'tapers' num2str(ntapers)]
+    outDir = [saveDir SC(analRoutine) SC('UnitFieldCoh') SC(GenFieldName(fileExt))];
+
+    tempDataCell = UnitCellRateThreshHelper(dataCell,cellRateMin,rateCell,1);
+    tempDataCell = UnitMeanHelper(tempDataCell,fo,freqRange);
+    tempDataCell = UnitWInCellHelper(tempDataCell);
+    UnitBoxPlotHelper(tempDataCell,infoText,figName,colNamesCell,reportFigBool,outDir)
+end
+
+if reportFigBool
+    close all
+end
+
+
+return
+
+
+
+
+junk = UnitCellRateThreshHelper(dataCell,cellRateMin,rateCell,[],0);
+junk = UnitCellRateThreshHelper(dataCell,cellRateMin,rateCell,[],1);
+
+junk = UnitLog10Helper(rateCell)
+junk = UnitWInCellHelper(junk)
+junk = UnitWInCellHelper(rateCell)
+UnitBoxPlotHelper(junk,1,[],[],colNamesCell)
+
+junk = UnitMeanHelper(dataCell,fo,[40 120]);
+junk = UnitCellRateThreshHelper(junk,cellRateMin,rateCell,[],0);
+junk = UnitCellRateThreshHelper(junk,cellRateMin,rateCell,[],1);
+junk = UnitWInCellHelper(junk);
+UnitBoxPlotHelper(junk,1,[],[],colNamesCell)
+
+
+%%%%%%%%%%%%%%%%% unit Field coh mean %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+cellLayers = {'or','ca1Pyr','rad','mol','gran','hil','ca3Pyr'};
+cellTypes = {'w' 'n'};
+plotColors = 'rgbk';
+for j=1:length(cellLayers)
+    for k=1:length(cellTypes)
+        figure
+        set(gcf,'units','inches')
+        set(gcf,'position',[0.5,0.5,screenHeight/size(selChanCell,1)*xyFactor,screenHeight])
+        set(gcf,'paperposition',get(gcf,'position'))
+
+        for m=1:size(selChanCell,1)
+            subplot(size(selChanCell,1),1,m)
+            hold on
+            titleText = {};
+            nText = [];
+            for p=1:size(ccgs,1)
+                if m==1 & p==1
+                    titleText = cat(1,titleText,{[cellLayers{j} ',' cellTypes{k}];...
+                        ['Unit Field Coh ' fileExt...
+                            ' tapers=' num2str(ntapers)];...
+                        [' trialMinRate=' num2str(trialRateMin)...
+                        ' cellMinRate=' num2str(cellRateMin)]});
+                end
+                if isfield(ccgs{p,end},cellLayers{j}) & isfield(ccgs{p,end}.(cellLayers{j}),cellTypes{k})...
+                        & isfield(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}),(selChanCell{m,1}))
+                    %                             & ~isempty(find(~isnan(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}).(cellLayers{m}).(cellTypes{n}))))
+
+                    tempRate = find(rates{p,end}.(cellLayers{j}).(cellTypes{k})>=cellRateMin);
+                    nText = cat(2,nText,['n=' num2str(size(tempRate,1)) ',']);
+                    temp1 = mean(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}).(selChanCell{m,1})(tempRate,:),1);
+                    %                          temp1 = UnATanCoh(mean(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}).(selChanCell{m,1}),1));
+
+                    %                     temp1 = temp1(~isnan(temp1));
+                    %                     temp2 = temp1(~isnan(temp2));
+
+                    plot(fo,temp1,'color',plotColors(p))
+                    %                     minVal = min([temp1;temp2]);
+                    %                     maxVal = max([temp1;temp2]);
+                    %                     if minVal == maxVal
+                    %                         maxVal = minVal + 1;
+                    %                     end
+                    %                     minVal = minVal-.1*(maxVal-minVal);
+                    %                     maxVal = maxVal+.1*(maxVal-minVal);
+                    %                     plot([minVal maxVal],[minVal maxVal])
+                end
+                title(SaveTheUnderscores(cat(1,titleText,nText)))
+                if p==m
+                    text(freqLim+0.1*freqLim,0,[ccgs{p,1:end-1}],'color',plotColors(p))
+                end
+                ylabel(selChanCell{m,1})
+                set(gca,'xlim',[0 freqLim])
+                %                     set(gca,'ylim',[0 1])
+            end
+        end
+    end
+
+end
+if reportFigBool
+    numFigs = length(cellLayers)*length(cellTypes);
+    ReportFigSM(1:numFigs,[saveDir SC(analRoutine) SC('UnitFieldCoh') SC(GenFieldName(fileExt))],...
+        repmat({['unitFieldCoh' ...
+        '_tMin' num2str(trialRateMin) '_cMin'...
+        num2str(cellRateMin) '_' cohName '_'...
+        'tapers' num2str(ntapers)]},[numFigs 1]));
+    close all
+end
+
+%%%%%%%%%%%%%%%%% unit Field coh mean freqRange %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+freqRangeCell = {[4 12],[40 120]};
+for q=1:length(freqRangeCell)
+    freqRange = freqRangeCell{q};
+for j=1:length(cellLayers)
+    for k=1:length(cellTypes)
+        figure
+%         screenHeight = 11;
+%         xyFactor = 2;
+        set(gcf,'units','inches')
+        set(gcf,'position',[0.5,0.5,screenHeight/size(selChanCell,1)*xyFactor,screenHeight])
+        set(gcf,'paperposition',get(gcf,'position'))
+
+        for m=1:size(selChanCell,1)
+                subplot(size(selChanCell,1),1,m)
+                hold on
+                titleText = {};
+                nText = [];
+                tempData = [];
+                tempGroup = {};
+                for p=1:size(ccgs,1)
+                    if m==1 & p==1
+                        titleText = cat(1,titleText,{[cellLayers{j} ',' cellTypes{k}];...
+                            ['Unit Field Coh ' fileExt ' ' ...
+                            num2str(freqRange(1)) '-' num2str(freqRange(2)) 'Hz'...
+                            ' tapers=' num2str(ntapers)];...
+                            [' trialMinRate=' num2str(trialRateMin)...
+                            ' cellMinRate=' num2str(cellRateMin)]});
+                    end
+                    if isfield(ccgs{p,end},cellLayers{j}) & isfield(ccgs{p,end}.(cellLayers{j}),cellTypes{k})...
+                            & isfield(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}),(selChanCell{m,1})) 
+                        %                             & ~isempty(find(~isnan(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}).(cellLayers{m}).(cellTypes{n}))))
+                        tempRate = find(rates{p,end}.(cellLayers{j}).(cellTypes{k})>=cellRateMin);
+                        nText = cat(2,nText,['n=' num2str(size(tempRate,1)) ',']);
+                        temp1 = mean(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}).(selChanCell{m,1})...
+                            (tempRate,fo>=freqRange(1) & fo<=freqRange(2)),2);
+                        tempData = cat(1,tempData,temp1);
+                        tempGroup = cat(1,tempGroup,repmat({[ccgs{p,1:end-1}]},size(temp1)));
+                        %if p==1
+                    end
+                    title(SaveTheUnderscores(cat(1,titleText,nText)))
+%                     if p==m 
+%                         text(xLimits(1)+0.1*xLimits(2),0,[ccgs{p,1:end-1}],'color',plotColors(p))
+%                     end
+%                         ylabel(selChanCell{m,1})
+%                     set(gca,'xlim',xLimits)
+%                     set(gca,'ylim',[0 1])
+                end
+                if ~isempty(tempData)
+                try 
+                    boxplot(tempData,tempGroup)
+                end
+                end
+                ylabel(selChanCell{m,1})
+            end
+    end
+end
+if reportFigBool
+    numFigs = length(cellLayers)*length(cellTypes);
+    ReportFigSM(1:numFigs,[saveDir SC(analRoutine) SC('UnitFieldCoh') SC(GenFieldName(fileExt))],...
+        repmat({['unitFieldCoh' ...
+        num2str(freqRange(1)) '-' num2str(freqRange(2)) 'Hz'...
+        '_tMin' num2str(trialRateMin) '_cMin'...
+        num2str(cellRateMin) '_' cohName '_'...
+        'tapers' num2str(ntapers)]},[numFigs 1]));
+    close all
+end
+end
+
+
+
+%%%%%%%%%%%% plot coh layerXcell %%%%%%%%%%%
+% cellLayers = {'or','ca1Pyr','rad','mol','gran','hil','ca3Pyr'};
+% cellTypes = {'w' 'n'};
+% plotColors = 'rgbk';
+% screenHeight = 10;
+% xyFactor = 1.5;
+
+for j=1:1%length(cellLayers)
+    for k=1:2%length(cellTypes)
+        figure
+
+        for m=1:size(selChanCell,1)
+            for p=1:size(ccgs,1)
+                if isfield(ccgs{p,end},cellLayers{j}) & isfield(ccgs{p,end}.(cellLayers{j}),cellTypes{k})...
+                        & isfield(ccgs{p,end}.(cellLayers{j}).(cellTypes{k}),(selChanCell{m,1}))
+
+                    numCell = size(ccgs{1,end}.(cellLayers{j}).(cellTypes{k}).(selChanCell{m,1}),1);
+                    if p==1
+                        rateText = cell(numCell);
+                    end
+                    for r=1:numCell
+                        subplot(size(selChanCell,1),numCell,(m-1)*numCell+r)
+                        hold on
+                        tempRate = rates{p,end}.(cellLayers{j}).(cellTypes{k})(r);
+                        if (tempRate>=cellRateMin);
+                            temp1 = ccgs{p,end}.(cellLayers{j}).(cellTypes{k}).(selChanCell{m,1})(r,:);
+                            plot(fo,temp1,'color',plotColors(p))
+                        end
+                        if r==1
+                            ylabel({selChanCell{m,1}})
+                        end
+                        if m==1
+                            rateText{r} = cat(2,rateText{r},[num2str(tempRate,3) ',']);
+                            if p==size(ccgs,1)
+                                if r==1
+                                titleText = {[cellLayers{j} ',' cellTypes{k}];...
+                                    ['Unit Field Coh ' fileExt...
+                                    ' tapers=' num2str(ntapers)];...
+                                    [' trialMinRate=' num2str(trialRateMin)...
+                                    ' cellMinRate=' num2str(cellRateMin)]};
+                                else
+                                    titleText = {};
+                                end
+                                title(SaveTheUnderscores(cat(1,titleText,rateText{r})))
+                            end
+                        end
+                        set(gca,'xlim',[0 freqLim])
+                    end
+                    set(gcf,'units','inches')
+                    set(gcf,'position',[0.5,0.5,screenHeight/size(selChanCell,1)*numCell*xyFactor,screenHeight])
+                    set(gcf,'paperposition',get(gcf,'position'))
+                    if p==m
+                        text(freqLim+0.1*freqLim,0,[ccgs{p,1:end-1}],'color',plotColors(p))
+                    end
+                    
+                    %                     set(gca,'ylim',[0 1])
+                end
+            end
+        end
+    end
+end
+
+if reportFigBool
+numFigs = length(cellLayers)*length(cellTypes);
+ReportFigSM(1:numFigs,[saveDir SC(analRoutine) SC('UnitFieldCoh') SC(GenFieldName(fileExt))],...
+    repmat({['unitFieldCoh_eachCell' ...
+    '_tMin' num2str(trialRateMin) '_cMin'...
+    num2str(cellRateMin) '_' cohName '_'...
+    'tapers' num2str(ntapers)]},[numFigs 1]));
+close all
+end
+
+
+return
+
+
+
+
+

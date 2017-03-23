@@ -1,0 +1,7 @@
+% function CountDesigTrials(fileBaseCell,spectAnalDir,depVar,trialDesig)
+% 
+% trials = LoadDesigVar(fileBaseCell,spectAnalDir,depVar,trialDesig)
+function CountDesigTrials(fileBaseCell,spectAnalDir,depVar,trialDesig)
+
+trials = LoadDesigVar(fileBaseCell,spectAnalDir,depVar,trialDesig)
+return

@@ -1,0 +1,22 @@
+What's new in version 3.x:
+
+1. You can initialise the state transition matrices (hmm.P) before
+you do hmmtrain.
+
+2. A demonstration, demar, showing an HMM with an AR
+observation model applied to a section of sleep spindle data.
+
+3. More help text.
+
+4. Includes a weighted EM algorithm for training Gaussian Mixture models where each data point is weighted by an amount `gamma'.
+
+5. A feature allowing you to update only selected observation models during training (ie observation models for some states stay the same).
+
+6. Version 3.1 contains the files: arembed.m, embed.m and arwls.m that should've been distributed with 3.0.
+
+7. Version 3.2 also contains: init_ar.m (and dar.m) necessary for initialising 
+AR vectors in HMM-AR model
+
+8. Version 3.2 also contains another demo: demar2.m which uses init_ar.m
+
+

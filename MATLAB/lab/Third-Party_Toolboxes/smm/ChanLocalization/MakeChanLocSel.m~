@@ -1,0 +1,19 @@
+function MakeChanLocSel(fileExtCell)
+for m=1:length(fileExtCell)
+    fileExt = fileExtCell{m};
+
+    ChanM = LoadVar(['ChanInfo/ChanLoc_Min' fileExt '.mat']);
+    selChan = LoadVar(['ChanInfo/SelChan' fileExt '.mat']);
+    chanFields = fieldnames(chanLoc);
+    for j=1:length(chanFields)
+        for k=1:length(chanLoc.(chanFields{j}))
+            if chanLoc.(chanFields{j}){k} ~= selChan.(chanFields{j})
+                chanLoc.(chanFields{j}){k} = [];
+            end
+        end
+    end
+    chanLoc
+    save(['ChanInfo/ChanLoc_Sel' fileExt '.mat'],SaveAsV6,'chanLoc')
+end
+   
+    

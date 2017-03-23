@@ -1,0 +1,60 @@
+opengl('neverselect')
+
+
+path(path,'/u12/programs/matlab/Kentoolbox/Spikes');
+path(path,'/u12/programs/matlab/Kentoolbox/General');
+path(path,'/u12/programs/matlab/Kentoolbox/DogFood');
+path(path,'/u12/programs/matlab/Kentoolbox/CrossVal');
+path(path,'/u12/programs/matlab/Kentoolbox/mitlib');
+path(path,'/u12/programs/matlab/Kentoolbox/svm');
+path(path,'/u12/programs/matlab/Kentoolbox/quickprop');
+path(path,'/u12/programs/matlab/Kentoolbox/extern');
+path(path,'/u12/programs/matlab/Kentoolbox/discrim');
+path(path,'/u12/programs/matlab/Kentoolbox/netlab');
+path(path,'/u12/programs/matlab/Hajtoolbox/eeg_anal')
+path(path,'/u12/programs/matlab/Hajtoolbox/place_field')
+path(path,'/u12/programs/matlab/Hajtoolbox/unit_anal');
+path(path,'/u12/programs/matlab/Hajtoolbox/circular');
+path(path,'/u12/programs/matlab/Kentoolbox/econometrics');
+path(path,'/u12/programs/matlab/Kentoolbox/econometrics/var_bvar');
+path(path,'/u12/programs/matlab/Kentoolbox/glmlab');
+path(path,'/u12/programs/matlab/Kentoolbox/glmlab/fit');
+path(path,'/u12/programs/matlab/Kentoolbox/wave_matlab');
+path(path,'/u12/programs/matlab/Kentoolbox/timefreq');
+path(path,'/u12/programs/matlab/Kentoolbox/rice-wlet-tools');
+path(path,'/u12/programs/matlab/Kentoolbox/gabbiani/bookchap');
+path(path,'/u12/programs/matlab/Kentoolbox/dataviz');
+path(path,'/u12/programs/matlab/Kentoolbox/statbox');
+path(path,'/u12/programs/matlab/Kentoolbox/smoothtoolbox');
+path(path,'/u12/programs/matlab/Kentoolbox/smoothing');
+path(path,'/u12/programs/matlab/Hajtoolbox/');
+path(path,'/u12/programs/matlab/');
+path(path,'/u12/programs/matlab/FMAToolbox/General');
+path(path,'/u12/antsiro/matlab/General');
+
+addpath /u12/programs/matlab/Smatlab6/STATS
+addpath /u12/programs/matlab/Smatlab6/SIGNAL/signal
+addpath /u12/programs/matlab/Smatlab6/SIGNAL/sptoolgui
+addpath /u12/programs/matlab/Smatlab6/SIGNAL/sigdemos
+addpath /u12/programs/matlab/Smatlab6/SIGNAL/fdatoolgui
+
+addpath ~/matlab/
+addpath ~/matlab/BadChanAnal/
+addpath ~/matlab/General/
+addpath ~/matlab/MazeBehavior/
+addpath ~/matlab/Movie/
+addpath ~/matlab/mpgwrite/
+addpath ~/matlab/Plotting/
+addpath ~/matlab/Regaa/
+addpath ~/matlab/Plotting/Subplot/
+addpath ~/matlab/InterpCSD/
+addpath ~/matlab/Stats/
+addpath ~/matlab/Spectral/
+addpath ~/matlab/DataManagement/
+addpath ~/matlab/WaveletCoh
+addpath ~/matlab/ChanLocalization
+addpath ~/matlab/ColorMaps/
+addpath ~/matlab/UnitAnal/
+addpath(genpath('~/matlab/chronux_1_50/'));
+addpath ~/matlab/bats/
+

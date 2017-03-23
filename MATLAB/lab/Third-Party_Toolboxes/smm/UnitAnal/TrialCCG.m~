@@ -1,0 +1,35 @@
+function [unitCCG.yo unitCCG.to unitRate] = TrialCCG(varargin)
+[T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs, biasCorrBool] = ...
+    DefaultArgs(varargin,{[],[],[],[],[],[],[],[],[]});
+
+ccgTemp = [];
+unitCCG.yo = [];
+unitRate = [];
+for n=1:size(Epochs,1)
+    if biasCorrBool
+        [ccgTemp unitCCG.to] = CCG(T,G,...
+            BinSize,HalfBins,...
+            SampleRate,GSubset,Normalization,...
+            Epochs(n,:));
+    else
+        tempInd = find(T>=Epochs(n,1)...
+            & T<=Epochs(n,2));
+        [ccgTemp unitCCG.to] = CCG(T(tempInd),G(tempInd),...
+            BinSize,HalfBins,...
+            SampleRate,GSubset,Normalization);
+    end
+    if isempty(unitRate)
+        unitCCG.yo = zeros([size(Epochs,1) size(ccgTemp,2)]);
+    end
+    if isempty(unitCCG.yo)
+        unitCCG.yo = zeros([size(Epochs,2) size(permute(ccgTemp,[2,3,1]))]);
+    end
+    unitCCG.yo(n,:,:,:) = permute(ccgTemp,[2,3,1]);
+    % calculate rate
+    for k=1:size(unitRate,2)
+        selInd = find(G==k & ...
+            T>=Epochs(n,1) & T<=(time(n)+timeWin/2)*datSamp);
+        unitRate(n,k) = length(selInd)/timeWin;
+    end
+end
+return

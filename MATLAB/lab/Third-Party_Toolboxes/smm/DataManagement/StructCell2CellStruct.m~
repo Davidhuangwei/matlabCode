@@ -1,0 +1,28 @@
+function outCellStruct = StructCell2CellStruct(inStructCell)
+% function outStructCell = CellStruct2StructCell(inCellStruct)
+% converts inCellStruct{n}.fields.fields.etc.(mXoX...) to
+% inCellStruct.fields.fields.etc.{n}(mXoX...)
+% NOTE: only works for structs where all branches are equal length.
+%       only works for single dim cell (sorry, I'm lazy)
+
+tempCell = Struct2CellArray(inStructCell,[],1);
+endCell = tempCell{1,end};
+for j=1:length(endCell(:))
+    outCellStruct{j}(1:size(tempCell,1),1:size(tempCell,2)-1) = tempCell(1:end,1:end-1);
+    endCell = tempCell{:,end};
+    outCellStruct{j}(j,size(tempCell,2)) = endCell(:);
+    %outCellStruct{j} = CellArray2Struct(outCellStruct{j});
+end
+keyboard
+return
+
+catCell = cell(size(tempCell,1),1);
+for j=1:length(inCellStruct)
+    tempCell = Struct2CellArray(inCellStruct{j},[],1);
+    for k=1:size(tempCell,1)
+        catCell{k} = cat(2,catCell{k},tempCell(k,end));
+    end
+end
+outStructCell(:,size(tempCell,2)) = catCell;
+outStructCell = CellArray2Struct(outStructCell);
+return

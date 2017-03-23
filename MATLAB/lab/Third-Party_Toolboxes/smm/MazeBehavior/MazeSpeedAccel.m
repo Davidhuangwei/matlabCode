@@ -1,0 +1,42 @@
+% function [speed, accel] = MazeSpeedAccel(whldata,varargin)
+% [pixelsPerCM, yAdjRatio, whlSamp, smoothlen] = ...
+%     DefaultArgs(varargin,{20.58/11,1.13,39.065,21});
+% Calculates running speed and acceleration from position data. 
+function [speed, accel] = MazeSpeedAccel(whldata,varargin)
+[pixelsPerCM, yAdjRatio, whlSamp, smoothlen] = ...
+    DefaultParam(varargin,[mfilename '.param'],{20.58/11,1.13,39.065,21});
+
+% filter with a hanning window
+hanfilter = hanning(smoothlen);
+hanfilter = hanfilter./sum(hanfilter);
+
+% fix camera distortion
+findex = find(whldata(:,1)~=-1);
+whldata(findex,[2 4]) = whldata(findex,[2 4])*yAdjRatio;
+
+[whl_m n] = size(whldata);
+
+speed = -1*ones(whl_m, 1);
+accel = -1*ones(whl_m, 1);
+if ~isempty(findex)
+    whldata(findex,1) = Filter0(hanfilter,whldata(findex,1));
+    whldata(findex,2) = Filter0(hanfilter,whldata(findex,2));
+
+    %calculate speed for values that aren't -1 or distorded by filtering
+    [findex_m n] = size(findex);
+    beginnotdistorted = ceil(smoothlen/2);
+    endnotdistorted = findex_m-ceil(smoothlen/2);
+    % speeddata starts one sample later due to loss by diff
+    speeddata(findex(beginnotdistorted+1:endnotdistorted), 1) = diff(whldata(findex(beginnotdistorted:endnotdistorted),1));
+    speeddata(findex(beginnotdistorted+1:endnotdistorted), 2) = diff(whldata(findex(beginnotdistorted:endnotdistorted),2));
+
+    speeddata2d = -1*ones(whl_m, 1);
+    speeddata2d(findex(beginnotdistorted+1:endnotdistorted)) = ...
+        sqrt(speeddata(findex(beginnotdistorted+1:endnotdistorted),1).^2+speeddata(findex(beginnotdistorted+1:endnotdistorted),2).^2);
+
+    findex = find(speeddata2d(:)~=-1);
+    speed(findex) = speeddata2d(findex).*whlSamp./pixelsPerCM;
+    [findex_m n] = size(findex);
+    accel(findex(1:findex_m-1)) = diff(speed(findex(1:findex_m))).*whlSamp; % account for lost datapoint by shifting findex position back
+end
+return

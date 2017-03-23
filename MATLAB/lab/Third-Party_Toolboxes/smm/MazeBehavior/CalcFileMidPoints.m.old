@@ -1,0 +1,77 @@
+function trialMidRegionsStruct = CalcFileMidPoints(taskType,fileBaseMat,plotFig,trialtypesbool)
+% function trialMidRegionsStruct = CalcFileMidPoints(fileBaseMat,taskType,trialtypesbool,plotFig)
+
+if ~exist('plotFig','var') | isempty(plotFig)
+    plotFig = 0;
+end
+
+if ~exist('trialtypesbool','var') | isempty(trialtypesbool)
+    trialtypesbool = [1  0  1  0  0   0   0   0   0   0   0   0  0];
+                    %LR RR RL LL LRP RRP RLP LLP LRB RRB RLB LLB XP
+                    %cr ir cl il crp irp clp ilp crb irb clb ilb xp
+end
+% [1 0 1 0 0 0 0 0 0 0 0 0 0]
+% [0 0 0 1 1 1 1 1 1]
+
+trialMidRegionsStruct = [];
+
+for i=1:size(fileBaseMat,1)
+    allMazeRegions = LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 1 1 1 1 1 1]);
+    waterPorts = LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[1 1 0 0 0 0 0 0 0]);
+
+    if strcmp(taskType(1:5),'alter')
+        mazeRegionsStruct = [];
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'returnArm','data',LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 0 0 0 0 1 1]));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'centerArm','data',LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 0 1 0 0 0 0]));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'Tjunction','data',LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 1 0 0 0 0 0]));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'goalArm','data',LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 0 0 1 1 0 0]));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'returnArm','midCalc',0);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'centerArm','midCalc',2/3);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'Tjunction','midCalc',0);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'goalArm','midCalc',0);
+    end
+    
+    if strcmp(taskType(1:5),'circl')
+        
+        waterPorts = LoadMazeTrialTypes(fileBaseMat(i,:),trialtypesbool,[1 1 1 0 0 0 0 0 0]);
+
+        mazeRegionsStruct = [];
+        leftRight = [1  0  0  0  1   0   0   0   1   0   0   0  0] & trialtypesbool;
+        rightLeft = [0  0  1  0  0   0   1   0   0   0   1   0  0] & trialtypesbool;
+        
+        temp1 = LoadMazeTrialTypes(fileBaseMat(i,:),leftRight,[0 0 0 0 0 0 0 0 1]);
+        temp2 = LoadMazeTrialTypes(fileBaseMat(i,:),rightLeft,[0 0 0 0 0 0 0 1 0]);
+        quad1 = -1.*ones(size(temp1));
+        quad1(temp1(:)~=-1) = temp1(find(temp1(:)~=-1));
+        quad1(temp2(:)~=-1) = temp2(find(temp2(:)~=-1));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad1','data',quad1);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad1','midCalc',0);
+
+        temp1 = LoadMazeTrialTypes(fileBaseMat(i,:),leftRight,[0 0 0 0 0 0 1 0 0]);
+        temp2 = LoadMazeTrialTypes(fileBaseMat(i,:),rightLeft,[0 0 0 0 0 1 0 0 0]);
+        quad2 = -1.*ones(size(temp1));
+        quad2(temp1(:)~=-1) = temp1(find(temp1(:)~=-1));
+        quad2(temp2(:)~=-1) = temp2(find(temp2(:)~=-1));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad2','data',quad2);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad2','midCalc',0);
+
+        temp1 = LoadMazeTrialTypes(fileBaseMat(i,:),leftRight,[0 0 0 0 0 1 0 0 0]);
+        temp2 = LoadMazeTrialTypes(fileBaseMat(i,:),rightLeft,[0 0 0 0 0 0 1 0 0]);
+        quad3 = -1.*ones(size(temp1));
+        quad3(temp1(:)~=-1) = temp1(find(temp1(:)~=-1));
+        quad3(temp2(:)~=-1) = temp2(find(temp2(:)~=-1));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad3','data',quad3);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad3','midCalc',0);
+
+        temp1 = LoadMazeTrialTypes(fileBaseMat(i,:),leftRight,[0 0 0 0 0 0 0 1 0]);
+        temp2 = LoadMazeTrialTypes(fileBaseMat(i,:),rightLeft,[0 0 0 0 0 0 0 0 1]);
+        quad4 = -1.*ones(size(temp1));
+        quad4(temp1(:)~=-1) = temp1(find(temp1(:)~=-1));
+        quad4(temp2(:)~=-1) = temp2(find(temp2(:)~=-1));
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad4','data',quad4);
+        mazeRegionsStruct = setfield(mazeRegionsStruct,'quad4','midCalc',0);
+    end
+
+    trialMidRegionsStruct = setfield(trialMidRegionsStruct,fileBaseMat(i,:),CalcTrialMidPoints(allMazeRegions,waterPorts,mazeRegionsStruct,plotFig));
+    %trialMidRegionsStruct = CalcTrialMidPoints(allMazeRegions,waterPorts,mazeRegionsStruct,plotFig)
+end

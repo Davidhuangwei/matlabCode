@@ -1,0 +1,11 @@
+function outStructMat = MatStruct2StructMat2(inMatStruct,varargin)
+%function outStructMat = MatStruct2StructMat(ins,fields, dims, withind)
+%turns a StructMat (i.e. junk.a(x,y) into a MatStruct (i.e. junk(x,y).a)
+%for specified fields and dimensions
+%first tries Sean's method that should be robust but slow and then try Anton's
+%method that is much faster, but not as robust.
+
+try outStructMat = MatStruct2StructMat_smm(inMatStruct,varargin{:})
+catch outStructMat = MatStruct2StructMat_ant(inMatStruct,varargin{:})
+end
+return

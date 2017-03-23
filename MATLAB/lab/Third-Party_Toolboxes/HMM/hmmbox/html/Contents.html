@@ -1,0 +1,95 @@
+<TITLE>/</TITLE>
+<BODY>
+<A HREF = "index.html">[Index for .]</A>
+<A HREF = "../index.html">[Return to Master Index]</A>
+<H1>Contents</H1>
+<H2>(./Contents.m)</H2>
+<HR><H3>Help text</H3>
+<pre>
+ HMMBOX, version 3.2, William Penny, Imperial College, October 1998
+ Matlab toolbox for Hidden Markov Models
+
+ (Adapted from Machine Learning Toolbox
+ Version 1.0  01-Apr-96
+ Copyright (c) by Zoubin Ghahramani, University of Toronto)
+
+ <A HREF = "../html/hmminit.html">hmminit</A>          initialise Gaussian observation HMM
+ <A HREF = "../html/hmmtrain.html">hmmtrain</A>         train HMM
+ <A HREF = "../html/hmmdecode.html">hmmdecode</A>        make classifications using HMM
+
+ <A HREF = "../html/obsinit.html">obsinit</A>          initialise observation model
+ <A HREF = "../html/obslike.html">obslike</A>          calculate likelihood of data given observation model
+ <A HREF = "../html/obsupdate.html">obsupdate</A>        update parameters of observation model
+
+ Auxiliary routines
+
+ <A HREF = "../html/rsum.html">rsum</A>        - row sum of matrix
+ <A HREF = "../html/rprod.html">rprod</A>       - row product of matrix and vector
+ <A HREF = "../html/rdiv.html">rdiv</A>        - row division of matrix by vector
+
+ Other routines
+
+ <A HREF = "../html/init_ar.html">init_ar</A>     - initialisation of AR models in HMM-AR model using
+		Penny and Roberts method (Comp. Biom. Res. 1999)
+ <A HREF = "../html/init_trans.html">init_trans</A>  - initialise a state transition matrix
+ <A HREF = "../html/wgmmem.html">wgmmem</A>      - weighted EM algorithm for training Gaussuan Mixture Models
+ <A HREF = "../html/plotseg.html">plotseg</A>     - data plotting routine used by <A HREF = "../html/demar.html">demar</A>
+
+ <A HREF = "../html/embed.html">embed</A>       - time series embedding
+ <A HREF = "../html/arembed.html">arembed</A>     - time series embedding using embed or toeplitz routine
+ <A HREF = "../html/arwls.html">arwls</A>	      - weighted least squares training of AR models
+
+ Demonstrations
+ 
+ <A HREF = "../html/demlike.html">demlike</A>     - Likelihood HMM trained on synthetic time series
+ <A HREF = "../html/demgausshmm.html">demgausshmm</A> - Gaussian observation HMM trained on synthetic time series
+ <A HREF = "../html/demar.html">demar</A>       - AR observation HMM trained on sleep data
+ <A HREF = "../html/demar2.html">demar2</A>      - AR observation HMM trained on sinewave data
+</pre>
+<HR><H3>Listing of  </H3>
+<pre>
+% HMMBOX, version 3.2, William Penny, Imperial College, October 1998
+% Matlab toolbox for Hidden Markov Models
+%
+% (Adapted from Machine Learning Toolbox
+% Version 1.0  01-Apr-96
+% Copyright (c) by Zoubin Ghahramani, University of Toronto)
+%
+% <A HREF = ../html/hmminit.html>hmminit</A>          initialise Gaussian observation HMM
+% <A HREF = ../html/hmmtrain.html>hmmtrain</A>         train HMM
+% <A HREF = ../html/hmmdecode.html>hmmdecode</A>        make classifications using HMM
+%
+% <A HREF = ../html/obsinit.html>obsinit</A>          initialise observation model
+% <A HREF = ../html/obslike.html>obslike</A>          calculate likelihood of data given observation model
+% <A HREF = ../html/obsupdate.html>obsupdate</A>        update parameters of observation model
+%
+% Auxiliary routines
+%
+% <A HREF = ../html/rsum.html>rsum</A>        - row sum of matrix
+% <A HREF = ../html/rprod.html>rprod</A>       - row product of matrix and vector
+% <A HREF = ../html/rdiv.html>rdiv</A>        - row division of matrix by vector
+%
+% Other routines
+%
+% <A HREF = ../html/init_ar.html>init_ar</A>     - initialisation of AR models in HMM-AR model using
+%		Penny and Roberts method (Comp. Biom. Res. 1999)
+% <A HREF = ../html/init_trans.html>init_trans</A>  - initialise a state transition matrix
+% <A HREF = ../html/wgmmem.html>wgmmem</A>      - weighted EM algorithm for training Gaussuan Mixture Models
+% <A HREF = ../html/plotseg.html>plotseg</A>     - data plotting routine used by <A HREF = ../html/demar.html>demar</A>
+%
+% <A HREF = ../html/embed.html>embed</A>       - time series embedding
+% <A HREF = ../html/arembed.html>arembed</A>     - time series embedding using embed or toeplitz routine
+% <A HREF = ../html/arwls.html>arwls</A>	      - weighted least squares training of AR models
+%
+% Demonstrations
+% 
+% <A HREF = ../html/demlike.html>demlike</A>     - Likelihood HMM trained on synthetic time series
+% <A HREF = ../html/demgausshmm.html>demgausshmm</A> - Gaussian observation HMM trained on synthetic time series
+% <A HREF = ../html/demar.html>demar</A>       - AR observation HMM trained on sleep data
+% <A HREF = ../html/demar2.html>demar2</A>      - AR observation HMM trained on sinewave data
+</pre>
+<HR>
+Produced by <A HREF="">mat2html</A> on Thu Feb  1 11:33:45 2001
+<BR>
+Cross-Directory links are: OFF<BR>
+</BODY>

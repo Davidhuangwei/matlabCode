@@ -1,0 +1,52 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_ri</title>
+
+<body><h1>gtm_ri</h1>
+Returns an initial random weight matrix.
+
+<p>
+Generates a weight matrix with the bias weights set to 
+map to the mean of the target distribution and remaining 
+weights drawn at random from a Gaussian distribution with 
+zero mean and variances choosen so that the variances of 
+the generated distribution roughly match the variances 
+of the target distribution.
+
+<p>
+In addition, an initial value for beta may be calculated as
+the inverse of the average distance between each Gaussian 
+centre, calculated with the random mapping, and its nearest 
+neighbours in the set of data points.
+
+<h3>Synopsis</h3>
+<pre>[W, beta] = gtm_ri(T, FI)</pre><pre>W = gtm_ri(T, FI)</pre>
+<h3>Arguments</h3>
+<code>T</code> - 
+sample of target distribution, used for
+calculating the mean; one data point
+per row; N-by-D
+
+<p>
+<code>FI</code> - 
+basis functions' activations when fed 
+the latent data, X, plus a bias, K-by-(M+1)
+
+<h3>Return</h3>
+<code>W</code> - 
+the initialised weight matrix; 
+(M+1)-by-D
+
+<p>
+<code>beta</code> - 
+the initial beta value, scalar. This is an 
+optional output argument; if omitted, the
+corresponding calculations are omitted too.
+
+<h3>See also</h3>
+<code><a href="./gtm_pci.htm">gtm_pci</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

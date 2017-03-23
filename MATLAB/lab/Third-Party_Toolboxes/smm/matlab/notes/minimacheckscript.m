@@ -1,0 +1,1 @@
+ch=ch+2;clf;plot(eeg(:,ch));hold on;plot([minima_cell{ch} minima_cell{ch}], [-2000 2000], 'color',[0 1 0]);plot([1:whln].*(eegn/whln),freqdat(:,ch).*100,'color',[1 0 0]);plot([goodparts.*(eegn/whln) goodparts.*(eegn/whln)],[-100 100],'color',[0 1 1]);zoom on;ch

@@ -1,0 +1,24 @@
+function outStruct = EmptyStruct(fieldsCell)
+
+if length(fieldsCell)==1
+     for j=1:length(fieldsCell{1})
+        outStruct.(fieldsCell{1}{j}) = [];
+     end
+else
+    for 
+   
+
+for j=1:length(fieldsCell)
+    
+    for k=1:length(fieldsCell{j}
+
+if ~iscell(fieldsCell{1})
+    for j=1:length(fieldsCell)
+        outStruct.(fieldsCell{j}) = [];
+    end
+else
+    for j=1:length(fieldsCell)
+        outStruct.(fieldsCell{j}) = EmptyStruct(fieldsCell{j});
+    end
+end
+return

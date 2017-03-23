@@ -1,0 +1,145 @@
+function [Spec fr]= mtSpec(x,kn,wn,Fs,fr,Winstep,is_fm,ncomp)
+% Spec = mtSpec(x,kn,wn,Fs,fr(or center of frequency bins),Winstep,is_fm,ncomp)
+% Using multitaper to get instantaneouse spectrum.
+% Input:
+% x: lfp in size tx*nch
+% kn: timewindow for computing spectrum. when it is a scaler, we use Parzen
+%   window.
+% wn: timewindow for computing frequency, when length<4 , we use dpss
+%   to comput taper,  wn = [WinLength,NW,nTapers]. NW: default 3, nTapers:
+%   default 2*NW -1. for frequency method, default: Parzen window. You can
+%   choose hamming window as you like,modify at line 51-52. 
+% Fs: sampling frequency of x. default: 1250 Hz.
+% fr: center of frequency bins. when it is a scaler, numbers of frequency
+%   bins. default: 35:10:200;
+% Winstep(tx/nt): Window step length of successive windows (default is
+%   WinLength/2)
+% is_fm:    0: using time domain method.
+%           1: using frequency domain method. default.
+%           Notice that this two methods are nearly equivalent. Frequnecy
+%           method have advantage of have positive semi-definite spectral
+%           matrix. 
+%
+% Output:
+% Spec: spectrum in size of: [nch,nch,nfr,nt]
+%
+% refernece: Pham 2002, Exploiting source non stationary and coloration in
+% blind source separation.
+% any bug: YY 
+
+if isempty(x);B=[]; Spec=[];return;end
+if isempty(Fs);Fs=1250;warning('Sampling frequency is set to 1250 Hz.');end
+if isempty(fr); fr=35:10:200;warning('Computing gamma band.');end
+if isempty(wn);wn=kn(1);end
+if isempty(kn); kn=[ceil(Fs/min(fr)*2), 3, 5];end
+if isempty(Winstep);Winstep=floor(wn(1)/2);end
+if isempty(is_fm);is_fm=true;end %
+% is_fm=true;% now using the 
+% Parameters:
+[tx, nch]=size(x);
+if isempty(ncomp);ncomp=nch;end
+% fcmp=false;
+if length(ncomp)<2
+    if ncomp>1
+        temp_c=1:ncomp;
+    else
+        fcmp=true;%
+    end
+else
+    temp_c=ncomp;
+end
+if tx<nch
+    warning('Dimention wrong, switched.')
+    x=x';
+    [tx, nch]=size(x);
+end
+fr=fr/Fs*2*pi;% home made fourier.
+nfr=length(fr);
+if length(kn)<2
+   [kn V]=dpss(kn(1),kn(2),kn(3),'calc');
+   for k=1:size(kn,2)
+    ku(:,k)=ku_regenerator(kn(:,k));
+   end
+else
+    ku=kn;
+end
+kn=size(ku,1);
+if length(wn)<4
+        wn=sigwin.parzenwin(wn);
+        [lwn,nwn]=size(wn); 
+else
+    [lwn,nwn]=size(wn);
+end
+
+% if is_fm
+    %%  using the frequency domain method:
+    % no problem with this part.
+    xlt=exp(bsxfun(@times,repmat([1:tx]',nch,1),-1i*fr)).*repmat(x(:),1,nfr);
+    clear x
+    xlt=reshape(xlt,[tx,nch*nfr]);
+    ku=ku_regenerator(ku,.001,1,kn);% computed as discribed in the paper.
+    for k=1:(nch*nfr)
+        xlt(:,k)=conv(xlt(:,k),ku(:),'same');
+    end
+%     xlt=a;
+%     clear a
+    xlt=reshape(xlt,tx,nch,nfr);
+    gt=lwn:Winstep:(tx-lwn);
+    nt=length(gt);
+    Spec=zeros(nch,nch,nfr,nt);
+    for k=1:nt
+        for n=1:nfr
+            t=gt(k)+[0:(lwn-1)]-floor(lwn/2);
+            Spec_tmp=bsxfun(@times,wn(end:(-1):1),sq(xlt(t,:,n))).'*sq(xlt(t,:,n));
+            Spec(:,:,n,k)=real(Spec_tmp+Spec_tmp')/2;
+        end
+    end
+    clear xlt
+    Spec=reshape(Spec,nch,nch,nfr,nt);
+        %% using the time domain method (not used)
+%     % Using multitaper to get the window w(s) fullfilling sum(w^2)=1
+%     % use dpss to get tapers.
+%     % the matrix of R would be very large. So you don't use long time chunk...
+%     % And it would be better to use short ones to check the stationarity.
+% else
+%     %% using the time domain method (not used)
+%     gt=max(lwn,kn):Winstep:tx;
+%     kul=bsxfun(@times,ku(:),exp(1i*bsxfun(@times,1:kn,fr(:))'));
+%     nt=length(gt);
+%     for kk=1:nwn
+%         Rx=complex(nch,nch,nt,kn);
+%         for k=1:kn
+%             wnkn=wn(1:(end-kn),kk).*wn((kn+1):end,kk);
+%             wnkn=wnkn(end:(-1):1);
+%             for n=1:nch
+%                 for m=1:nch
+%                     xnt=x(:,n);
+%                     xmt=x(:,m);
+%                     Rx(n,m,:,k)=(xnt(bsxfun(@plus,gt(:),1:(lwn-kn))).*...
+%                         xmt(bsxfun(@plus,gt(:),1:(lwn-kn))))*wnkn(:);
+%                 end
+%             end
+%         end
+%         clear xnt xmt
+%         if kk==1
+%             Spec=zeros(nch*nch*nt,nfr);
+%         end
+%         Rx=reshape(Rx,nch*nch*nt,kn);
+%         tmp=Rx*kul
+%         Spec=Spec+real(tmp+tmp')/2;
+%     end
+%     Spec=permute(reshape(real(Spec),nch,nch,nt,nfr),[1,2,4,3]);
+%     Spec=reshape(Spec,nch,nch,nfr*nt);
+% end
+end
+function kui=ku_regenerator(ku,okui,jku,lku)
+% generate subfunction to compute ku in frequency method.
+% see last sentence in page 3 of Pham's 2002 paper. 
+% NB: not longer than 500... 
+if jku<lku
+    nku=ku(lku-jku)*sum(ku(1:jku).^2)/sum(okui);
+    kui=ku_regenerator(ku,[nku, okui],jku+1,lku);
+else
+    kui=okui;
+end
+end

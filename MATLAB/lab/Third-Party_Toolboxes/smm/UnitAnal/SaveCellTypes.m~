@@ -1,0 +1,5 @@
+function SaveCellTypes(cellTypes,cellTypesFile)
+fid = open('cellTypesFile');
+if fid
+    for j=1:size(cellTypes,1)
+return

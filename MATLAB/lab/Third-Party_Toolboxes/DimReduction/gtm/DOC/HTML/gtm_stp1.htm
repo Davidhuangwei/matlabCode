@@ -1,0 +1,81 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_stp1</title>
+
+<body><h1>gtm_stp1</h1>
+Generates the components of a GTM with a 1D latent space.
+
+<h3>Synopsis</h3>
+<pre>[X, MU, FI, W, beta] = gtm_stp1(T, noLatVarSmpl, noBasFn, s)</pre>
+<h3>Arguments</h3>
+<code>T</code> - 
+target data, to be modelled by the GTM.
+
+<p>
+<code>noLatVarSmpl</code> - 
+number of samples in the latent variable
+space
+
+<p>
+<code>noBasFn</code> - 
+number of basis functions
+
+<p>
+<code>s</code> - 
+the width of basis functions relative
+to the distance between two neighbouring 
+basis function centres, i.e. if s = 1,
+the basis functions will have widths
+(std.dev) equal to (i.e. 1 times) the  
+distance between two neighbouring basis  
+function centres.  
+
+<h3>Return</h3>
+<code>X</code> - 
+the grid of data points making up the
+latent variable sample; a vector of length
+noLatVarSmpl, in which each row is 
+a data point
+
+<p>
+<code>MU</code> - 
+a noBasFn-element vector holding the 
+coordinates of the centres of the  
+basis functions
+
+<p>
+<code>FI</code> - 
+the activations of the basis functions when 
+fed the latent variable sample X, and a bias 
+unit fixed to 1.0; a matrix with the same 
+number of rows as X and noBasFn+1 columns 
+(+1 for the bias).
+
+<p>
+<code>W</code> - 
+the initial matrix of weights, mapping
+the latent variable sample X linearly
+onto the first principal component
+of the target data (T)
+
+<p>
+<code>beta</code> - 
+the intial value for the inverse variance
+of the data space noise model
+
+<h3>Notes</h3>
+The latent variable sample is constructed as a uniform
+grid on the interval [-1, 1]. Similarly	the centres of 
+the basis function are gridded uniformly over the latent 
+variable sample, with equal standard deviation, set  
+relative to the distance between two centres. The initial 
+linear mapping maps mean and std.devs. 1:1 from	the latent 
+to the target sample along the principal component.
+
+<h3>See also</h3>
+<code><a href="./gtm_stp2.htm">gtm_stp2</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

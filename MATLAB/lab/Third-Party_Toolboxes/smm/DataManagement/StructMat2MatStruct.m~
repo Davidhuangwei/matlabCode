@@ -1,0 +1,64 @@
+function matStruct  = StructMat2MatStruct(structMat,nDims,extractDims)
+% input: requires a structure tree in which each branch concludes in a
+% matrix of equal size.
+% performs: matStruct(x,y,z).a.b = structMat.a.b(x,y,z)
+% for all subfields of structure and all dims of matrix.
+endhelp=1;
+
+if exist('nDims','var') & ~isempty(nDims
+% get the sizes of the mats in the struct tree
+fieldSizes = StructFieldSizes(structMat);
+% check they are all the same size
+for i=1:length(fieldSizes)
+    try
+        if fieldSizes{i} == fieldSizes{1}
+        else
+            fprintf('ERROR: all data must be the same size: [ ')
+            fprintf('%i ',fieldSizes{i});
+            fprintf('] ~= [ ');
+            fprintf('%i ',fieldSizes{1});
+            fprintf(']\n');
+            error('EXITING...')
+        end
+    catch
+        fprintf('ERROR: all data must be the same size: [ ')
+        fprintf('%i ',fieldSizes{i});
+        fprintf('] ~= [ ');
+        fprintf('%i ',fieldSizes{1});
+        fprintf(']\n');
+        error('EXITING...')
+    end
+end
+matStruct = cell(fieldSizes{1});
+for i=1:prod(fieldSizes{1})
+    matStruct{i} = GetStructInd(structMat,i);
+end
+matStruct = cell2mat(matStruct);
+return
+
+
+%%%%%%%%%% returns sizes of teminal fields in a cell array vector %%%%%%%%%
+function fieldSizes = StructFieldSizes(structMat)
+fieldSizes = {};
+if ~isstruct(structMat)
+    fieldSizes = {size(structMat)};
+    return
+else
+    fields = fieldnames(structMat);
+    for i=1:length(fields)
+        fieldSizes = cat(1,fieldSizes,StructFieldSizes(structMat.(fields{i})));
+    end
+end
+
+function outStruct = GetStructInd(structMat,ind)
+outStruct = [];
+if ~isstruct(structMat)
+    outStruct = structMat(ind);
+    return
+else
+    fields = fieldnames(structMat);
+    for i=1:length(fields)
+        outStruct.(fields{i}) = GetStructInd(structMat.(fields{i}),ind);
+    end
+    return
+end

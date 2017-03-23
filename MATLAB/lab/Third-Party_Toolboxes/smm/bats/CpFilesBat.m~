@@ -1,0 +1,15 @@
+function CpFilesBat(analDirs,fileBaseNames,fromSpectAnalDir,toSpectAnalDir,regExp)
+
+for j=1:length(analDirs)
+    for m=1:length(fileBaseNames)
+        fileBaseCell = LoadVar([analDirs{j} 'FileInfo/' fileBaseNames{m}]);
+        for k=1:length(fileBaseCell)
+            if exist([analDirs{j} fileBaseCell{k} '/' toSpectAnalDir '/' regExp],'file')
+                fprintf('File Exists: %s\n',[analDirs{j} fileBaseCell{k} '/' toSpectAnalDir '/' regExp]
+            evalText = ['!cp ' analDirs{j} fileBaseCell{k} '/' fromSpectAnalDir '/' regExp ' '...
+                analDirs{j} fileBaseCell{k} '/' toSpectAnalDir '/'];
+            fprintf('%s\n',evalText)
+            eval(evalText);
+        end
+    end
+end

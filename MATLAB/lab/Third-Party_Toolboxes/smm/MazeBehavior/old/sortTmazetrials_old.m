@@ -1,0 +1,580 @@
+function sortTmazetrials(filebase)
+% function sortTmazetrials(filebase)
+% sorts T maze trials into different bevaioral conditions
+%
+% outputs are saved to a file named to match a corresponding .whl file
+% the left column of outputs below contain indexes of the corresponding .whl file
+% that indicate the type of trial performed. the right column of outputs 
+% designates how many trials of the corresponding type were performed.
+% exploration            xp
+% LeftRight              lr
+% RightRight             rr
+% RightLeft              rl
+% LeftLeft               ll
+% ponderLeftRight        lrp
+% ponderRightRight       rrp
+% ponderRightLeft        rlp
+% ponderLeftLeft         llp
+% badLeftRight           lrb
+% badRightRight          rrb
+% badRightLeft           rlb
+% badLeftLeft            llb
+%
+% the following outputs contain indexes corresponding to when the animal
+% was in different parts of the maze/task
+% delayarea
+% Rwaterport
+% Lwaterport
+% choicepoint
+% centerarm
+% Rchoicearm
+% Lchoicearm
+% Rreturnarm
+% Lreturnarm
+
+xlimits  =[0 368];
+ylimits = [0 240];
+
+filename = [filebase '.whl'];
+whldat = load(filename);
+[whlm n] = size(whldat);
+
+exploration = zeros(whlm,1);
+LeftRight = zeros(whlm,1);
+RightRight = zeros(whlm,1);
+RightLeft = zeros(whlm,1);
+LeftLeft = zeros(whlm,1);
+ponderLeftRight = zeros(whlm,1);
+ponderRightRight = zeros(whlm,1);
+ponderRightLeft = zeros(whlm,1);
+ponderLeftLeft = zeros(whlm,1);
+badLeftRight = zeros(whlm,1);
+badRightRight = zeros(whlm,1);
+badRightLeft = zeros(whlm,1);
+badLeftLeft = zeros(whlm,1);
+delayarea = zeros(whlm,1);
+Rwaterport = zeros(whlm,1);
+Lwaterport = zeros(whlm,1);
+choicepoint = zeros(whlm,1);
+centerarm = zeros(whlm,1);
+Rchoicearm = zeros(whlm,1);
+Lchoicearm = zeros(whlm,1);
+Rreturnarm = zeros(whlm,1);
+Lreturnarm = zeros(whlm,1);
+
+xp = 0;
+lr = 0;
+rr = 0;
+rl = 0;
+ll = 0;
+lrp = 0;
+rrp = 0;
+rlp = 0;
+llp = 0;
+lrb = 0;
+rrb = 0;
+rlb = 0;
+llb = 0;
+
+setnewtriggers = 1;
+while (setnewtriggers)
+    figure(1)
+    clf;
+    plot(whldat(:,1),whldat(:,2),'.','color',[0 0 1],'markersize',7,'linestyle','none');
+    set(gca,'xlim',xlimits,'ylim',ylimits);
+    zoom on;
+    hold on;
+    
+    figure(1)
+    fprintf('\ndesignation of trial beginning & end points\n------------------------------\n');
+    input('Select the bottom trigger zone (right port) to start a new trial.\n   Then click back in this window and hit ENTER...','s');
+    rwpx = xlim;
+    rwpy = ylim; 
+    Rwaterport = (whldat(:,1)>=rwpx(1) & whldat(:,1)<=rwpx(2) & whldat(:,2)>=rwpy(1) & whldat(:,2)<=rwpy(2));
+    plot([rwpx(1) rwpx(2) rwpx(2) rwpx(1) rwpx(1)],[rwpy(1) rwpy(1) rwpy(2) rwpy(2) rwpy(1)],'color',[1 0 0]);
+    set(gca,'xlim',xlimits,'ylim',ylimits);
+    
+    figure(1)
+    zoom on
+    input('Select the top trigger zone (left port) to start a new trial.\n   Then click back in this window and hit ENTER...','s');
+    lwpx = xlim;
+    lwpy = ylim; 
+    Lwaterport = (whldat(:,1)>=lwpx(1) & whldat(:,1)<=lwpx(2) & whldat(:,2)>=lwpy(1) & whldat(:,2)<=lwpy(2));
+    plot([lwpx(1) lwpx(2) lwpx(2) lwpx(1) lwpx(1)],[lwpy(1) lwpy(1) lwpy(2) lwpy(2) lwpy(1)],'color',[1 0 0]);
+    set(gca,'xlim',xlimits,'ylim',ylimits);   
+    
+    delayarea = zeros(whlm,1);
+    moreboxes = 1;
+    while (moreboxes)
+        figure(1)
+        zoom on;
+        input('Select part of the delay area.\n   Then click back in this window and hit ENTER...','s');
+        dax = xlim;
+        day = ylim;
+        if xlim==xlimits & ylim==ylimits,
+            fprintf('*********\nThe whole maze area is not a reasonable selection\n*********\n');
+        else   
+            hold on;
+            plot([dax(1) dax(2) dax(2) dax(1) dax(1)],[day(1) day(1) day(2) day(2) day(1)],'color',[1 0 0]);
+            delayarea = delayarea | (whldat(:,1)>=dax(1) & whldat(:,1)<=dax(2) & whldat(:,2)>=day(1) & whldat(:,2)<=day(2));
+            set(gca,'xlim',xlimits,'ylim',ylimits);
+            while (1)
+                i = input('Do the boxes cover the entire area? (y/n):', 's');
+                if strcmp(i,'y') | strcmp(i,'n'), break; end
+            end
+            if ~isempty(i) & i(1)=='y',
+                moreboxes = 0;        
+            end
+        end
+    end
+    set(gca,'xlim',xlimits,'ylim',ylimits);
+    
+    
+    figure(1)
+    zoom on
+    input('Select the choice point.\n   Then click back in this window and hit ENTER...','s');
+    cpx = xlim;
+    cpy = ylim; 
+    choicepoint = (whldat(:,1)>=cpx(1) & whldat(:,1)<=cpx(2) & whldat(:,2)>=cpy(1) & whldat(:,2)<=cpy(2));
+    plot([cpx(1) cpx(2) cpx(2) cpx(1) cpx(1)],[cpy(1) cpy(1) cpy(2) cpy(2) cpy(1)],'color',[1 0 0]);
+    set(gca,'xlim',xlimits,'ylim',ylimits);
+
+    while (1)
+        i = input('Are these trigger zones good? (yes/no):', 's');
+        if strcmp(i,'yes') | strcmp(i,'no'), break; end
+    end
+    if i(1)=='y',
+        setnewtriggers = 0;
+    end
+end
+ 
+% find when the rat is in the trig zone
+intrigzone = find(Rwaterport | Lwaterport);
+trigzoneentry = intrigzone(1);
+
+% find when the rat is not in the trig zone
+notintrigzone = find(~Rwaterport & ~Lwaterport & whldat(:,1)~=-1);
+
+donewithfile=0;
+while ~donewithfile
+    while (~isempty(intrigzone) & ~isempty(notintrigzone))
+        newtrialtrigger = notintrigzone(find(notintrigzone>trigzoneentry));
+        if isempty(newtrialtrigger),
+            break;
+        end
+        
+        reachedgoal = intrigzone(find(intrigzone>newtrialtrigger(1)));
+        if isempty(reachedgoal),
+            break;
+        end
+      
+        exitedgoal = notintrigzone(find(notintrigzone>reachedgoal(1)));
+        if isempty(exitedgoal),
+            break;
+        end
+        
+        endoftrial = intrigzone(find(intrigzone<exitedgoal(1)));
+        if isempty(endoftrial),
+            break;
+        end
+        
+        if Rwaterport(trigzoneentry), % if the end of the last trial was at the right water port
+            beginning = 'right';
+        end
+        if Lwaterport(trigzoneentry), % if the end of the last trial was at the left water port
+            beginning = 'left ';
+        end
+        if Rwaterport(endoftrial(end)), % if endoftrial is at the right water port
+            ending = 'right';
+        end
+        if Lwaterport(endoftrial(end)), % if endoftrial is at the left water port
+            ending = 'left ';
+        end
+        
+        
+        daentry = newtrialtrigger(1)-1+find(delayarea(newtrialtrigger(1):endoftrial(end))); % find the delay period for this trial
+        if isempty(daentry)
+            fprintf('\n *** no delay period ***\n');
+        else
+            if beginning == 'right', % if the end of the last trial was at the right water port
+                Rreturnarm(newtrialtrigger(1):daentry(1)-1)=1;
+            end
+            if beginning == 'left ', % if the end of the last trial was at the left water port
+                Lreturnarm(newtrialtrigger(1):daentry(1)-1)=1;
+            end
+            cpentry = daentry(end)-1+find(choicepoint(daentry(end):endoftrial(end))); % find the choicepoint for this trial
+            if isempty(cpentry)
+                fprintf('\n *** no choice point ***\n');
+            else
+                centerarm((daentry(end)+1):(cpentry(1)-1))=1;
+                if ending == 'right', % if endoftrial is at the right water port
+                    Rchoicearm((cpentry(end)+1):(reachedgoal(1)-1))=1;
+                end
+                if ending == 'left ', % if endoftrial is at the left water port
+                    Lchoicearm((cpentry(end)+1):(reachedgoal(1)-1))=1;
+                end
+            end
+        end
+        figure(1)
+        clf
+        hold on
+        % in order to view the maze in the correct orientation the values in whldat are transformed
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(newtrialtrigger(1):endoftrial(end),2),xlimits(2)-whldat(newtrialtrigger(1):endoftrial(end),1),'.','color',[0.5 0.5 0.5],'markersize',7,'linestyle','none');
+
+        
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(Rreturnarm(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(Rreturnarm(newtrialtrigger(1):endoftrial(end))),1),'.','color',[0 0 1],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(Lreturnarm(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(Lreturnarm(newtrialtrigger(1):endoftrial(end))),1),'.','color',[0 0 1],'markersize',7,'linestyle','none');
+
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(delayarea(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(delayarea(newtrialtrigger(1):endoftrial(end))),1),'.','color',[0 1 1],'markersize',7,'linestyle','none');
+        
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(centerarm(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(centerarm(newtrialtrigger(1):endoftrial(end))),1),'.','color',[1 0 0],'markersize',7,'linestyle','none');
+
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(choicepoint(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(choicepoint(newtrialtrigger(1):endoftrial(end))),1),'.','color',[0 1 0],'markersize',7,'linestyle','none');
+
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(Rchoicearm(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(Rchoicearm(newtrialtrigger(1):endoftrial(end))),1),'.','color',[0 0 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(Lchoicearm(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(Lchoicearm(newtrialtrigger(1):endoftrial(end))),1),'.','color',[0 0 0],'markersize',7,'linestyle','none');
+
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(Rwaterport(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(Rwaterport(newtrialtrigger(1):endoftrial(end))),1),'.','color',[1 0 1],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(newtrialtrigger(1)-1+find(Lwaterport(newtrialtrigger(1):endoftrial(end))),2),xlimits(2)-whldat(newtrialtrigger(1)-1+find(Lwaterport(newtrialtrigger(1):endoftrial(end))),1),'.','color',[1 0 1],'markersize',7,'linestyle','none');
+        
+        set(gca,'xlim',ylimits,'ylim',xlimits);
+        tryagain = 1;
+        while (tryagain == 1)
+            fprintf('%s %s\n', beginning, ending);
+            keyin = input('classify trial - [exploration=x,good=g,ponder=p,bad=b] :', 's');
+            switch (keyin)
+            case 'x'
+                exploration(newtrialtrigger(1):endoftrial(end))=1;
+                tryagain = 0;
+                xp=xp+1;            
+            case 'g'
+                if beginning == 'right',
+                    if ending == 'right',
+                        RightRight(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        rr=rr+1;
+                    else
+                        RightLeft(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        rl=rl+1;
+                    end
+                else
+                    if ending == 'right',
+                        LeftRight(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        lr=lr+1;
+                    else
+                        LeftLeft(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        ll=ll+1;
+                    end
+                end
+            case 'p'
+                if beginning == 'right',
+                    if ending == 'right',
+                        ponderRightRight(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        rrp=rrp+1;
+                    else
+                        ponderRightLeft(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        rlp=rlp+1;
+                    end
+                else
+                    if ending == 'right',
+                        ponderLeftRight(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        lrp=lrp+1;
+                    else
+                        ponderLeftLeft(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        llp=llp+1;
+                    end
+                end
+            case 'b'
+                if beginning == 'right',
+                    if ending == 'right',
+                        badRightRight(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        rrb=rrb+1;
+
+                    else
+                        badRightLeft(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        rlb=rlb+1;
+                    end
+                else
+                    if ending == 'right',
+                        badLeftRight(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        lrb=lrb+1;
+
+                    else
+                        badLeftLeft(newtrialtrigger(1):endoftrial(end))=1;
+                        tryagain = 0;
+                        llb=llb+1;
+                    end
+                end
+            otherwise
+                fprintf('unrecognized input -- try again------------------------------\n');
+            end
+        end
+        trigzoneentry = endoftrial(end);
+    end 
+    clf;
+    
+    if ~isempty(find(LeftRight)),
+        subplot(4,4,1)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(LeftRight),2),xlimits(2)-whldat(find(LeftRight),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Left Right good n=' num2str(lr)]);
+    end
+    if ~isempty(find(RightLeft)),
+        subplot(4,4,2)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(RightLeft),2),xlimits(2)-whldat(find(RightLeft),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Right Left good n=' num2str(rl)]);
+    end
+    if ~isempty(find(RightRight)),
+        subplot(4,4,3)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(RightRight),2),xlimits(2)-whldat(find(RightRight),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Right Right good n=' num2str(rr)]);
+    end
+    if ~isempty(find(LeftLeft)),
+        subplot(4,4,4)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(LeftLeft),2),xlimits(2)-whldat(find(LeftLeft),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Left Left good n=' num2str(ll)]);
+    end
+    if ~isempty(find(ponderLeftRight)),
+        subplot(4,4,5)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(ponderLeftRight),2),xlimits(2)-whldat(find(ponderLeftRight),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Left Right ponder n=' num2str(lrp)]);
+    end
+    if ~isempty(find(ponderRightLeft)),
+        subplot(4,4,6)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(ponderRightLeft),2),xlimits(2)-whldat(find(ponderRightLeft),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Right Left ponder n=' num2str(rlp)]);
+    end
+    if ~isempty(find(ponderRightRight)),
+        subplot(4,4,7)
+        hold on
+          plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+      plot(ylimits(2)-whldat(find(ponderRightRight),2),xlimits(2)-whldat(find(ponderRightRight),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Right Right ponder n=' num2str(rrp)]);
+    end
+    if ~isempty(find(ponderLeftLeft)),
+        subplot(4,4,8)
+        hold on
+          plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+      plot(ylimits(2)-whldat(find(ponderLeftLeft),2),xlimits(2)-whldat(find(ponderLeftLeft),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Left Left ponder n=' num2str(llp)]);
+    end
+    if ~isempty(find(badLeftRight)),
+        subplot(4,4,9)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(badLeftRight),2),xlimits(2)-whldat(find(badLeftRight),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Left Right bad n=' num2str(lrb)]);
+    end
+    if ~isempty(find(badRightLeft)),
+        subplot(4,4,10)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(badRightLeft),2),xlimits(2)-whldat(find(badRightLeft),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Right Left bad n=' num2str(rlb)]);
+    end
+    if ~isempty(find(badRightRight)),
+        subplot(4,4,11)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(badRightRight),2),xlimits(2)-whldat(find(badRightRight),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Right Right bad n=' num2str(rrb)]);
+    end
+    if ~isempty(find(badLeftLeft)),
+        subplot(4,4,12)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(badLeftLeft),2),xlimits(2)-whldat(find(badLeftLeft),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Left Left bad n=' num2str(llb)]);
+    end
+    if ~isempty(find(exploration)),
+        subplot(4,4,13)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(exploration),2),xlimits(2)-whldat(find(exploration),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['exploration']);
+    end
+
+    
+    figure(2)
+    clf;    
+    if ~isempty(find(Lchoicearm)),
+        subplot(3,3,1)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(Lchoicearm),2),xlimits(2)-whldat(find(Lchoicearm),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Lchoicearm']);
+    end
+    if ~isempty(find(choicepoint)),
+        subplot(3,3,2)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(choicepoint),2),xlimits(2)-whldat(find(choicepoint),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['choicepoint']);
+    end
+    if ~isempty(find(Rchoicearm)),
+        subplot(3,3,3)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(Rchoicearm),2),xlimits(2)-whldat(find(Rchoicearm),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Rchoicearm']);
+    end
+    if ~isempty(find(Lwaterport)),
+        subplot(3,3,4)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(Lwaterport),2),xlimits(2)-whldat(find(Lwaterport),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Lwaterport']);
+    end
+    if ~isempty(find(centerarm)),
+        subplot(3,3,5)
+        hold on
+        plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+        plot(ylimits(2)-whldat(find(centerarm),2),xlimits(2)-whldat(find(centerarm),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['centerarm']);
+    end
+    if ~isempty(find(Rwaterport)),
+        subplot(3,3,6)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(Rwaterport),2),xlimits(2)-whldat(find(Rwaterport),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Rwaterport']);
+    end
+    if ~isempty(find(Lreturnarm)),
+        subplot(3,3,7)
+        hold on
+          plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+      plot(ylimits(2)-whldat(find(Lreturnarm),2),xlimits(2)-whldat(find(Lreturnarm),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Lreturnarm']);
+    end
+    if ~isempty(find(delayarea)),
+        subplot(3,3,8)
+        hold on
+          plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+      plot(ylimits(2)-whldat(find(delayarea),2),xlimits(2)-whldat(find(delayarea),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['delayarea']);
+    end
+    if ~isempty(find(Rreturnarm)),
+        subplot(3,3,9)
+        hold on
+         plot(ylimits(2)-whldat(:,2),xlimits(2)-whldat(:,1),'.','color',[1 1 0],'markersize',7,'linestyle','none');
+       plot(ylimits(2)-whldat(find(Rreturnarm),2),xlimits(2)-whldat(find(Rreturnarm),1),'.','color',[0 0 1],'markersize',4,'linestyle','none');
+        set(gca,'xlim',ylimits,'ylim',xlimits, 'xtick', [], 'ytick', []);
+        title(['Rreturnarm']);
+    end
+    figure(1)
+
+        fprintf('total trials n=%i\n', lr+rr+rl+ll+lrp+rlp+rrp+llp+lrb+rrb+rlb+llb);
+    while 1,
+        i = input('Save to disk? (yes/no):', 's');
+        if strcmp(i,'yes') | strcmp(i,'no'), break; end
+    end
+    if i(1) == 'y'
+        fprintf('Saving %s\n', [filebase '_whl_indexes.mat']);
+
+        matlabVersion = version;
+        if str2num(matlabVersion(1)) > 6
+            save([filebase '_whl_indexes.mat'],'-V6','exploration','LeftRight','RightRight','RightLeft','LeftLeft',...
+                'ponderLeftRight','ponderRightRight','ponderRightLeft','ponderLeftLeft',...
+                'badLeftRight','badRightRight','badRightLeft','badLeftLeft','delayarea','Rwaterport',...
+                'Lwaterport','choicepoint','centerarm','Rchoicearm','Lchoicearm','Rreturnarm','Lreturnarm',...
+                'xp','lr', 'rr', 'rl', 'll', 'lrp', 'rrp', 'rlp', 'llp', 'lrb', 'rrb', 'rlb', 'llb');
+            donewithfile = 1;
+        else
+            save([filebase '_whl_indexes.mat'],'exploration','LeftRight','RightRight','RightLeft','LeftLeft',...
+                'ponderLeftRight','ponderRightRight','ponderRightLeft','ponderLeftLeft',...
+                'badLeftRight','badRightRight','badRightLeft','badLeftLeft','delayarea','Rwaterport',...
+                'Lwaterport','choicepoint','centerarm','Rchoicearm','Lchoicearm','Rreturnarm','Lreturnarm',...
+                'xp','lr', 'rr', 'rl', 'll', 'lrp', 'rrp', 'rlp', 'llp', 'lrb', 'rrb', 'rlb', 'llb');
+            donewithfile = 1;
+        end
+    else
+        while 1,
+            i=input('\nDo you want to try again with the same trigger zones? (yes/no):', 's');
+            if strcmp(i,'yes') | strcmp(i,'no'), break; end
+        end
+        if i(1) == 'y'
+            
+            exploration = zeros(whlm,1);
+            LeftRight = zeros(whlm,1);
+            RightRight = zeros(whlm,1);
+            RightLeft = zeros(whlm,1);
+            LeftLeft = zeros(whlm,1);
+            ponderLeftRight = zeros(whlm,1);
+            ponderRightRight = zeros(whlm,1);
+            ponderRightLeft = zeros(whlm,1);
+            ponderLeftLeft = zeros(whlm,1);
+            badLeftRight = zeros(whlm,1);
+            badRightRight = zeros(whlm,1);
+            badRightLeft = zeros(whlm,1);
+            badLeftLeft = zeros(whlm,1);
+            centerarm = zeros(whlm,1);
+            Rchoicearm = zeros(whlm,1);
+            Lchoicearm = zeros(whlm,1);
+            Rreturnarm = zeros(whlm,1);
+            Lreturnarm = zeros(whlm,1);
+
+         
+            xp = 0;
+            lr = 0;
+            rr = 0;
+            rl = 0;
+            ll = 0;
+            lrp = 0;
+            rrp = 0;
+            rlp = 0;
+            llp = 0;
+            lrb = 0;
+            rrb = 0;
+            rlb = 0;
+            llb = 0;
+                      
+            trigzoneentry = intrigzone(1);
+        else
+            donewithfile = 1;
+        end
+    end
+end
+        

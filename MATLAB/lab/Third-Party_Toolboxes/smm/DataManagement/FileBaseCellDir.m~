@@ -1,0 +1,9 @@
+% function fileBaseCell = FileBaseCellDir(fileBaseCell)
+% performs fileBaseCell{j} = [fileBaseCell{j} '/' fileBaseCell{j}];
+function fileBaseCell = CatDirFileBase(fileBaseCell)
+
+if iscell(file
+
+for j=1:length(fileBaseCell)
+    fileBaseCell{j} = [fileBaseCell{j} '/' fileBaseCell{j}];
+end

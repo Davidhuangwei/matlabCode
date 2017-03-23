@@ -1,0 +1,95 @@
+function plotchanspectrum(freq,pspec,chanmat,badchan,samescale,dbscale,removeexp,color,lineWidth)
+
+if ~exist('samescale','var') | isempty(samescale)
+    samescale = 0;
+end
+if ~exist('badchan','var') | isempty(badchan)
+    badchan = 0;
+end
+if ~exist('dbscale','var') | isempty(dbscale)
+    dbscale = 0;
+end
+if ~exist('removeexp','var') | isempty(removeexp)
+    removeexp = 0;
+end
+if ~exist('color','var') | isempty(color)
+    color = [0 0 1];
+end
+if ~exist('lineWidth','var') | isempty(lineWidth)
+    lineWidth = 0.5;
+end
+
+xmax = 140;
+
+[chan_y chan_x chan_z] = size(chanmat);
+
+findfreq = find(freq>xmax);
+
+ymin = NaN;
+ymax = NaN;
+
+
+for z=1:chan_z
+    figure(z)
+    for y=1:chan_y
+        for x=1:chan_x
+            if isempty(find(badchan==chanmat(y,x,z))), % if the channel isn't bad
+                % now plot
+                subplot(chan_y,chan_x,(y-1)*chan_x+x);
+                ylim = get(gca,'ylim');
+                if ylim == [0 1];
+					ylim = [NaN NaN];
+                end
+                if ~isnan(ymax)
+                    headRoom = 0.1*ymax;
+                else
+                    headRoom = 0;
+                end
+                hold on;
+                if dbscale,
+                    plot(freq(1:findfreq(1)),10*log10(pspec(1:findfreq(1),chanmat(y,x,z))),'color',color,'LineWidth',lineWidth);
+                    if samescale,
+                        ymin = min(min(ymin,10*log10(pspec(1:findfreq(1),chanmat(y,x,z)))+headRoom),ylim(1));
+                        ymax = max(max(ymax,10*log10(pspec(1:findfreq(1),chanmat(y,x,z)))+headRoom),ylim(2));
+                    end
+                else
+                    if removeexp,
+                        [beta,pspec(:,chanmat(y,x,z))] = hajexpfit(f,log(pspec(:,chanmat(y,x,z))));
+                    end
+                    plot(freq(1:findfreq(1)),pspec(1:findfreq(1),chanmat(y,x,z)),'color',color,'LineWidth',lineWidth);
+                    if samescale, 
+                        ymin = min(min(ymin,pspec(1:findfreq(1),chanmat(y,x,z))+headRoom),ylim(1));
+                        ymax = max(max(ymax,pspec(1:findfreq(1),chanmat(y,x,z))+headRoom),ylim(2));                     
+                    end
+                end
+            end
+        end
+    end
+end
+
+for z=1:chan_z
+    figure(z)
+    for y=1:chan_y
+        for x=1:chan_x
+            if isempty(find(badchan==chanmat(y,x,z))), % if the channel isn't bad
+                % now plot
+                subplot(chan_y,chan_x,(y-1)*chan_x+x);
+                if dbscale,
+                    if samescale,
+                        set(gca,'xlim',[0 xmax],'ylim',[ymin ymax]);
+                    else
+%                        set(gca,'xlim',[0 xmax],'ylim',[min(10*log10(pspec(findfreq(1),chanmat(y,x,z)))) max(max(10*log10(pspec(:,chanmat(y,x,z)))))+1]);
+                    end
+                else
+                    if samescale,
+                        set(gca,'xlim',[0 xmax],'ylim',[ymin ymax]);
+                    else
+%                        set(gca,'xlim',[0 xmax],'ylim',[min(pspec(findfreq(1),chanmat(y,x,z))) max(max(pspec(:,chanmat(y,x,z))))+1]);
+                    end
+                end
+                title(['channel ' num2str(chanmat(y,x,z))],'fontsize', 5);
+                set(gca, 'xtick', [0:10:80 100:20:xmax], 'fontsize', 4);
+            end
+        end
+    end
+end

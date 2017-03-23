@@ -1,0 +1,26 @@
+function outStruct = CellArray2StructMat(inCell)
+%function outStruct = CellArray2StructMat(inCell)
+%Each row of inCell delineates a branch of outStruct ending in the
+%in the data at inCell(i,end)
+%The inverse of StructMat2CellArray
+
+outStruct = [];
+for i=1:size(inCell,1)
+    evalText = ['outStruct'];
+    for j=1:size(inCell,2)-1
+        lastField = ['.' inCell{i,j}];
+        if j~=size(inCell,2)-1
+            evalText = [evalText  lastField];
+        end
+    end  
+    evalText
+    lastField(2:end)
+    if isstruct(outStruct) & isstruct(eval(evalText)) & isfield(eval(evalText),lastField(2:end))
+    %if isstruct(eval(evalText)) & isfield(eval(evalText),lastField(2:end))
+    %if isfield(eval(evalText),lastField(2:end))
+        evalText = [evalText lastField '=[' evalText lastField '; inCell{' num2str(i) ',end}];'];
+    else
+        evalText = [evalText lastField '=inCell{' num2str(i) ',end};'];
+    end
+    eval(evalText);
+end

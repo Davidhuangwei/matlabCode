@@ -1,0 +1,6 @@
+function x=orix(x,b,a,istest)
+% x=orix(x,b,a,istest)
+% x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);x=filter(b,a,x);
+if ~istest
+    x=filter(b,a,x);
+end

@@ -1,0 +1,48 @@
+function axesHandles = XYFImageScMask(subPlotsCell,mask,colorLimits,sameScaleBool,figureHandles,maskHSV)
+% function axesHandles = XYFImageScMask(subPlotsCell,mask,colorLimits,sameScaleBool,figureHandles,maskHSV)
+% subPlotsCell is an x by y cell array whose arrangement determines the (x,y)
+%   coordinates of the subplots in the figure;
+% colorLimits is used to set 'clim' of all subplots.
+% sameScaleBool determines whether all subplots use a common (min/max) 
+%   scale if colorLimits isempty
+% maskHSV set the HSV of the masked data
+
+if ~exist('mask', 'var') | isempty(mask)
+    mask = [];
+end
+if ~exist('maskHSV', 'var') | isempty(maskHSV)
+    maskHSV = [];
+end
+
+[x, y, f] = size(subPlotsCell);
+
+if ~exist('colorLimits', 'var') | isempty(colorLimits)
+    if ~exist('sameScaleBool', 'var') | isempty(sameScaleBool) | sameScaleBool==0;
+        colorLimits = [];
+    else
+        colorLimits = [];
+        for k=1:f
+            for i=1:x
+                for j=1:y
+                    imageData = subPlotsCell{i,j,f};
+                    colorLimits = [min([min(min(imageData(mask))) colorLimits]) max([max(max(imageData(mask))) colorLimits])];
+                end
+            end
+        end
+    end
+end
+
+for k=1:f
+    if ~exist('figureHandles','var') | isempty(figureHandles)
+        figure;
+    else
+        figure(figureHandles(f));
+    end
+    
+    for i=1:x
+        for j=1:y
+            axesHandles(i,j) = subplot(x,y,(i-1)*y+j);
+            ImageScMask(subPlotsCell{i,j,f},mask,colorLimits,maskHSV);
+        end
+    end
+end

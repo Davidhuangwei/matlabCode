@@ -1,0 +1,63 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_pci</title>
+
+<body><h1>gtm_pci</h1>
+Returns a weight matrix initialised using principal components.
+
+<p>
+The returned weight matrix maps the mean of the 
+latent variable to the mean of the target variable, 
+and the L-dimensional latent variable variance to 
+the variance of the target data along its L first
+principal components. 
+
+<p>
+An initial value for beta can also be calculated,
+based on the noise of the data (the "L+1"th
+eigenvalue) and the interdistances between 
+Gaussian mixture centres in the data space.
+
+<h3>Synopsis</h3>
+<pre>[W, beta] = gtm_pci(T, X, FI)</pre><pre>W = gtm_pci(T, X, FI)</pre>
+<h3>Arguments</h3>
+<code>T</code> - 
+target distribution sample; one data point
+per row; N-by-D
+
+<p>
+<code>X</code> - 
+the latent distribution sample, K-by-L
+
+<p>
+<code>FI</code> - 
+basis functions' activation when fed 
+the latent data, X, plus a bias, K-by-(M+1)
+
+<h3>Return</h3>
+<code>W</code> - 
+the initialised weight matrix, (K+1)-by-D
+
+<p>
+<code>beta</code> - 
+the initial beta value, scalar. This is an 
+optional output argument; if ommitted, the
+corresponding (rather time consuming)
+calculations are ommitted too.
+
+<h3>Notes</h3>
+The first dimension (column) of X will map to the 
+first principal component, the second dimension 
+(column) of X will map to the second principal
+component, and so on.
+This may be of importance for the choice of 
+sampling density along the different dimensions
+of X, if it differs between different dimensions 
+
+<h3>See also</h3>
+<code><a href="./gtm_ri.htm">gtm_ri</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

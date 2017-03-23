@@ -1,0 +1,66 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_dstg</title>
+
+<body><h1>gtm_dstg</h1>
+Calculate the squared distances between two sets of data points. 
+
+<p>
+This function calculates distances between all data 
+points in the two data sets T and Y and returns
+them via the global variable matrix gtmGlobalDIST.
+
+<p>
+In addition, the minimum and maximum value of each 
+column in gtmGlobalDIST may be calculated and 
+returned via the global variables gtmGlobalMinDist
+and gtmGlobalMaxDist.
+
+<h3>Synopsis</h3>
+<pre>gtm_dstg(T, Y, m)</pre><pre>gtm_dstg(T, Y)</pre>
+<h3>Arguments</h3>
+<code>T, Y</code> - 
+data set matrices in which each row is a
+data point; dimensions N-by-D and K-by-D
+respectively
+
+<p>
+<code>m</code> - 
+mode of calculation; the default mode is m = 0
+(see gtmGlobalMinDist/MaxDist below)
+
+<h3>Global variables</h3>
+<code>gtmGlobalDIST</code> - 
+Matrix containing the calculated 
+distances; dimension K-by-N; DIST(k,n) contains the
+squared distance between T(n,:) and Y(k,:).
+This matrix is assumed to be pre-allocated; if this
+is not the case, performance deteriorates
+dramatically
+
+<p>
+<code>gtmGlobalMinDist, gtmGlobalMaxDist</code> - 
+vectors 
+containing the minimum and maximum of each 
+column in DIST, respectively; 1-by-N; 
+calculated iff m > 0.
+
+<h3>Notes</h3>
+This m-file provides this help comment and a MATLAB
+implementation of the distance calculation. If, 
+however, a mex-file with the same name is present
+in the MATLABPATH, this will be called for doing
+the calculation. As this is a computationally 
+demanding step of the algorithm, an efficient
+mex-file implementation will improve the 
+performance of the GTM training algorithm.
+A mex-file implementation will have pre-allocated
+global matrices as an absolute requirement. 
+
+<h3>See also</h3>
+<code><a href="./gtm_dist.htm">gtm_dist</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

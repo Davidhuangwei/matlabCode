@@ -1,0 +1,80 @@
+function CalcFileSpectrograms(fileBaseMat,fileExt,nChan,chunkSize,winLength,Fs,nFFT,nOverlap,NW)
+
+bps = 2; % bytes per sample
+chunkSize = 
+for i=1:size(fileBaseMat,1)
+    outNameCell = {};
+    infoStruct = dir([fileBaseMat(i,:) fileExt]);
+    numSamples = infoStruct.bytes/nChan/bps;
+    numSamples = 100000;
+    readPos = 0; % in samples
+    
+    while readPos < numSamples
+        
+        data = bload([fileBaseMat(i,:) fileExt],[nChan chunkSize],readPos*nChan*bps,'int16');
+        
+        [yo, fo, to] = mtpsg(data,nFFT,Fs,winLength,nOverlap,NW);
+        
+        if nOverlap > 0 
+            chop = 10;
+            if chop~=0
+                if readPos ~= 0
+                    yo(:,[1:chop],:) = [];
+                    to([1:chop]) = [];
+                end
+                if (numSamples - readPos) > chunkSize
+                    yo(:,[end-chop:end],:) = [];
+                    to([end-chop:end]) = [];
+                end
+            end
+            offset = 2*chop*median(diff(to))*Fs
+        else
+            offset = 0;
+        end
+        
+        %outName = [fileBaseMat(i,:) fileExt 'Win' num2str(winLength) 'NW' num2str(NW)...
+        %    '_samp' num2str(readPos) '-' num2str(max(readPos+chunksize,numSamples)) '_MTPSG.mat'];
+        %
+        outName = ['junk_samp' num2str(readPos) '-' num2str(min(readPos+chunkSize,numSamples)) '_MTPSG.mat'];
+        outNameCell = cat(1, outNameCell, {outName});
+        fprintf('Saving: %s\n',outName);
+        matlabVersion = version;
+        if str2num(matlabVersion(1)) > 6
+            save(outName,'-V6','yo','fo','to','winLength','Fs','nFFT','nOverlap','NW');
+        else
+            save(outName,'yo','fo','to','winLength','Fs','nFFT','nOverlap','NW');
+        end
+        %(diff(to))
+        median(diff(to))*Fs
+        %2*chop*median(diff(to))*Fs
+        readPos = readPos + chunkSize - offset;
+    end
+end
+
+yo2 = [];
+for i=1:size(outNameCell,1)
+    load(outNameCell{i})
+    yo2 = cat(2,yo2,yo);
+end
+
+keyboard
+
+return
+
+
+yo2 = [];
+load junk_samp0-20000_MTPSG.mat
+yo2 = cat(2,yo2,yo);
+load junk_samp19354-39354_MTPSG.mat
+yo2 = cat(2,yo2,yo);
+load junk_samp38708-58708_MTPSG.mat
+yo2 = cat(2,yo2,yo);               
+load junk_samp58062-78062_MTPSG.mat
+yo2 = cat(2,yo2,yo);               
+load junk_samp77416-97416_MTPSG.mat
+yo2 = cat(2,yo2,yo);               
+load junk_samp96770-100000_MTPSG.mat
+yo2 = cat(2,yo2,yo);
+
+
+load junk_samp0-100000_MTPSG.mat

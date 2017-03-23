@@ -1,0 +1,78 @@
+This is METAFONT, Version 2.7182 (Web2C 7.4.5) (base=mf 2005.1.6)  13 DEC 2005 16:24
+**FileInterp1D.m ../InterpCSD/
+(FileInterp1D.m
+>> function.FileInterp1D
+! Isolated expression.
+<to be read again> 
+                   (
+l.1 function FileInterp1D(
+                          FileBaseMat,fileExt,numChan,nShanks,nChansPerShank...
+
+? ls
+Type <return> to proceed, S to scroll future error messages,
+R to run without stopping, Q to run quietly,
+I to insert something, E to edit your file,
+1 or ... or 9 to ignore the next 1 to 9 tokens of input,
+H for help, X to quit.
+? 
+! Extra tokens will be flushed.
+<to be read again> 
+                   (
+l.1 function FileInterp1D(
+                          FileBaseMat,fileExt,numChan,nShanks,nChansPerShank...
+
+? 
+! Interruption.
+l.1 function FileInterp1D(
+                          FileBaseMat,fileExt,numChan,nShanks,nChansPerShank...
+
+? 
+! A secondary expression can't begin with `..'.
+<inserted text> 
+                0
+<to be read again> 
+                   ..
+...->..
+       tension.atleast1..
+l.8 ...Shank = (nChansPerShank*interpFactor) - ...
+                                                  
+? 
+! Extra tokens will be flushed.
+<to be read again> 
+                   ..
+...->..
+       tension.atleast1..
+l.8 ...Shank = (nChansPerShank*interpFactor) - ...
+                                                  
+? 
+Runaway loop?
+size(FileBaseMat,1)fileBase=FileBaseMat((EXPR0),:);fprintf('\nFile:interpFileNa
+me ETC.
+! Forbidden token found while scanning the text of a for loop.
+<inserted text> 
+                endfor
+<to be read again> 
+                   end
+l.20     end
+            
+? 
+>> size
+! Isolated expression.
+<to be read again> 
+                   (
+<for(1)> size(
+              FileBaseMat,1)fileBase=FileBaseMat((EXPR0),:);fprintf('\nFile:...
+<inserted text> endfor
+                      
+<to be read again> 
+                   end
+l.20     end
+            
+? :
+Type <return> to proceed, S to scroll future error messages,
+R to run without stopping, Q to run quietly,
+I to insert something, E to edit your file,
+1 or ... or 9 to ignore the next 1 to 9 tokens of input,
+H for help, X to quit.
+? x
+

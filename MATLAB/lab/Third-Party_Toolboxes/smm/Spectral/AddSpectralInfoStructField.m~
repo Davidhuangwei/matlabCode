@@ -1,0 +1,18 @@
+function AddSpectralInfoStructField(fileBaseCell,spectAnalBase,fileExtCell,fieldName,fieldValue)
+
+infoStruct.(fieldName) = fieldValue;
+
+for k=1:length(fileExtCell)
+    saveDir = [spectAnalBase fileExtCell{k}];
+    
+    for j=1:length(fileBaseCell)
+        
+        dirName = [SC(fileBaseCell{j}) SC(saveDir)];
+        
+        if exist([dirName 'infoStruct.mat'],'file')
+            infoStruct = MergeStructs(LoadVar([dirName 'infoStruct.mat']),infoStruct);
+        end
+        
+        save([saveDir 'infoStruct.mat'],SaveAsV6,'infoStruct');
+    end
+end

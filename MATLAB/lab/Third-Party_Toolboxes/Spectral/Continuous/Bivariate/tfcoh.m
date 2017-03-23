@@ -1,0 +1,105 @@
+function [coh,f,S_x,S_y] = ...
+    tfcoh(X,Y,tapers,sampling,dn,fk,pad,flag) 
+%  TFCOH Moving window time-frequency coherency between two time series.
+%
+% [COH, F, S_X, S_Y] = ...
+%	TFCOH(X, Y, TAPERS, SAMPLING, DN, FK, PAD, FLAG)
+%
+%  Inputs:  X		=  Time series array in [Space/Trials,Time] form.
+%	    Y		=  Time series array in [Space/Trials,Time] form.
+%	    TAPERS 	=  Data tapers in [K,TIME], [N,P,K] or [N, W] form.
+%			   	Defaults to [N,5,9] where N is the duration 
+%				of X and Y.
+%	    SAMPLING 	=  Sampling rate of time series X, in Hz. 
+%				Defaults to 1.
+%	    DN		=  Overlap in time between neighbouring windows.
+%			       	Defaults to N./10;
+%	    FK 	 	=  Frequency range to return in Hz in
+%                               either [F1,F2] or [F2] form.  
+%                               In [F2] form, F1 is set to 0.
+%			   	Defaults to [0,SAMPLING/2]
+%	    PAD		=  Padding factor for the FFT.  
+%			      	i.e. For N = 500, if PAD = 2, we pad the FFT 
+%			      	to 1024 points; if PAD = 4, we pad the FFT
+%			      	to 2048 points.
+%				Defaults to 2.
+%
+%	   FLAG = 0:	calculate COH seperately for each channel/trial.
+%	   FLAG = 1:	calculate COH by pooling across channels/trials. 
+%                       Defaults to 0
+% 
+%  Outputs: COH	        =  Coherency between X and Y in [Space/Trials,Freq].
+%	    F		=  Units of Frequency axis for COH.
+%	    S_X		=  Spectrum of X in [Space/Trials, Freq] form. 
+%	    S_Y		=  Spectrum of Y in [Space/Trials, Freq] form. 
+%
+
+%  Written by:  Bijan Pesaran Caltech 1998
+%
+
+sX = size(X);
+nt1 = sX(2);
+nch1 = sX(1);
+
+sY = size(Y);
+nt2 = sY(2);
+nch2 = sY(1);
+
+if nt1 ~= nt2 error('Error: Time series are not the same length'); end 
+if nch1 ~= nch2 error('Error: Time series are incompatible'); end 
+nt = nt1;
+nch = nch1;
+
+if nargin < 4 sampling = 1; end 
+t = nt./sampling;
+if nargin < 3 tapers = [t,5,9]; end 
+if length(tapers) == 2
+   n = tapers(1);
+   w = tapers(2);
+   p = n*w;
+   k = floor(2*p-1);
+   tapers = [n,p,k];
+   disp(['Using ' num2str(k) ' tapers.']);
+end
+if length(tapers) == 3  
+   tapers(1) = tapers(1).*sampling;  
+   tapers = dpsschk(tapers); 
+end
+if nargin < 5 dn = n./10; end
+if nargin < 6 fk = [0,sampling./2]; end
+if length(fk) == 1
+    fk = [0,fk];
+end
+if nargin < 7 pad = 2; end
+if nargin < 8 pval = 0.05;  end
+if nargin < 9 flag = 0; end 
+
+K = length(tapers(1,:)); 
+N = length(tapers(:,1));
+if N > nt error('Error: Tapers are longer than time series'); end
+
+% Determine outputs
+errorchk = 0;
+if nargout > 3 errorchk = 1; end
+
+dn = dn.*sampling;
+nf = max(256, pad*2^nextpow2(N+1)); 
+nfk = floor(fk./sampling.*nf);
+nwin = floor((nt-N)./dn);           % calculate the number of windows
+f = linspace(fk(1),fk(2),diff(nfk));
+
+for win=1:nwin
+   tmp1=X(:,dn*win:dn*win+N-1);
+   tmp2=Y(:,dn*win:dn*win+N-1);
+   [tmp_coh,f,tS1,tS2]=coherency(tmp1,tmp2,tapers,sampling,fk,pad,pval,flag);
+   if flag == 0 
+        coh(win,:,:)=tmp_coh; 
+        S_x(win,:,:)=tS1;
+        S_y(win,:,:)=tS2;
+   end
+   if flag > 0 
+       coh(win,:)=tmp_coh; 
+       S_x(win,:)=tS1;
+       S_y(win,:)=tS2;
+   end
+end

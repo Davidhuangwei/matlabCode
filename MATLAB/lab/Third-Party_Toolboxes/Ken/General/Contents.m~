@@ -1,0 +1,31 @@
+% Ken's matlab library, everyone is welcome to use it
+% Version 0.5.0 1999 May
+%
+% Clustogram - Draws a shaded clustogram from the Feature file and cluster file.
+% ColorScatter -draws a 2d scatter plot of the data with colors allocated according to the vector Colors
+% FileExists - tests if a file exists
+% FileLines - returns number of lines in a file - USE WordCount instead.
+% LoadStringArray - Loads a 2d array of strings from a text file
+% LoadStringList - Loads a 1d array of strings from a text file
+% MultiReg - does lots of linear regressions at the same time, so you can regress an entire waveform onto a single variable
+% OutlierRemoveAuto - An automatic, iterative function to remove outliers from multivariate data
+% OutlierRemoveManual - An interactive, iterative function to remove outliers from multivariate data
+% PlotConic -Plots the conic section that is the solution of x'*M*x + v'*x + c = 0
+% PlotLine - Plots a line w'*x + b = 0
+% RealignToPeaks - Realigns waveforms on their peaks
+% SpecAv - computes mean power spectrum of a set of traces
+% SpikePower - computes the spectra of a set of traces
+% SpikePowerMTM - computes the spectra of a set of traces using the multitaper method
+% ThresholdCrossings - finds times when a waveform crosses up through a given threshold
+% WithinRanges - checks which elements of a vector lie in a specified set of ranges
+% WordCount - counts number of words in a file
+% bload - loads a binary file
+% bsave - saves a binary file
+% chi2plot - displays a Chi^2 plot (to check if data come from a Chi^2 distribution)
+% clip - limits data above and below
+% gnumeric - launch a gnumeric session
+% hist2 - plots a 2d histogram
+% pplot - plots graphs one at a time with a pause between
+% sq - alias for squeeze
+% xgobi - launches an xgobi session
+

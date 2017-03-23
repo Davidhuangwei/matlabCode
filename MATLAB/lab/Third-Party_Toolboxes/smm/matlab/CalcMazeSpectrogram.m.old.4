@@ -1,0 +1,165 @@
+function [sumPerPosStruct,fo,channelNums] = CalcMazeSpectrogram(taskType,fileBaseMat,fileExt,fileNameFormat,Channels,winLength,nOverlap,NW,dbBool,autoSave,trialTypesBool,mazeLocationsBool)
+% function [sumPerPosCell,fo,channelNums] = CalcMazeSpectrogram(taskType,fileBaseMat,fileExt,fileNameFormat,Channels,winLength,nOverlap,NW,dbBool,autoSave,trialTypesBool,mazeLocationsBool)
+% Loads files containing power spectra for each point in time that
+% corresponds to a position in the .whl file. These spectra are Accumulated
+% for each position contained in a _LinearizedWhl.mat. The Accumulated
+% power spectra can then be used to plot positional spectrograms.
+
+if ~exist('trialTypesBool','var') | isempty(trialTypesBool)
+    trialTypesBool = [1  0  1  0  0   0   0   0   0   0   0   0  1];
+                   % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+end
+if ~exist('mazeLocationsBool','var') | isempty(mazeLocationsBool)
+    mazeLocationsBool = [1  1  1  1  1  1   1   1   1];
+                      % rp lp dp cp ca rca lca rra lra
+end
+ 
+if ~exist('autoSave','var') | isempty(autoSave)
+    autoSave = 1;
+end
+ if ~exist('fileNameFormat','var') | isempty(fileNameFormat)
+    fileNameFormat = 2;
+ end
+ if ~exist('dbBool','var') | isempty(dbBool)
+    dbBool = 0;
+ end
+spectrogramDir = 'spectrograms/';
+
+maxMazeX = 368;
+sumPerPosStruct = [];
+whlSamp = 39.065;
+
+for h=1:size(fileBaseMat,1);
+    whlFileName = [fileBaseMat(h,:) '_LinearizedWhl.mat'];
+    if ~exist(whlFileName);
+        fprintf('\nSkipping: %s - File not found',whlFileName);
+    else
+        load(whlFileName);
+        mazeRegionNames = fieldnames(linearRLaverageStruct);
+        whlDat = LoadMazeTrialTypes(fileBaseMat(h,:),trialTypesBool,mazeLocationsBool,1);
+
+        for k=1:length(Channels)
+            spectraFileName = [spectrogramDir fileBaseMat(h,:) fileExt 'Win' num2str(winLength) 'Ovrlp' num2str(nOverlap) 'NW' num2str(NW) '_mtpsg_' num2str(Channels(k)) '.mat'];
+            %spectraFileName = [spectrogramDir fileBaseMat(h,:) fileExt 'Win' num2str(winLength) 'NW' num2str(NW) '_mtpsg_' num2str(Channels(k)) '.mat'];
+            fprintf('\nReading: %s',spectraFileName);
+            load(spectraFileName);
+            for m=1:size(mazeRegionNames,1)
+                  %fprintf('\n%s',linearRLaverageCell{m,1});
+                linearRLaverage = getfield(linearRLaverageStruct,mazeRegionNames{m});
+                linearRLaverage = ceil(linearRLaverage);
+                notMinusOnes = find(linearRLaverage > 0 & whlDat(:,1) ~= -1);
+                toSamp = 1/median(diff(to));
+                %whlSpectRatio = size(yo,2)/size(linearRLaverage,1);
+                
+                if isempty(notMinusOnes)
+                    %fprintf(': empty')
+                else
+
+                    yFreqPos = zeros(length(fo),maxMazeX,length(Channels));
+                    nPerPos = zeros(maxMazeX,1);
+                    %keyboard
+                    nPerPos = Accumulate(linearRLaverage(notMinusOnes),1,maxMazeX);
+                    for j = 1:length(fo)
+                        %for k=1:length(Channels)
+                        if dbBool
+                            yFreqPos(j,:,k) = Accumulate(linearRLaverage(notMinusOnes),10.*log10(yo(j,round((notMinusOnes-1)/whlSamp*toSamp+1))),maxMazeX);
+                        else
+                            yFreqPos(j,:,k) = Accumulate(linearRLaverage(notMinusOnes),yo(j,round((notMinusOnes-1)/whlSamp*toSamp+1)),maxMazeX);
+                        end
+                        %end
+                    end
+                    %if ~exist('sumYFreqPos','var')
+                    %    sumYFreqPos = zeros(length(fo),maxMazeX,length(Channels));
+                    %    sumNperPos = zeros(maxMazeX,1);
+                    %end
+                    if isfield(sumPerPosStruct,mazeRegionNames{m})
+                        sumPerPosStruct = setfield(sumPerPosStruct,mazeRegionNames{m},'nPerPos', ...
+                            getfield(sumPerPosStruct,mazeRegionNames{m},'nPerPos') + nPerPos);
+                        sumPerPosStruct = setfield(sumPerPosStruct,mazeRegionNames{m},'yFreqPos', ...
+                            getfield(sumPerPosStruct,mazeRegionNames{m},'yFreqPos') + yFreqPos);
+                    else
+                        sumPerPosStruct = setfield(sumPerPosStruct,mazeRegionNames{m},'nPerPos',nPerPos);
+                        sumPerPosStruct = setfield(sumPerPosStruct,mazeRegionNames{m},'yFreqPos',yFreqPos);
+                    end
+
+                    %sumPerPosCell{m,2} = sumPerPosCell{m,2} + nPerPos;
+                    %sumPerPosCell{m,3} = sumPerPosCell{m,3} + yFreqPos;
+                    %sumNperPos = sumNperPos + nPerPos;
+                    %            sumYFreqPos = sumYFreqPos + yFreqPos;
+
+                    if max(max(max(getfield(sumPerPosStruct,mazeRegionNames{m},'yFreqPos')))) >= 2^63
+                        fprintf('summation approaching 2^64 bit limit');
+                        keyboard
+                    end
+                end
+            end
+        end
+    end
+end
+
+for m=1:size(mazeRegionNames,1)
+    if isfield(sumPerPosStruct,mazeRegionNames{m})
+        notZero = find(getfield(sumPerPosStruct,mazeRegionNames{m},'nPerPos')~=0);
+
+        tempVar = getfield(sumPerPosStruct,mazeRegionNames{m},'nPerPos');
+        tempVar(notZero(end)+1:end) = [];
+        sumPerPosStruct = setfield(sumPerPosStruct,mazeRegionNames{m},'nPerPos',tempVar);
+
+        tempVar = getfield(sumPerPosStruct,mazeRegionNames{m},'yFreqPos');
+        tempVar(:,notZero(end)+1:end,:) = [];
+        sumPerPosStruct = setfield(sumPerPosStruct,mazeRegionNames{m},'yFreqPos',tempVar);
+    else
+        fprintf('\n"sumPerPosStruct.%s" does not exist\n',mazeRegionNames{m});
+    end
+     
+     %sumPerPosCell{m,2}(notZero(end)+1:end) = [];
+     %sumPerPosCell{m,3}(:,notZero(end)+1:end,:) = [];     
+end
+if exist('channelNums','var')
+    channelNums = channelNums(Channels);
+else
+    channelNums = Channels;
+end
+
+in = 'y';
+if (autoSave == 0)
+    while 1,
+        in = input('Save to disk (yes/no)? ', 's');
+        if strcmp(in,'yes') | strcmp(in,'no'), break; end
+    end
+end
+if in(1) == 'n'
+    CountTrialTypes(fileBaseMat,1);
+    return;
+else
+    DB = '';
+    if dbBool
+        DB = '_DB';
+    end
+    trialsMat = CountTrialTypes(fileBaseMat,1);     
+    if fileNameFormat == 1,
+        outname = [taskType '_' fileBaseMat(1,1) fileBaseMat(1,2:4) fileBaseMat(1,5) fileBaseMat(1,6:8) ...
+            '-' fileBaseMat(end,1) fileBaseMat(end,2:4) fileBaseMat(end,5) fileBaseMat(end,6:8)...
+            fileExt '_MazeSpectrogram_Win' num2str(winLength) '_NW' num2str(NW) DB '.mat'];
+    end
+    if fileNameFormat == 0,
+        outname = [taskType '_' fileBaseMat(1,7) fileBaseMat(1,10:12) fileBaseMat(1,14) fileBaseMat(1,17:19) ...
+            '-' fileBaseMat(end,7) fileBaseMat(end,10:12) fileBaseMat(end,14) fileBaseMat(end,17:19) ...
+            fileExt '_MazeSpectrogram_Win' num2str(winLength) '_NW' num2str(NW) DB '.mat'];
+    end
+    if fileNameFormat == 2,
+                outname = [taskType '_' fileBaseMat(1,:) '-' fileBaseMat(end,8:10) ...
+                    fileExt '_MazeSpectrogram_Win' num2str(winLength) '_NW' num2str(NW) DB '.mat'];
+    end
+    fprintf('Saving %s\n', outname);
+    matlabVersion = version;
+    if str2num(matlabVersion(1)) > 6
+        save(outname,'-V6','sumPerPosStruct','fo','channelNums','trialsMat','fileBaseMat');
+    else
+        save(outname,'sumPerPosStruct','fo','channelNums','trialsMat','fileBaseMat');
+    end
+end
+return
+
+% plot(squeezenPerCell(j,k,:)))
+% imagesc(squeeze(log10(aveYFreqPos./avenPerCell)));

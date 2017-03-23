@@ -1,0 +1,68 @@
+% function [catRes catClu]= Trough2Res(fileBase,nChan,varargin)
+% [chan fileExt filtFreqRange maxFreq epochs eegFs resFs bps] = ...
+%     DefaultArgs(varargin,{[1:nChan],'.eeg',[4 30],15,[],1250,20000,2});
+% % Finds the troughs for a specified frequency range and makes a .res & .clu
+% % file with each channel marked as a separate cluster
+% % epochs in seconds
+
+function [catRes catClu]= Trough2Res(fileBase,nChan,varargin)
+try
+[chan fileExt filtFreqRange maxFreq epochs eegFs resFs bps peakBool readMultiBool] = ...
+    DefaultArgs(varargin,{[1:nChan],'.eeg',[4 30],15,[],1250,1250,2,0,0});
+if isempty(epochs)
+    temp = dir([fileBase fileExt]);
+    epochs = [0 temp.bytes/eegFs/nChan/bps];
+end
+firfiltb = fir1(odd(3/filtFreqRange(1)*eegFs)-1,...
+    [filtFreqRange(1)/eegFs*2,filtFreqRange(2)/eegFs*2]);
+   
+catRes = [];
+catClu = [];
+% epochs
+% epochs*eegFs
+%     temp = dir([fileBase fileExt]);
+% temp.bytes/nChan/bps
+if readMultiBool
+    for k=chan
+        eeg = readmulti([fileBase fileExt],nChan,k);
+        filt = Filter0(firfiltb, eeg);
+        if peakBool
+            filt = -filt;
+        end
+        for j=1:size(epochs,1)
+            lMin = LocalMinima(filt(round(epochs(j,1)*eegFs)+1:round(epochs(j,2)*eegFs)),...
+                eegFs/maxFreq,0);
+            catRes = cat(1,catRes,round(((lMin-1)/eegFs+epochs(j,1))*resFs));
+            catClu = cat(1,catClu,repmat(k,size(lMin)));
+        end
+    end
+else
+    for j=1:size(epochs,1)
+        %% load eeg
+        eeg = bload([fileBase fileExt],[nChan round((epochs(j,2)-epochs(j,1))*eegFs)],...
+            round(epochs(j,1)*eegFs*nChan*bps));
+
+        if ~isempty(eeg)
+            %% filter
+            filt = Filter0(firfiltb, eeg')';
+            if peakBool
+                filt = -filt;
+            end
+            for k=chan
+                %% detect local minima
+                lMin = LocalMinima(filt(k,:),eegFs/maxFreq,0);
+                catRes = cat(1,catRes,round(((lMin-1)/eegFs+epochs(j,1))*resFs));
+                catClu = cat(1,catClu,repmat(k,size(lMin)));
+            end
+        end
+    end
+end
+[catRes ind] = sort(catRes);
+catClu = catClu(ind);
+return;
+catch
+    junk = lasterror
+    junk.message
+    junk.stack(1)
+    keyboard
+end

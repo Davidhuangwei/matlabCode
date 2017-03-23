@@ -1,0 +1,362 @@
+<HTML>
+<! author: Scott Makeig
+           The Salk Institute
+           La Jolla CA 92037
+    phone: 858 453 4100 x1455
+    email: scott@salk.edu
+  updated: Wed Sep 27 11:10:31 PDT 2000
+>
+<HEAD>
+<TITLE>Information on ICA / EEG Matlab Package </TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffe5">
+<center>
+<font face="Helvetica,Ariel">
+<strong><H3>General Information on ICA Matlab package for Psychophysiological Data</H3>
+<br>
+</strong>
+</center>
+<p>
+<strong>Current toolbox version</strong>: 3.52 (release of 10/12/00)
+<br>
+<strong>Written for</strong> Matlab Unix versions: 4.2c and 5.0+ (separate releases).
+Version 4.2c no longer supported.
+<p>
+<strong>Run demonstration:</strong> >> icademo <font color="#990000">% But first replace the string 'XXX' in icadefs.m</font>
+<br>
+<strong>List of functions:</strong> >> help ica
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/icabib.html">
+List of publications on ICA applied to EEG and fMRI data.</A>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/icafaq.html">
+Frequently-asked questions about ICA (icafaq.html).</A>
+<p>
+<A HREF="http://www.cnl.salk.edu/~scott/ica-download-form.html">
+Download the Matlab ICA/EEG toolbox</A>
+<p>
+<strong>Version History</strong>:
+<p>
+1.0 11-30-96 First release, CNL / Salk Institute 
+(<A HREF="http://www.cnl.salk.edu/~scott">Makeig</A> et al.) 
+<br>
+3.52 10-12-00 Latest release
+<p>
+The ICA/EEG toolbox has now been downloaded over 2100 times by users from 
+over 50 countries and research fields.
+Please email feedback about things that do or don't work, 
+or any suggested improvements. If you improve your working 
+versions of the scripts, please send me a copy or description.
+I will credit your suggestions.
+<p>
+Scott Makeig
+<p>
+<b>New functions/features/fixes in 3.52 (as of 10/12/00):</B>
+<p>
+** rmart() - remove EOG artifacts from EEG data using multiple time-lag
+   regression. Added back to the toolbox -- though we prefer using ICA for 
+   this purpose! (See new publication below).
+** envtopo(), a new [-n] option for arg 'compnums' directs envtopo() to
+   show only the largest n (<=7) component envelopes and maps. Also, line
+   colors and styles have been made bolder.
+** binica() now uses unique filenames for data, script, weights and sphere
+   files, to avoid conflicts when multiple binica() calls are made in the
+   same pwd.
+** binica() now reads the .wts file correctly when 'pca' ncomps < nchans in
+** timef() fixed recent version bug in calculating output (and displayed)
+   frequencies when cycles >0 - they were 1:n instead of actual Hz values! 
+<p>
+<strong>New functions in version 3.5 (as of 8/00):</strong>
+<pre>
+<font face="Helvetica,Ariel" size=3>
+** <b>binica()</b> - calls binary ica (separate download) from the Matlab command 
+   line (much faster and more memory-efficient than runica())
+<br>
+** <b>axcopy()</b> - window popup function incorporated into many plotting functions 
+<p>
+<b>New features/fixes:</B>
+<p>
+** <b>axcopy()</b> is now added to many plotting functions to allow the user 
+    to pop up a window closeup of any subaxes with a mouse click and 
+    to zoom in on plotted data in this new window.
+<br>
+** <b>erpimage()</b> now has amplitude significance bounds estimated and shown
+    as well as an inter-trial coherence significance bound. 
+<br>
+** <b>erpimage()</b> now has a 'topo' map plotting option, plus axcopy()
+    A bug that caused the y-axis labels to be missing when time limits were
+    specified has been fixed.
+<br>
+** <b>erpimage()</b> now has a 'spec' plotting option - plots data spectrum
+<br>
+** <b>erpimage()</b> now has a new 'caxis' plotting option - causes the color map
+    to use a specified fraction of data range instead of the whole data range
+<br>
+** <b>testica()</b> uses a new eyeLike() function, contributed by Benjamin Blankertz,
+    in place of idit(), which failed in some circumstances.
+<br>
+** <b>testica()</b> now has new defaults and extra figures (for educational purposes)
+<br>
+** sph2pol is now <b>sph2topo()</b>, and pol2sph is pol2topo(). (cf. cart2topo())
+<br>
+** <b>envtopo()</b> has new 'comp_fill' and 'bold' options - they look sharp! 
+<br>
+** <b>plottopo()</b> now has easier color and vertical line specification
+    It also performs popups using axcopy.
+<br>
+** <b>timef()</b> has a new 'details' argument that scrolls detailed notes on its 
+    arguments, outputs, history, references and internal constants. 
+<br>
+** <b>floatread()</b> now takes size argument 'square'.
+<br>
+** <b>runica()</b> now allows nchans > nframes if 'pca' reduction is used to
+    reduce the data dimension < nframes.
+<br>
+** <b>eegplot()</b> now has the cal bar turned 'on' and will accept an int vector
+    of channel numbers
+<p>
+<em>Known bugs:</em>
+<p>
+** plottopo() was broken in the 3.5 release, fixed in 3.5.1 -sm
+<br>
+** In erpimage(), the 'phase' option may not work in MATLAB 5.2 (ok in 5.3)???
+<br>
+** In erpimage(), the 'allcohers' option is not debugged.
+</pre>
+<p>
+<b>News of ICA applications to biomedical research</b>
+<p>
+There were 10 papers on ICA applied to fMRI or PET data at the recent Human Brain 
+Mapping meeting in Texas, and 10 ICA papers on ICA for MEG data at BioMag2000.
+The ICA200 meeting, held in Helsinki in June, included nearly 200 papers and 
+posters, with the final session on biomedical applications. 
+<p>
+The next ICA meeting, ICA2001 will be hosted by the Institute for 
+Neural Computation, UCSD in early December, 2001 (just after NIPS) 
+at Del Mar, CA.  For details, see http://ica2001.org 
+<p>
+<b>Recent Publications on ICA decomposition of biomedical data:</b>
+(downloads: www.cnl.salk.edu/~scott or www.cnl.salk.edu/~jung)
+<ul>
+<li>
+Jung T-P, Makeig S, Westerfield W, Townsend J, Courchesne E, and
+Sejnowski TJ, "Removal of eye activity artifacts from visual event-
+related potentials in normal and clinical subjects", <em>Clinical
+Neurophysiology</em> 111:1745-58, 2000.
+<li>
+Makeig,, S., Enghoff, S., Jung, T-P. and Sejnowski, T. J., An
+efficient basis for brain-actuated control, <em>IEEE Trans Rehab Eng</em>
+8:208-211, 2000.
+<li>
+Jung, T-P., Makeig, S., Colin Humphries, Te-Won Lee, Martin J.
+McKeown, Vicente Iragui, Terrence J. Sejnowski, Removing
+electroencephalographic artifacts by blind source separation. 
+<em>Psychophysiology</em> 37:163-178, 2000.
+<li> 
+ Makeig, S., Enghoff, S., Jung, T-P. and Sejnowski, T. J., Moving-window
+ ICA decomposition of EEG data reveals event-related  changes in
+ oscillatory brain activity. Proceedings of the Second International 
+ Workshop on Independent Component Analysis and Signal Separation, 
+ Helsinki, Finland, pp. 627-632, 2000.
+<li> 
+ Jung, T-P., Makeig, S., Lee, T-W., McKeown, M. L., Brown, G., Bell,
+ A. J. and Sejnowksi, T. J., Independent component analysis of
+ biomedical signals. Proceedings of the Second International
+ Workshop on Independent Component Analysis and Signal Separation,
+ Helsinki, Finland, pp. 633-644, 2000.
+<li> 
+ McKeown, M. J., Humphries, C., Iragui, V., and Sejnowski, T. J.,
+ Spatially fixed patterns account for the spike and wave components
+ in absence seizures, Brain Topography, 12(2):107-16 (1999).
+<li>
+ Jung T-P, Makeig S, Westerfield W, Townsend J, Courchesne E, and
+ Sejnowski TJ, "Removal of eye activity artifacts from visual
+ event-related potentials in normal and clinical subjects", 
+ Clinical Neurophysiology, in press.
+<li> 
+ Simon F. Giszter et al., abstract on frog EMG:
+ http://www-ncm.cs.umass.edu/abstracts/2000/238720.html
+<li>
+ Jung T-P, Makeig S, Westerfield M, Townsend J, Courchesne E, and
+ Sejnowski TJ,  "Analyzing and visualizing single-trial event-related
+ potentials," Advances in Neural Information Processing Systems
+ 11:118-124, 1999.
+<li> 
+</ul>
+<p>
+<b>For further information:</b>
+<p>
+<center>
+http://www.cnl.salk.edu/~scott/ica.readme.html
+<br>
+http://www.cnl.salk.edu/~tewon/ica_cnl.html
+<br>
+http://www.cnl.salk.edu/~scott/icafaq.html
+<br>
+http://www.cnl.salk.edu/~scott/icabib.html
+<p>
+Scott Makeig CNL / Salk Institute
+<br>
+August 19, 2000
+</center>
+<p>
+P.S. While many of the tools in this toolbox are specialized for 
+electrophysiological research, general interest in ICA is exploding.  
+Some of the ICA applications listed by users who have downloaded 
+the ICA/EEG Matlab toolbox: 
+<center>
+<p>
+    EEG Signal Processing; Nonlinear dynamics in EEG
+<br>
+    Analysis of EEG using the chaos theory
+<br>
+    EEG spatio-temporal analysis; EEG and cognitive processes
+<br>
+    Inverse problems in EEG, MEG;
+<br>
+    Sleep Research, EEG analysis, vigilance analysis;
+<br>
+    Sleep spindles; EEG Microarousals in sleep;
+<br>
+    Alertness monitoring 
+<br>
+    Wavelet analysis of EEG signals
+<br>
+    Autonomic nervous system & EEG, GSR
+<br>
+    Neurofeedback for children EEG
+<br>
+    EEG data from AD and VD patients
+<br>
+    MEG data on speech perception; 
+<br>
+    MEG and EEG; DC-Magnetometry
+<br>
+    MEG, Neural control and neural plasticity
+<br>
+    Auditory Evoked Potentials 
+<br>
+    Cognitive classification using ERPs
+<br>
+    Visual VEP/EEG with depth perception. 
+<br>
+    Single trial evoked potential detection 
+<br>
+    Motor potentials; EMG
+<br>
+    Eye movements
+<br>
+    Classical conditioning
+<br>
+    Auditory evoked response data from cochlear implant users. 
+<br>
+    Acoustic emissions
+<br>
+    PET; PET stimulation data;
+<br>
+    Functional brain imaging research
+<br>
+    fMRI & MEG integration
+<br>
+    fMRI, PET and EEG
+<br>
+    Visual processing using fMRI & MEG
+<br>
+    High Resolution ECG improvements using ICA
+<br>
+    Cardiac electrograms ECG; 
+<br>
+    EEG/EKG data analysis and modelling
+<br>
+    Epilepsy Research
+<br>
+    Brain-computer interface BCI
+<br>
+    Multi-electrode single-unit recordings in the CNS
+<br>
+    Population vectors from multineuron recordings 
+<br>
+    Optical imaging of visual cortex; 
+<br>
+    Separating out vascular motion from optical maps
+<br>
+    Multivariate hormonal dynamics
+<br>
+    Protein bioinformatics
+<br>
+    Nonstatonary astronomical time series
+<br>
+    Speech recognition; Speech in noise;
+<br>
+    Spectroscopic data
+<br>
+    Sound spectrograms
+<br>
+    Image processing and de-noising
+<br>
+    CCD imaging and sound separation
+<br>
+    Ultrasonic research
+<br>
+    Spacecraft fault detection/prediction; machine vibration signals
+<br>
+    In vivo and in vitro pharmacological applications
+<br>
+    Telecommunications; Multichannel transmission
+<br>
+    Control and adaptive systems
+<br>
+    Pattern recognition and learning
+<br>
+    Computational structural molecular biology
+<br>
+    Applied mathematics, ill-posed problems
+<br>
+    Nonlinear brain dynamics; 
+<br>
+    Motor control of Octopus
+<br>
+    Brain transplants, somatosensory plasticity
+<br>
+    New model of the synapses and endocrine factors
+<br>
+    Cognitive Neuroscience - signal and image processing
+<br>
+    Medical image analysis and pattern recognition
+<br>
+    Image processing; Image Denoising
+<br>
+    Hyperspectral visible and infrared data
+<br>
+    Eddy Current Sensors
+<br>
+    Neural Networks, Artificial Intelligence, Agent Based systems
+<br>
+    Statistics; Konnektionismus; neural networks
+<br>
+    Target tracking
+<br>
+    Neuro-fuzzy methods applied to nonlinear systems
+<br>
+    Human Engineering; Neuroengineering; 
+<br>
+    Finanical prediction; Data mining in finance; 
+<br>
+    Biocybernetics
+<br>
+    The world of ODE
+<br>
+    Ionospheric tomography 
+<br>
+    Ecological data analysis
+<br>
+    Hyperspectral geology
+<br>
+    Video understanding
+<br>
+    Sperm dynamics(!)
+<br>
+    Telepathy, etc.(?)
+<br>
+    Fun
+</center>

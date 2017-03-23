@@ -1,0 +1,217 @@
+% clear all
+% close all
+
+sjn='/storage/evgeny/data/project/gamma/data/';
+FileBase='ni04-20110503';%'g10-20130305';% 'g10-20130305'
+cd(['/storage/weiwei/data/', FileBase])
+load([FileBase, '.SICs.ch.1.32.fr.4.200.r4.0.mat'])
+cd([sjn, FileBase])
+FreqBins=Par.FreqBins;
+nfr=size(FreqBins,1);
+States={'RUN','REM'};% I need to think of what is the time window in ,'SWS'
+Freq=Par.FreqB;
+% load([FileBase, '.sts.RUN'])% AWK1
+% Period=g09_20120330_sts;
+Period=load([FileBase, '.sts.SWS']);
+Period2=load([FileBase, '.sts.RUN']);
+cPeriods=[Period2(Period2(:,1)>10^5,:);Period];
+Period=cPeriods;
+%%
+cd(['/storage/noriaki/data/processed/', FileBase])
+theta=GetThetaPhase(FileBase,Period);
+FS = 1250;
+nPeriod=ReshapePeriod(Period);
+%%
+
+r=Par.r;
+theta=Par.theta;
+A=Par.A;
+W=Par.W;
+tm=Par.tm;
+cthr=Par.cthr;
+HP=Par.HP;
+gCh=Par.gCh;
+lambda=Par.lambda;
+cd([sjn, FileBase])
+lfp=LoadBinary([FileBase '.lfpinterp'],gCh,64,2,[],[],Period)';
+%%
+cd(['/storage/weiwei/data/', FileBase])
+sname=sprintf([FileBase,'.rIC.SWS.HP%d.%d.mat'],HP([1 end]));
+if exist(sname,'file')
+    load(sname);
+else
+[~, A, W, m]=wKDICA(lfp',.9999,0,0,0);%,'W0
+figure;
+subplot(131);
+imagesc(A)
+subplot(132);
+imagesc(A(1:(end-2),:)+A(3:end,:)-2*A(2:(end-1),:))
+subplot(133)
+plot(bsxfun(@plus,bsxfun(@rdivide,A,sqrt(sum(A.^2,1))),1:size(A,2)))
+tm=input('which component is Vol-Con?');%1;%
+save(sname,'A','W','tm')
+end
+lfp=lfp-lfp*W(tm,:)'*A(:,tm)';
+%%
+usetime=StrongActivityPeriods(lfp);
+
+%%
+Periods=1:12500:(sum(usetime>0)-25000);
+nP=length(Periods);
+for kfr=5;%2:nfr
+    clclength=fix(1250/FreqBins(kfr,1)*1.5);
+nlfp=ButFilter(lfp,4,FreqBins(kfr,:)/625,'bandpass');
+nlfp=mkCSD(nlfp(usetime>0,:),r,gCh,HP,lambda,theta);
+gbsnm=S(kfr).gbsnm;
+% gbwnm=S(kfr).gbwnm;
+% refine components.
+%%
+[rfw, rfA]=RefineICsFrIC(nlfp,pinv(gbsnm)');
+nlfp=ButFilter(lfp,4,FreqBins(kfr,:)/625,'bandpass');
+S(kfr).rfw=rfw;
+S(kfr).rfA=rfA;
+nlfp=mkCSD(nlfp,r,gCh,HP,lambda,theta);
+%%
+nn=1;
+sig=[];
+mact=cell(2,1);
+        t=(-30):2:50;
+        ct=length(t);
+        Par.t=t;
+        %
+for kk=1:2
+    if kk==1;
+        icasig=pinv(gbsnm)*nlfp';
+        [msign,locs]=SinkLoc(gbsnm);
+        ncomps=size(icasig,1);
+        [S(kfr).sMI,dummy]=PairwiseInformation(nlfp,pinv(gbsnm)');
+        
+%     elseif kk==2
+%         icasig=pinv(gbwnm)*nlfp';
+%         [msign,locs]=SinkLoc(gbwnm);
+%         ncomps=size(icasig,1);
+%         [S(kfr).wMI,dummy]=PairwiseInformation(nlfp,pinv(gbwnm)');
+    else
+        icasig=rfw*nlfp';
+        [msign,locs]=SinkLoc(rfA);
+        ncomps=size(icasig,1);
+        [S(kfr).rMI,dummy]=PairwiseInformation(nlfp,rfw');
+    end
+    sig(kk).peak=findpeaks(-bsxfun(@times,icasig',msign));
+    sig(kk).mact=cell(ncomps,1);
+    for kc=1:ncomps
+        sig(kk).mact{kc}=zeros(ncomps,ct);%
+        taketime=bsxfun(@plus,sig(kk).peak(kc).loc((sig(kk).peak(kc).loc>30)& (sig(kk).peak(kc).loc<size(icasig,2)-50)),t);
+        for nkc=1:ncomps
+            tmp=icasig(nkc,:)';
+            sig(kk).mact{kc}(nkc,:)= mean(tmp(taketime),1);
+        end
+    end
+    
+end
+%
+S(kfr).sig=sig;
+% phasediff=angle(exp(i*bsxfun(@minus,S(kfr).thetaphase,Par.thetaphase)));
+% ncomps=size(gbsnm,2)+size(gbwnm,2)+size(rfA,2);
+% ui=zeros(2,ncomps);
+% up=zeros(2,ncomps);
+% for k=1:ncomps; [ui(1,k), up(1,k)]=UInd_KCItestnb(S(kfr).thetaphase(:,k),phasediff(:,k),.08);[ui(2,k),up(2,k)]=UInd_KCItestnb(Par.thetaphase,phasediff(:,k),.08);end;
+% S(kfr).ui=ui;
+% S(kfr).up=up;
+% fprintf('%.3f-',up(1,:))
+% fprintf('\n')
+% fprintf('%.3f-',up(2,:))
+% fprintf('\n')
+end
+%%
+cd(['/storage/weiwei/data/',FileBase])
+sname=sprintf([FileBase, '.thetaPhase.CSD.span.%d.%d.Ch.%d.%d.r%.1f.SWS.%d.mat'],theta([1 3]),HP([1 end]),r,cthr);
+save(sname,'S','Par')
+return
+cd ~/data/sm/4_16_05_merged/
+nlag=3;
+
+cnames={'pl','pci','cci','cpap'};
+nte=zeros(nfr,2,nlag);
+me=zeros(nfr,2,nlag);
+ste=zeros(nfr,2,nlag);
+pval=zeros(nfr,2,nlag);
+h=cell(nfr,2,nlag);
+pci=zeros(nfr,2,nlag);
+pst=zeros(nfr,2,nlag);
+cst=zeros(nfr,2,nlag);
+cci=zeros(nfr,2,nlag);
+cpap=zeros(nfr,2,nlag);
+NI=zeros(nfr,2,nlag);
+NIP=zeros(nfr,2,nlag);
+A=zeros(nfr,2,nlag);
+Noi_dist=cell(nfr,2,nlag);
+par.width=0;
+tRes=zeros(nBursts,4,nfr);
+for k=1:nfr
+    wn = FreqBins(k,:)/(FS/2);
+    [z, p, kk] = butter(4,wn,'bandpass');
+    [b, a]=zp2sos(z,p,kk);
+    filtLFP_temp = filtfilt(b, a, lfp);
+    filtLFP_temp=hilbert(filtLFP_temp);
+    sl=ceil(FS/FreqBins(k,1));
+    for m=1:2
+        if m==2
+            filtLFP_temp=filtLFP_temp(:,[2,1]);
+        end
+        % this is only for the two
+        a=filtLFP_temp(:,1);
+        b=filtLFP_temp(:,2);
+        tRes(:,1,k)=nRes+7-sl+clocalmin1(a(bsxfun(@plus,nRes,(6-sl):5)),sl-4);
+        tRes(:,2,k)=tRes(:,1,k)+1-sl+clocalmin1(b(bsxfun(@plus,tRes(:,1,k),(-sl):(-1))),sl);
+        tRes(:,3,k)=tRes(:,1,k)-3-sl+clocalmin1(a(bsxfun(@plus,tRes(:,1,k),(-4-sl):(-5))),sl);
+        tRes(:,4,k)=tRes(:,2,k)-3-sl+clocalmin1(b(bsxfun(@plus,tRes(:,2,k),(-4-sl):(-5))),sl);
+        
+        for n=1:nlag
+            %             pl(k,m,n)=fangle(filtLFP_temp(tRes-stp*(nlag-n+1),2))'*fangle(filtLFP_temp(tRes,1))/nb;
+            if n<2
+                ny=1;
+                nx=2*n;
+            else
+                ny=3;
+                nx=4;
+            end
+            X=zscore(abs(filtLFP_temp(tRes(:,nx,k),2)));
+            Y=zscore(abs(filtLFP_temp(tRes(:,ny,k),1)));
+            Z=zscore(abs(filtLFP_temp(tRes(:,nx,k),1)));
+            [oci, Noi_dist{k,m,n}]=...
+                KCIcausal_new(X,Y,Z,par,0,0);%
+            pci(k,m,n)=oci(1);
+            pst(k,m,n)=oci(2);
+            cst(k,m,n)=oci(3);
+            cci(k,m,n)=oci(5);
+            cpap(k,m,n)=oci(7);
+            [nte(k,m,n), me(k,m,n), ste(k,m,n), pval(k,m,n), h{k,m,n}, ~, ~, ~, ~]=nTE(Y,X,Z,400);
+            [Ress, A(k,m,n)]=BasicRegression(X,Y);
+            [NIP(k,m,n),NI(k,m,n)]=UInd_KCItest(X, Ress);
+            fprintf('*')
+        end
+        fprintf('inv')
+    end
+    fprintf('\n')
+    %     end
+    clear filtLFP_temp
+end
+clear lfp
+cd ~/data/g09_20120330/
+% datat=sprintf('compLFP%d-%d.%dHz.RUN3.basictests.amp.mat',Channels,cfrequency);
+save(datat)%['8_9nitry', labels{ln}])% 724all bursts 
+
+
+figure
+%     datat=sprintf('compLFP%d-%d.%dHz.RUN3.basictests.amp.mat',Channels,cfrequency);
+%     load(datat)
+%     subplot(1,3,sstk);
+    plot(1:3,sq(cci(:,1,:))');
+    legend('5Hz','10Hz','15Hz','20Hz')
+    hold on;
+    plot(1:3,sq(cci(:,2,:))','+-')
+    plot([1 3],[.05 .05],'k--');
+    axis tight
+    set(gca,'XTick',1:3,'XTicklabel',{'C(0)>E(0)','C(-1)>E(0)','C(-1)>E(-1)'})
+    title('RUN')

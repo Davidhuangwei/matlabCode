@@ -1,0 +1,38 @@
+WHAT'S NEW WITH  glmlab  VERSION 2
+(that rhymes--I wonder what will happen with version 3?)
+
+glmlab version 2 is much better than version 1.  There are many
+improvements, most of which aren't visible to the user.  But here
+are some of the major changes that come with version 2 (a list of
+all changes can be found in CHANGES.txt):
+
+From 2.3 to 2.3.1
+* Fixed problem with MATLAB v5.2 that weren't in MATLAB v5.0
+* Fixed an obscure bug where MATLAB complained about a COLON operator.
+* Some other bugs fixes
+* Updated web reference to point to new glmlab Home Page.
+* Quicker and smoother start
+* Tooltips added
+
+To 2.0
+* Interactive variable selection windows
+* Change fitting parameters in window, not in the file
+* The inverse Gaussian distribution is now included.
+* An on-line manual is available, accessable via glmlab.
+* A demo is included that runs in the gui window.
+* Dialog boxes are used whenever possible.
+* The Residual Plots have been mobved to a pull-down menu.
+* The A-variable window allows multi-line strings; indeed, this
+  is how glmlab handles them now.
+* The standard errors of the parameter estimates are now
+  returned in a separate variable SERRORS.
+* The value of the linear predictor (usually called  eta) is
+  returned as LINPRED.
+* The workspace has been tidied by using the UserData property
+  of MATAB, rather than having the workspace all cluttered up by
+  internal variables.
+* Fixed some bugs (and, unfortunately, probably introduced some
+  creative new ones).
+
+Peter Dunn
+02 March 1998

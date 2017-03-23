@@ -1,0 +1,31 @@
+% function varargout = BsTest(centroidFunc,testVals,nResamp,bootFunc,resampArgNum,varargin)
+% calculates the probability (p-value) with which values of testVals or
+% further from the centriod appear in the resampled bootFunc distribution
+% BsFunc 
+% tag:bootstrap
+% tag:resampling
+% tag:error bars
+function varargout = BsTest(centroidFunc,testVals,nResamp,bootFunc,resampArgNum,varargin)
+varargout = cell(nargout,1);
+bsData = cell(nargout,1);
+[bsData{:}] = BsFunc(nResamp,bootFunc,resampArgNum,varargin{:});
+for j=1:length(bsData)
+%    varargout{j} = squeeze(centroidFunc(bsData{j}));
+    for k=1:size(squeeze(shiftdim(bsData{j},1)),1);
+%         [n x] = hist(bsData{j}(:,k),100);
+%         confBars(:,k) = cat(1,x(100-percConf+1),x(percConf));
+        testP = [];
+        for m=1:length(testVals)
+            if testVals(m) < squeeze(centroidFunc(bsData{j})); % varargout{j}
+                testP = cat(1,testP,(1 + sum(bsData{j}(:,k) < testVals))/nResamp);
+            else
+                testP = cat(1,testP,(1 + sum(bsData{j}(:,k) > testVals))/nResamp);
+            end
+        end
+        % multiplied by 2 to adjust for 2-tailed test (probably not
+        % right, but conservative)
+        confBars(:,k) = 2.*testP;
+    end
+    varargout{j} = cat(1,varargout{j},confBars);
+end
+return

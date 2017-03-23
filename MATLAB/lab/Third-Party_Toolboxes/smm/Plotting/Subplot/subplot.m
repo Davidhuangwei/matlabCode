@@ -1,0 +1,94 @@
+function handle = subplot(varargin)
+% Sean's hack of subplot to add the 'align' and 'replace' options to 
+% the subplot call.
+%
+% SUBPLOT Create axes in tiled positions.
+%     H = SUBPLOT(m,n,p), or SUBPLOT(mnp), breaks the Figure window
+%     into an m-by-n matrix of small axes, selects the p-th axes for 
+%     for the current plot, and returns the axis handle.  The axes 
+%     are counted along the top row of the Figure window, then the
+%     second row, etc.  For example,
+%   
+%         SUBPLOT(2,1,1), PLOT(income)
+%         SUBPLOT(2,1,2), PLOT(outgo)
+%   
+%     plots income on the top half of the window and outgo on the
+%     bottom half. If the CurrentAxes is nested in a uipanel the
+%     panel is used as the parent for the subplot instead of the
+%     current figure.
+%   
+%     SUBPLOT(m,n,p), if the axis already exists, makes it current.
+%     SUBPLOT(m,n,p,'replace'), if the axis already exists, deletes it and
+%     creates a new axis.
+%     SUBPLOT(m,n,p,'v6') places the axes so that the plot boxes 
+%     are aligned, but does not prevent the labels and ticks from 
+%     overlapping. Saved subplots created with the 'v6' option are 
+%     compatible with MATLAB 6.5 and earlier versions. 
+%     SUBPLOT(m,n,P), where P is a vector, specifies an axes position
+%     that covers all the subplot positions listed in P.
+%     SUBPLOT(H), where H is an axis handle, is another way of making
+%     an axis current for subsequent plotting commands.
+%  
+%     SUBPLOT('position',[left bottom width height]) creates an
+%     axis at the specified position in normalized coordinates (in 
+%     in the range from 0.0 to 1.0).
+%  
+%     SUBPLOT(m,n,p, PROP1, VALUE1, PROP2, VALUE2, ...) sets the
+%     specified property-value pairs on the subplot axis. To add the
+%     subplot to a specific figure pass the figure handle as the
+%     value for the 'Parent' property.
+%  
+%     If a SUBPLOT specification causes a new axis to overlap an
+%     existing axis, the existing axis is deleted - unless the position
+%     of the new and existing axis are identical.  For example,
+%     the statement SUBPLOT(1,2,1) deletes all existing axes overlapping
+%     the left side of the Figure window and creates a new axis on that
+%     side - unless there is an axes there with a position that exactly
+%     matches the position of the new axes (and 'replace' was not specified),
+%     in which case all other overlapping axes will be deleted and the 
+%     matching axes will become the current axes.
+%     
+%     SUBPLOT(111) is an exception to the rules above, and is not
+%     identical in behavior to SUBPLOT(1,1,1).  For reasons of backwards
+%     compatibility, it is a special case of subplot which does not
+%     immediately create an axes, but instead sets up the figure so that
+%     the next graphics command executes CLF RESET in the figure
+%     (deleting all children of the figure), and creates a new axes in
+%     the default position.  This syntax does not return a handle, so it
+%     is an error to specify a return argument.  The delayed CLF RESET
+%     is accomplished by setting the figure's NextPlot to 'replace'.
+%  
+%     Be aware when creating subplots from scripts that the Position
+%     property of subplots is not finalized until either a drawnow
+%     command is issued, or MATLAB returns to await a user command. 
+%     That is, the value obtained for subplot i by the command 
+%     get(h(i),'Position') will not be correct until the script
+%     refreshes the plot or exits. 
+%  
+%     Backwards compatibility 
+%     Use the SUBPLOT 'v6' option and save the figure with the 'v6' 
+%     option when you want to be able to load a FIG-file containing 
+%     subplots into MATLAB Version 6.5 or earlier. 
+%  
+%     See also  GCA, GCF, AXES, FIGURE, UIPANEL
+% 
+%     Reference page in Help browser
+%        doc subplot
+%        
+
+v = version;
+loc = which('subplot');
+if num2str(v(1)) > 6
+    rmpath(loc(1:end-9))
+    cat(1,varargin{:},{'align'},{'replace'});
+    handle = subplot(varargin{:});
+    addpath(loc(1:end-9))
+else
+    rmpath(loc(1:end-9))
+    handle = subplot(varargin{:});
+    addpath(loc(1:end-9))
+end
+if nargout == 0
+    clear handle;
+end
+ 

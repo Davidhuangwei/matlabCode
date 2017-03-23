@@ -1,0 +1,28 @@
+% function varargout = BsFunc(nResamp,func,resampArgNum,varargin)
+% calculates the bootstrap resampling for the passed data operated by the
+% passed function. 
+% tag:bootstrap
+% tag:resampling
+function varargout = BsFunc(nResamp,func,resampArgNum,varargin)
+varargout = cell(nargout,1);
+temp = cell(nargout,1);
+% saveData = zeros(nResamp,length(varargin{resampArgNum}));
+origData = varargin{resampArgNum};
+if iscell(origData)
+    origData = origData{1};
+end
+
+for j=1:nResamp
+    randData = randsample(origData,length(origData),'true');
+%     saveData = cat(1,saveData,shiftdim(randData,-1));
+    varargin{resampArgNum} = randData;
+    [temp{:}] = func(varargin{:});
+    for k=1:length(temp)
+        varargout{k} = cat(1,varargout{k},shiftdim(squeeze(temp{k}),-1));
+    end
+end
+for k=1:length(varargout)
+    varargout{k} = squeeze(varargout{k});
+end
+% keyboard
+return

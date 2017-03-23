@@ -1,0 +1,3 @@
+
+badchannels = load('badchannels.dat');
+

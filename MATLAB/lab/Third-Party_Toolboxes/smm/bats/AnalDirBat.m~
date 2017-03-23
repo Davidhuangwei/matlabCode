@@ -1,0 +1,9 @@
+function varargout = AnalDirBat(analDirs,filesNameCell,funcName,varargin)
+
+cwd = pwd;
+for j=1:length(analDirs)
+    cd(analDirs{j})
+    fileBaseCell = {};
+    for k=1:length(filesNameCell)
+        fileBaseCell = cat(1,fileBaseCell,LoadVar(['FileInfo/' filesNameCell{k}]));
+    end

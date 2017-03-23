@@ -1,0 +1,1 @@
+function put_up_phase(outputmat,imagename,phase_type)figureif strcmp(phase_type,'cos')scale = 1;elsescale = pi;endimagesc(outputmat,[-1 1]*scale)hotter = hot;colormap([hotter(33:64,:)])hold oncontour(outputmat,[0:0.2:1]*scale,'k-')contour(outputmat,[0:-0.2:-1]*scale,'k--')title(imagename)axis('off')colorbar

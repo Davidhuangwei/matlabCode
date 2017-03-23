@@ -1,0 +1,6 @@
+
+This package contains a small example of the usage of the
+Nonlinear factor analysis Matlab package.
+
+Just check that you have the Nlfa package available in your Matlab
+path and type 'run_helix' to start the show.

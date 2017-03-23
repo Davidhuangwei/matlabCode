@@ -1,0 +1,101 @@
+% SpikeDetect(FileBase)
+%
+% This script reads FileBase.fil and FileBase.par.  It
+% detects spikes, and writes FileBase.res.1 (eventually
+% will deal with multi-tetrode recordings).
+
+function SpikeDetect(FileBase)
+
+Par = LoadPar(strcat(FileBase, '.par'));
+
+% PARAMETERS
+BufferSize = 1000000; % samples to process at once
+Threshold = 4; % times standard deviation
+SpikeSize = 10; % it will look this many samples on each side to realign the spike
+
+FilFp = fopen(strcat(FileBase, '.fil'), 'r');
+ResFp = fopen(strcat(FileBase, '.res'), 'w');
+%DeCovFp = fopen('decov.fil', 'w');
+
+BufferStart = 0;
+CovMat = 0;
+
+while 1
+	[Buffer, nRead] = fread(FilFp, [Par.nChannels, BufferSize], 'short');
+	
+	% Calculate covariance matrix if none exists
+	if (CovMat == 0)
+		CovMat = cov(Buffer');
+	end;
+
+	% Calculate decorrelated signal	
+	DeCov =(CovMat^-0.5)*Buffer;
+%	fwrite(DeCovFp, 100*DeCov, 'short');
+	
+	% find threshold crossings on any channel
+	AllThresholdCrossings = find(DeCov<-Threshold);
+	
+	% This produces a 1D array that indexes DeCov(:).
+	% To get sample times we need to integer divide by the number of channels
+	% and take unique() because it may cross on more than 1 channel
+	ThresholdCrossings = 1+unique(floor((AllThresholdCrossings-1)/Par.nChannels));
+	
+	
+	% We want to restrict to all those threshold crossing points that
+	% are local minima of the sum of all 4 channels
+
+	ChannelSum = sum(Buffer, 1);
+	
+	% if Threshold Crossings at start or end we need to deal with them	
+	StartMax = 0;
+	if (ThresholdCrossings(1) == 1)
+		if ChannelSum(1) < ChannelSum(2)
+			StartMax = 1;
+		end;
+		ThresholdCrossings(1) = [];
+	end;
+	
+	EndMax = 0;
+	if (ThresholdCrossings(end) == BufferSize)
+		if ChannelSum(BufferSize) <= ChannelSum(BufferSize-1)
+			EndMax = 1;
+		end;
+		ThresholdCrossings(end) = [];
+	end;
+	
+	% now find the rest ...	
+	LocMax = find(...
+		ChannelSum(ThresholdCrossings)	< ChannelSum(ThresholdCrossings+1) ...
+		& ChannelSum(ThresholdCrossings) <= ChannelSum(ThresholdCrossings-1) ...
+	);
+	
+	SpikeTimes = ThresholdCrossings(LocMax);
+	
+	% add start and end points, if necessary
+	if StartMax
+		SpikeTimes = [1, SpikeTimes];
+	end;
+	if EndMax
+		LocMax = [SpikeTimes, BufferSize];
+	end;
+	
+%	clf;
+%	hold on
+%	plot(Buffer');
+%	axis auto;
+%	for x=ThresholdCrossings(LocMax)
+%		line([x x], get(gca, 'ylim'), 'color', 'k');
+%	end;
+%	pause
+	
+	% Write to .res file
+	fprintf(ResFp, '%d\n', BufferStart+SpikeTimes);
+%	fprintf(ResFp, '%d\n', ThresholdCrossings);
+		
+	if (nRead<BufferSize*Par.nChannels) break; end;
+	BufferStart = BufferStart + BufferSize
+end;
+
+fclose(FilFp);
+fclose(ResFp);
+%fclose(DeCovFp);

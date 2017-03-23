@@ -1,0 +1,841 @@
+trialDesig.maze = cat(1,{'alter',[1 0 1 0 0 0 0 0 0 0 0 0 0],0.6,[0 0 0 1 1 1 1 1 1],0.5},...
+    {'circle',[1 0 1 0 0 0 0 0 0 0 0 0 0],0.6,[0 0 0 0 0 1 1 1 1],0.5});
+trialDesig.rem =  {'REM',[1 1 1 1 1 1 1 1 1 1 1 1 1],1,[1 1 1 1 1 1 1 1 1],1}
+ files = [LoadVar('RemFiles');LoadVar('MazeFiles')];
+
+%fileExt = '_LinNearCSD121.csd'
+fileExt = '.eeg'
+interpFunc = 'linear';
+selChans = load(['ChanInfo/SelectedChannels' fileExt '.txt']);
+chanMat = LoadVar(['ChanInfo/ChanMat' fileExt '.mat']);
+badChans = load(['ChanInfo/BadChan' fileExt '.txt']);
+analDir = ['RemVsRun_noExp_MinSpeed0Win1250' fileExt];
+anatCurvesName = 'ChanInfo/AnatCurves.mat';
+offset = load(['ChanInfo/OffSet' fileExt '.txt']);
+normBool = 1;
+fs = LoadField([files(1,:) '/' analDir '/powSpec.fo']);
+maxFreq = 150;
+thetaFreqRange = [6 12];
+gammaFreqRange = [65 100];
+%y = atanh(x*2-1)./(max(atanh(x*2-1))*2) + 0.5
+
+
+data = [];
+%data = LoadDesigVar(files,analDir,'powSpec.yo' ,trialDesig);
+data1 = LoadDesigVar(files,analDir,'thetaPowPeak4-12Hz' ,trialDesig);
+data1 = LoadDesigVar(files,analDir,'gammaPowIntg60-120Hz' ,trialDesig);
+data2 = LoadDesigVar(files,analDir,'thetaFreq' ,trialDesig);
+
+data4 = LoadDesigVar(files,analDir,'powSpec.yo' ,trialDesig);
+for j=1:size(data2.rem,1)
+    for k=1:size(data2.rem,2)
+        data5.rem(j,k) = data4.rem(j,k,find(abs(fs-2.*data2.rem(j,k))==min(abs(fs-2.*data2.rem(j,k)))));
+    end
+end
+
+figure(2)
+clf
+for j=1:length(selChans)
+    subplot(length(selChans),1,j)
+    %plot(data2.rem(:,34),data1.rem(:,selChans(j)),'.')
+    hist(data1.rem(:,selChans(j)))
+end
+
+data.rem = cat(2,data1.rem,data2.rem,data2.rem);
+[COEFF, SCORE, LATENT, TSQUARED]=princomp(junk,'econ');
+
+[COEFF, SCORE, LATENT, TSQUARED]=princomp(data4.rem);
+figure(6)
+plot(1-cumsum(LATENT./sum(LATENT)),'.')
+figure(5)
+for j=1:20
+    for k=1:20
+        clf
+        hold on
+        plot(SCORE(idx==1,j),SCORE(idx==1,k),'b.')
+        plot(SCORE(idx==2,j),SCORE(idx==2,k),'r.')
+        fprintf('j=%i,k=%i',j,k)
+        in = input('anything quits:','s');
+        if ~isempty(in)
+            break
+        end
+    end
+    if ~isempty(in)
+        break
+    end
+end
+
+chan = 39;
+figure(4)
+clf
+%idx = kmeans(data.rem,2);
+idx = ones(size(data.rem,1),1);
+idx(find(data2.rem(:,chan)>=8)) = 2;
+subplot(2,1,1)
+hold on
+plot(data1.rem(idx==1,chan),data2.rem(idx==1,chan),'b.')
+plot(data1.rem(idx==2,chan),data2.rem(idx==2,chan),'r.')
+% idx = kmeans(SCORE(:,1:20),2);
+% subplot(2,1,2)
+% hold on
+% plot(data1.rem(idx==1,chan),data2.rem(idx==1,chan),'b.')
+% plot(data1.rem(idx==2,chan),data2.rem(idx==2,chan),'r.')
+
+figure(3)
+clf
+data3 = LoadDesigVar(files,analDir,'thetaPowPeak4-12Hz' ,trialDesig);
+subplot(2,1,1)
+tonicRem = data3.rem(idx==1,:);
+phasicRem = data3.rem(idx==2,:);
+imagesc(Make2DPlotMat(median(phasicRem)-median(tonicRem),chanMat,badChans,interpFunc));
+PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+set(gca,'clim',[-2.5 2.5])
+colorbar
+data3 = LoadDesigVar(files,analDir,'gammaPowIntg60-120Hz' ,trialDesig);
+subplot(2,1,2)
+tonicRem = data3.rem(idx==1,:);
+phasicRem = data3.rem(idx==2,:);
+imagesc(Make2DPlotMat(median(phasicRem)-median(tonicRem),chanMat,badChans,interpFunc));
+PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+set(gca,'clim',[-2.5 2.5])
+colorbar
+
+
+
+
+
+% data = [];
+% for j=1:length(selChans)
+%     selChanNames{j} = ['ch' num2str(selChans(j))];
+%     data.(selChanNames{j}) = LoadDesigVar(files,analDir,['thetaPhaseMean6-12Hz.' selChanNames{j}] ,trialDesig);
+% end
+chan = 59;
+filtMat = [1 2 2 1]./sum([1 2 2 1])
+data1conv = conv(filtMat,data1.rem(:,chan));
+data2conv = conv(filtMat,data2.rem(:,chan));
+figure(2)
+clf
+subplot(2,1,1)
+hold on
+plot(length(filtMat):length(data1conv)-length(filtMat),data1conv(length(filtMat):end-length(filtMat)),'r')
+subplot(2,1,2)
+hold on
+plot(data2conv(length(filtMat):end-length(filtMat)),'r')
+
+temp = [];
+tempData1 = data1.rem(:,chan);
+tempData2 = data2.rem(:,chan);
+tempData3 = data5.rem(:,chan);
+temp1 = LocalMinima(-tempData1,4,-76);
+temp2 = LocalMinima(-tempData2,4,-8);
+temp3 = LocalMinima(-tempData3,4,-60);
+%temp = intersect(temp1,temp2);
+tempA = union(union(union(intersect(temp1,temp2),...
+    union(intersect(temp1+1,temp2),intersect(temp1,temp2+1))),...
+    union(intersect(temp1+2,temp2),intersect(temp1,temp2+2))),...
+    union(intersect(temp1+3,temp2),intersect(temp1,temp2+3)));
+tempB =     union(intersect(temp1,temp3),...
+    union(intersect(temp1+1,temp3),intersect(temp1,temp3+1)));
+temp = intersect(tempA,tempB)
+%tempC = find(tempData1>=80);
+tempC = find(tempData2>=9);
+temp = union(temp,tempC)
+figure(2)
+clf
+subplot(3,1,1)
+hold on
+plot(data1.rem(:,chan))
+plot(temp,data1.rem(temp,chan),'r.')
+
+subplot(3,1,2)
+hold on
+plot(data2.rem(:,chan))
+plot(temp,data2.rem(temp,chan),'r.')
+
+subplot(3,1,3)
+hold on
+plot(data5.rem(:,chan))
+plot(temp,data5.rem(temp,chan),'r.')
+
+
+figure(1)
+clf
+subplot(2,2,1)
+hold on
+plot(data1.rem(:,chan),data2.rem(:,chan),'b.')
+plot(data1.rem(temp,chan),data2.rem(temp,chan),'r.')
+subplot(2,2,2)
+hold on
+plot(data1.rem(:,chan),data5.rem(:,chan),'b.')
+plot(data1.rem(temp,chan),data5.rem(temp,chan),'r.')
+subplot(2,2,3)
+hold on
+plot(data2.rem(:,chan),data5.rem(:,chan),'b.')
+plot(data2.rem(temp,chan),data5.rem(temp,chan),'r.')
+
+
+figure(3)
+clf
+hold on
+
+
+
+%data3 = LoadDesigVar(files,analDir,'thetaPowPeak4-12Hz' ,trialDesig);
+data3 = LoadDesigVar(files,analDir,'gammaPowIntg60-120Hz' ,trialDesig);
+figure(3)
+clf
+tonicRem = data3.rem(setdiff(1:length(data3.rem),temp),:);
+phasicRem = data3.rem(temp,:);
+imagesc(Make2DPlotMat(median(phasicRem)-median(tonicRem),chanMat,badChans,interpFunc));
+PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+set(gca,'clim',[-1.75 1.75])
+colorbar
+
+
+% subplot(2,1,1)
+% imagesc(Make2DPlotMat(mean(tonicRem),chanMat,badChans,interpFunc));
+% %set(gca,'clim',[73 85])
+% colorbar
+% subplot(2,1,2)
+% imagesc(Make2DPlotMat(,chanMat,badChans,interpFunc));
+% %set(gca,'clim',[73 85])
+% colorbar
+
+
+
+figure(1)
+chan = 62;
+for j=1:min([size(data.maze,1) size(data.rem,1)]);
+    clf
+    hold on
+    plot(fs,squeeze(data.maze(j,chan,:)),'b')
+    plot(fs,squeeze(data.rem(j,chan,:)),'r')
+    in = input('anything breaks:','s')
+    if ~isempty(in)
+        break
+    end
+end
+
+figure(1)
+clf
+for j=1:length(selChans)
+    chan = selChans(j);
+    subplot(length(selChans),1,j)
+    hold on
+    plot(fs,squeeze(mean(data.maze(:,chan,:))),'b')
+    plot(fs,squeeze(mean(data.rem(:,chan,:))),'r')
+%     plot(fs,squeeze(mean(data.maze(:,chan,:))+std(data.maze(:,chan,:))),'--b')
+%     plot(fs,squeeze(mean(data.rem(:,chan,:))+std(data.rem(:,chan,:))),'--r')
+%     plot(fs,squeeze(mean(data.maze(:,chan,:))-std(data.maze(:,chan,:))),'--b')
+%     plot(fs,squeeze(mean(data.rem(:,chan,:))-std(data.rem(:,chan,:))),'--r')
+    set(gca,'xlim',[0 150],'ylim',[40 90])
+end
+
+figure(4)
+mazeRegions = fieldnames(data);
+for k=1:30
+    clf
+    for j=1:length(mazeRegions)
+        subplot(1,length(mazeRegions),j)
+        hold on
+        grid on
+        for m=1:length(selChans)
+            plot(squeeze(data.(mazeRegions{j})(k,selChans(m),:))-m*5000)
+        end
+        title(mazeRegions{j})
+    end
+    in = input('anything quits:','s')
+    if ~isempty(in)
+        break
+    end
+end
+
+
+figure(1)
+clf
+colormap(LoadVar('CircularColorMap.mat'))
+refChans = fieldnames(data);
+for j=1:length(refChans)
+    mazeRegions = fieldnames(data.(refChans{j}));
+    for k=1:length(mazeRegions)
+        subplot(length(refChans),length(mazeRegions),(j-1)*length(mazeRegions)+k)
+        imagesc(Make2DPlotMat(angle(mean(data.(refChans{j}).(mazeRegions{k}))),chanMat,badChans,interpFunc));
+        colorbar
+        PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+        if k==1
+            ylabel(refChans{j})
+        end
+        if j==1
+            title(mazeRegions{k})
+        end
+    end
+end
+
+junk = cat(2,data.(refChans{2}).(mazeRegions{1})(:,37),data.(refChans{2}).(mazeRegions{2})(:,37));
+junk = cat(2,data.(refChans{2}).(mazeRegions{1})(:,37),data.(refChans{2}).(mazeRegions{2})(:,37));
+
+
+figure(2)
+clf
+chan = 48;
+%plotColors = ['b','r','g','k'];
+plotColors = [0 0 1;1 0 0;0 1 0;0 0 0];
+colormap(LoadVar('ColorMapSean6.mat'))
+refChans = fieldnames(data);
+for j=1:length(refChans)
+    mazeRegions = fieldnames(data.(refChans{j}));
+    allReg = [];
+    for k=1:length(mazeRegions)
+        %meanReg(k) = mean(data.(refChans{j}).(mazeRegions{k}));
+        allReg = cat(1,allReg,data.(refChans{j}).(mazeRegions{k}));
+    end
+    size(allReg);
+        angle(mean(allReg(:,chan)));
+         subplot(length(refChans),1,j)
+         get(gca,'colororder');
+         temp2 = [];
+   for k=1:length(mazeRegions)
+        %subplot(length(refChans),length(mazeRegions),(j-1)*length(mazeRegions)+k)
+        temp = angle(data.(refChans{j}).(mazeRegions{k}))-repmat(angle(mean(allReg)),size(data.(refChans{j}).(mazeRegions{k}),1),1);
+        temp = angle((complex(cos(temp),sin(temp))));
+        temp2 = cat(2,temp2,permute(temp,[1 3 2]));
+    end
+        hist(temp2(:,:,chan),5,1)
+         %set(gca,'colororder',plotColors)
+        %imagesc(Make2DPlotMat(temp,chanMat,badChans));
+        %set(gca,'clim',[-pi/8 pi/8])
+        set(gca,'xlim',[-pi pi],'ylim',[0 25]);
+        %colorbar
+        %PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+        %if k==1
+            ylabel(refChans{j})
+        %end
+        %if j==1
+        %    title(mazeRegions{k})
+        %end
+    %end
+end
+
+
+figure(3)
+clf
+colormap(LoadVar('ColorMapSean6.mat'))
+refChans = fieldnames(data);
+for j=1:length(refChans)
+    mazeRegions = fieldnames(data.(refChans{j}));
+    allReg = [];
+    for k=1:length(mazeRegions)
+        %meanReg(k) = mean(data.(refChans{j}).(mazeRegions{k}));
+        allReg = cat(1,allReg,data.(refChans{j}).(mazeRegions{k}));
+    end
+    for k=1:length(mazeRegions)
+        subplot(length(refChans),length(mazeRegions),(j-1)*length(mazeRegions)+k)
+        temp = angle(data.(refChans{j}).(mazeRegions{k}))-repmat(angle(mean(allReg)),size(data.(refChans{j}).(mazeRegions{k}),1),1);
+        temp = angle(mean(complex(cos(temp),sin(temp))));
+        imagesc(Make2DPlotMat(temp./pi.*360,chanMat,badChans,interpFunc));
+        set(gca,'clim',[-50 50]);
+        colorbar
+        PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+        if k==1
+            ylabel(refChans{j})
+        end
+        if j==1
+            title(mazeRegions{k})
+        end
+    end
+end
+
+figure(2)
+clf
+colormap(LoadVar('ColorMapSean6.mat'))
+refChans = fieldnames(data);
+for j=1:length(refChans)
+    mazeRegions = fieldnames(data.(refChans{j}));
+    allReg = [];
+    for k=1:length(mazeRegions)
+        allReg = cat(1,allReg,data.(refChans{j}).(mazeRegions{k}));
+    end
+    size(allReg);
+        angle(mean(allReg(:,37)));
+    for k=1:length(mazeRegions)
+        subplot(length(refChans),length(mazeRegions),(j-1)*length(mazeRegions)+k)
+        rose(angle(data.(refChans{j}).(mazeRegions{k})(:,34))-angle(mean(allReg(:,34))),40);
+        if k==1
+            ylabel(refChans{j})
+        end
+        if j==1
+            title(mazeRegions{k})
+        end
+    end
+end
+
+
+
+plot(real(data.(refChans{j}).(mazeRegions{k})(:,37)),imag(data.(refChans{j}).(mazeRegions{k})(:,37)),'.')
+
+
+allThetaMed = [];
+allGammaMed = [];
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        dataAtanh.(selChanNames{j}).(fields{k}) = atanh((data.(selChanNames{j}).(fields{k})-0.5)*1.999);
+        dataAtanhSq.(selChanNames{j}).(fields{k}) = atanh(((data.(selChanNames{j}).(fields{k})).^2-0.5)*1.999);
+        %thetaMed.(selChanNames{j}).(fields{k}) = squeeze(atanh((median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=thetaFreqRange(1) & fs<=thetaFreqRange(2))),3)-0.5)*1.999));
+        %thetaMed.(selChanNames{j}).(fields{k}) = squeeze(median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=thetaFreqRange(1) & fs<=thetaFreqRange(2))),3));
+        %thetaMed.(selChanNames{j}).(fields{k}) = squeeze(median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=thetaFreqRange(1) & fs<=thetaFreqRange(2))),3));
+        %allThetaMed = cat(1,allThetaMed,thetaMed.(selChanNames{j}).(fields{k}));
+        %gammaMed.(selChanNames{j}).(fields{k}) = squeeze(atanh((median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=gammaFreqRange(1) & fs<=gammaFreqRange(2))),3)-0.5)*1.999));
+        %gammaMed.(selChanNames{j}).(fields{k}) = squeeze(median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=gammaFreqRange(1) & fs<=gammaFreqRange(2))),3));
+        %gammaMed.(selChanNames{j}).(fields{k}) = squeeze(median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=gammaFreqRange(1) & fs<=gammaFreqRange(2))),3));
+        %allGammaMed = cat(1,allGammaMed,gammaMed.(selChanNames{j}).(fields{k}));           
+    end
+end
+speed = LoadDesigVar(files,analDir,'speed.p0',trialDesig);
+accel = LoadDesigVar(files,analDir,'accel.p0',trialDesig);
+plotColors = [0 0 1;1 0 0;0 1 0;0 0 0];
+clf
+f = 37;
+selChans2 = [40 53 55 57 46 79];
+for j=1:length(selChans)
+    for k=1:length(selChans2)
+        subplot(length(selChans),length(selChans2),(k-1)*length(selChans)+j);
+        hold on
+        fields = fieldnames(data.(selChanNames{j}));
+        for m=1:length(fields)
+            plot(accel.(fields{m}),data.(selChanNames{j}).(fields{m})(:,selChans2(k),f),'.','color',plotColors(m,:));
+        end
+        if k==1
+            title(selChanNames{j});
+        end
+        if j==1
+            ylabel(num2str(selChans2(k)));
+        end
+        %ylabel(selChanNames{j});
+        %title(num2str(selChans2(k)));
+        %set(gca,'xlim',[0 150],'ylim',[-2 3]);
+        %set(gca,'xlim',[0 150])
+        set(gcf,'name',num2str(fs(f)));
+    end
+end
+
+
+
+
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        sigCoh.(selChanNames{j}).(fields{k}) = atanh((data.(selChanNames{j}).(fields{k})-0.5)*1.999);
+    end
+end
+hist(sigCoh.(selChanNames{1}).(fields{1})(:,37,39))
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        for ch=1:96
+            for f=1:109
+                yNormPsSigCoh.(selChanNames{j}).(fields{k})(ch,f) = TestNormality(sigCoh.(selChanNames{j}).(fields{k})(:,ch,f));
+                yNormPs.(selChanNames{j}).(fields{k})(ch,f) = TestNormality(data.(selChanNames{j}).(fields{k})(:,ch,f));
+            end
+        end
+    end
+end
+
+%for j=2:2
+for j=1:length(selChans)
+    nextFig = j;
+    for k=1:length(fields)
+        a = yNormPsSigCoh.(selChanNames{j}).(fields{k});
+        a(find(a==0)) = 1.1e-16;
+        plotData(k,:,:) =  log10(a);
+    end
+    %log10Bool = 1;
+    colorLimits = [-3 0];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = 'sigCoh';
+    resizeWinBool = 1;
+    filename = selChanNames{j};
+    interpFunc = [];
+    PlotMultiFreqHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+end
+%for j=2:2
+for j=1:length(selChans)
+    nextFig = j+6;
+    for k=1:length(fields)
+        a = yNormPs.(selChanNames{j}).(fields{k});
+        a(find(a==0)) = 1.1e-16;
+        plotData(k,:,:) =  log10(a);
+    end
+    %log10Bool = 1;
+    colorLimits = [-3 0];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = [];
+    resizeWinBool = 1;
+    filename = selChanNames{j};
+    interpFunc = [];
+    PlotMultiFreqHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+end
+
+
+
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        thetaMed.(selChanNames{j}).(fields{k}) = squeeze(median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=thetaFreqRange(1) & fs<=thetaFreqRange(2))),3));
+        thetaATanMed.(selChanNames{j}).(fields{k}) = atanh((thetaMed.(selChanNames{j}).(fields{k})-0.5)*1.999);
+        gammaMed.(selChanNames{j}).(fields{k}) = squeeze(median(data.(selChanNames{j}).(fields{k})(:,:,find(fs>=gammaFreqRange(1) & fs<=gammaFreqRange(2))),3));
+        gammaATanMed.(selChanNames{j}).(fields{k}) = atanh((gammaMed.(selChanNames{j}).(fields{k})-0.5)*1.999);
+    end
+end
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        for ch=1:96
+            thetayNormPs.(selChanNames{j}).(fields{k})(ch) = TestNormality(thetaMed.(selChanNames{j}).(fields{k})(:,ch));
+            thetaAtanNormPs.(selChanNames{j}).(fields{k})(ch) = TestNormality(thetaATanMed.(selChanNames{j}).(fields{k})(:,ch));
+            gammayNormPs.(selChanNames{j}).(fields{k})(ch) = TestNormality(gammaMed.(selChanNames{j}).(fields{k})(:,ch));
+            gammaAtanNormPs.(selChanNames{j}).(fields{k})(ch) = TestNormality(gammaATanMed.(selChanNames{j}).(fields{k})(:,ch));
+            %yNormPsSqrt.(selChanNames{j}).(fields{k})(ch) = TestNormality(dataSqrt.(selChanNames{j}).(fields{k})(:,ch));
+            %yNormPsATanH.(selChanNames{j}).(fields{k})(ch) = TestNormality(dataATanH.(selChanNames{j}).(fields{k})(:,ch));
+        end
+    end
+end
+%for j=2:2
+for j=1:length(selChans)
+    nextFig = j+10;
+    a = [];
+    plotData = [];
+    for k=1:length(fields)
+        a = gammaAtanNormPs.(selChanNames{j}).(fields{k});
+        a(find(a==0)) = 1.1e-16;
+        plotData(k,:) =  log10(a);
+    end
+    %log10Bool = 1;
+    colorLimits = [-5 0];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = [];
+    resizeWinBool = 0;
+    filename = selChanNames{j};
+    interpFunc = [];
+    PlotHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+end
+
+
+
+
+
+figure(1)
+colormap(LoadVar('ColorMapSean6.mat'))
+set(gcf,'DefaultAxesPosition',[0.05,0.15,0.92,0.75]);
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        subplot(length(fields),length(selChans),(k-1)*length(selChans)+j);
+        imagesc(Make2DPlotMat(log10(gammayNormPs.(selChanNames{j}).(fields{k})),chanMat,badChans,'linear'));
+        title([selChanNames{j} ': ' fields{k}])
+        set(gca,'clim',[-2 0])
+        PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+        colorbar
+    end
+end
+
+
+
+
+
+%cd([alterFiles(1,:) '/' analDir]);
+%fo = LoadField('cohSpec.fo');
+%cd('../..')
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        dataATanH.(selChanNames{j}).(fields{k}) = atanh(data.(selChanNames{j}).(fields{k}));
+    end
+end
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        for ch=1:96
+            for f=1:109
+                yNormPs.(selChanNames{j}).(fields{k})(ch,f) = TestNormality(data.(selChanNames{j}).(fields{k})(:,ch,f));
+                yNormPsAtanhSq.(selChanNames{j}).(fields{k})(ch,f) = TestNormality(dataAtanhSq.(selChanNames{j}).(fields{k})(:,ch,f));
+                yNormPsATanh.(selChanNames{j}).(fields{k})(ch,f) = TestNormality(dataAtanh.(selChanNames{j}).(fields{k})(:,ch,f));
+            end
+        end
+    end
+end
+for j=2:2
+%for j=1:length(selChans)
+    nextFig = j;
+    fields = fieldnames(yNormPs.(selChanNames{j}));
+    plotData = [];
+    for k=1:length(fields)
+        a = yNormPs.(selChanNames{j}).(fields{k});
+        a(find(a==0)) = 1.1e-16;
+        %size(a)
+        plotData(k,:,:) =  log10(a);
+    end
+    colorLimits = [-5 0];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = [];
+    resizeWinBool = 1;
+    filename = selChanNames{j};
+    interpFunc = [];
+    PlotMultiFreqHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+end
+%for j=2:2
+for j=1:length(selChans)
+    nextFig = j+6;
+    fields = fieldnames(yNormPsAtanhSq.(selChanNames{j}));
+    plotData = [];
+    for k=1:length(fields)
+        a = yNormPsAtanhSq.(selChanNames{j}).(fields{k});
+        a(find(a==0)) = 1.1e-16;
+        %size(a)
+        plotData(k,:,:) =  log10(a);
+    end
+    colorLimits = [-3 0];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = ['yNormPsAtanhSq'];
+    resizeWinBool = 1;
+    filename = selChanNames{j};
+    interpFunc = [];
+    PlotMultiFreqHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+end
+%for j=2:2
+for j=1:length(selChans)
+    nextFig = j;
+    fields = fieldnames(yNormPsATanh.(selChanNames{j}));
+    plotData = [];
+    for k=1:length(fields)
+        a = yNormPsATanh.(selChanNames{j}).(fields{k});
+        a(find(a==0)) = 1.1e-16;
+        %size(a)
+        plotData(k,:,:) =  log10(a);
+    end
+    colorLimits = [-3 0];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = ['yNormPsATanh'];
+    resizeWinBool = 1;
+    filename = selChanNames{j};
+    interpFunc = [];
+    PlotMultiFreqHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+end
+
+function nextFig = PlotMultiFreqHelper(nextFig,plotData,fileExt,log10Bool,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc)
+chanMat = LoadVar(['ChanMat' fileExt '.mat']);
+badChans = load(['BadChan' fileExt '.txt']);
+plotAnatBool = 1;
+anatOverlayName = 'AnatCurves.mat';
+plotSize = [-16.5,6.5]; % adjusted for inversion of pcolor
+plotOffset = [-16.5 0];% adjusted for inversion of pcolor
+if invCscaleBool
+    colorStyle = flipud(LoadVar('ColorMapSean6'));
+else
+    colorStyle = LoadVar('ColorMapSean6');
+end
+figSizeFactor = 1.5;
+figVertOffset = 0.5;
+figHorzOffset = 0;
+defaultAxesPosition = [0.05,0.05,0.92,0.80+.1*size(plotData,1)/6];
+sitesPerShank = size(chanMat,1);
+nShanks = size(chanMat,2);
+if ~isempty(colorLimits)
+    commonCLim = 2;
+end
+
+nextFig = nextFig +1;
+figure(nextFig)
+clf
+set(gcf,'name',filename);
+set(gcf,'DefaultAxesPosition',defaultAxesPosition);
+if resizeWinBool
+    set(gcf, 'Units', 'inches')
+    set(gcf, 'Position', [figHorzOffset,figVertOffset,figSizeFactor*(nShanks)*1.6,figSizeFactor*(size(plotData,1))*1.3])
+end
+
+for j=1:size(plotData,1)
+    if commonCLim ~=2
+        colorLimits = [];
+    end
+    for k=1:nShanks
+
+        subplot(size(plotData,1),nShanks,(j-1)*nShanks+k);
+        a = plotData(j,(k-1)*sitesPerShank+1:(k)*sitesPerShank,:);
+        a(find(a==0)) = 1.1e-16;
+        if log10Bool
+            a = log10(a);
+        end
+        pcolor(fs(1:find(abs(fs-maxFreq)==min(abs(fs-maxFreq)),1)),sitesPerShank:-1:1,squeeze(a));
+        shading 'interp'
+        %h = ImageScMask(Make2DPlotMat(log10((j,:)),chanMat,badChans,interpFunc),badChanMask,colorLimits);
+        %imagesc(fs(1:find(abs(fs-maxFreq)==min(abs(fs-maxFreq)),1)),1:sitesPerShank,squeeze(a));
+        if commonCLim == 0
+            colorLimits = [];
+        end
+        if isempty(colorLimits)
+            if isempty(cCenter)
+                colorLimits = [median(abs(a(:)))-1*std(a(:)) median(abs(a(:)))+1*std(a(:))];
+            else
+                colorLimits = [cCenter-median(abs(a(:)))-1*std(a(:)) cCenter+median(abs(a(:)))+1*std(a(:))];
+            end
+        end
+        if ~isempty(colorLimits)
+            set(gca,'clim',colorLimits)
+        end
+        colorbar
+        if isempty(interpFunc)
+            hold on
+            barh(flipud(Accumulate([intersect(chanMat(:,k), badChans)-min(chanMat(:,k))+1]',maxFreq,16)),1,'w');
+        end
+        if plotAnatBool
+            PlotShankAnatCurves(anatOverlayName,k,get(gca,'xlim'),plotSize,plotOffset)
+        end
+        set(gca,'fontsize',8)
+        if k == 1
+            ylabel(titlesBase(j));
+        end
+        if j == 1
+            title([{titlesExt}] );
+        end
+    end
+    colormap(colorStyle)
+end
+return
+
+
+
+if normBool
+    for j=1:length(selChans)
+        fields = fieldnames(data.(selChanNames{j}));
+        meanTemp = [];
+        stdTemp = [];
+        for k=1:length(fields)
+            meanTemp = cat(1,meanTemp,mean(data.(selChanNames{j}).(fields{k})));
+            stdTemp = cat(1,stdTemp,std(data.(selChanNames{j}).(fields{k}),[],1));
+        end
+        %size(meanTemp)
+        %keyboard
+        meanData.(selChanNames{j}) = mean(meanTemp);
+        stdData.(selChanNames{j}) = mean(stdTemp);
+    end
+end
+
+figure(1)
+colormap(LoadVar('ColorMapSean6.mat'))
+set(gcf,'DefaultAxesPosition',[0.05,0.15,0.92,0.75]);
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        subplot(length(fields),length(selChans),(k-1)*length(selChans)+j);
+        imagesc(Make2DPlotMat(squeeze(mean(data.(selChanNames{j}).(fields{k}))),chanMat,badChans,'linear'));
+        title([selChanNames{j} ': ' fields{k}])
+        set(gca,'clim',[0 1])
+        PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+        colorbar
+    end
+end
+
+if normBool
+    figure(2)
+    colormap(LoadVar('ColorMapSean6.mat'))
+    set(gcf,'DefaultAxesPosition',[0.05,0.15,0.92,0.75]);
+    for j=1:length(selChans)
+        fields = fieldnames(data.(selChanNames{j}));
+        for k=1:length(fields)
+            %             if j==2
+            %                 junk = mean(data.(selChanNames{j}).(fields{k}))-meanData.(selChanNames{j});
+            %             end
+            %             junk(37)
+            subplot(length(fields),length(selChans),(k-1)*length(selChans)+j);
+            imagesc(Make2DPlotMat(squeeze((mean(data.(selChanNames{j}).(fields{k}))-meanData.(selChanNames{j}))./stdData.(selChanNames{j}))',chanMat,badChans,'linear'));
+            title([selChanNames{j} ': ' fields{k}])
+            set(gca,'clim',[-1 1])
+             PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+            colorbar
+        end
+    end
+end
+
+
+figure(1)
+colormap(LoadVar('CircularColorMap.mat'))
+set(gcf,'DefaultAxesPosition',[0.05,0.15,0.92,0.75]);
+for j=1:length(selChans) 
+    fields = fieldnames(data.(selChanNames{j}));
+    for k=1:length(fields)
+        subplot(length(fields),length(selChans),(k-1)*length(selChans)+j);
+        imagesc(Make2DPlotMat(angle(squeeze(mean(data.(selChanNames{j}).(fields{k})))),chanMat,badChans,'linear'));
+        title([selChanNames{j} ': ' fields{k}])
+        set(gca,'clim',[-pi pi])
+        %set(gca,'clim',[0.5 1])
+        PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+        colorbar
+    end
+end
+
+
+if normBool
+    figure(2)
+    colormap(LoadVar('CircularColorMap'))
+    set(gcf,'DefaultAxesPosition',[0.05,0.15,0.92,0.75]);
+    for j=1:length(selChans)
+        fields = fieldnames(data.(selChanNames{j}));
+        for k=1:length(fields)
+            %             if j==2
+            %                 junk = mean(data.(selChanNames{j}).(fields{k}))-meanData.(selChanNames{j});
+            %             end
+            %             junk(37)
+            subplot(length(fields),length(selChans),(k-1)*length(selChans)+j);
+            imagesc(Make2DPlotMat(angle(squeeze((mean(data.(selChanNames{j}).(fields{k}))-meanData.(selChanNames{j})))),chanMat,badChans,'linear'));
+            title([selChanNames{j} ': ' fields{k}])
+            set(gca,'clim',[-pi pi])
+             PlotAnatCurves(anatCurvesName,[16.5 6.5],offset)
+            colorbar
+        end
+    end
+end
+
+
+
+
+    nextFig = j+10;
+    a = [];
+    plotData = [];
+    fields = fieldnames(assumTest.dw);
+    a = MatStruct2StructMat(assumTest.dw);
+    for k=1:length(fields)
+        %a = assumTest.dw.(fields{k});
+        %a(find(a==0)) = 1.1e-16;
+        plotData(k,:) = a.(fields{k});
+    end
+    %log10Bool = 1;
+    colorLimits = [];
+    commonCLim = [];
+    cCenter = [];
+    invCscaleBool = 1;
+    titlesBase = fields;
+    titlesExt = [];
+    resizeWinBool = 1;
+    filename = 'junk';
+    interpFunc = [];
+    PlotHelper(nextFig,plotData,fileExt,colorLimits,commonCLim,cCenter,invCscaleBool,titlesBase,titlesExt,resizeWinBool,fs,maxFreq,filename,interpFunc);
+

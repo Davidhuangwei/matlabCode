@@ -1,0 +1,10 @@
+function csdBadChan = CalcCsdBadChans(badChans,EEGnChanPerShank,CSDnChanPerShank)
+%function csdBadChan = CalcCsdBadChans(badChans,nShanks,nChanPerShank)
+keyboard
+shift = (EEGnChanPerShank-CSDnChanPerShank)/2;
+
+csdBadChan = badChans(mod(badChans,EEGnChanPerShank)+shift<=EEGnChanPerShank & mod(badChans,EEGnChanPerShank)-shift>0);
+
+%csdBadChan = badChans(mod(badChans,nChanPerShank)~=0 & mod(badChans+nChanPerShank-shift,nChanPerShank)~=0);
+
+csdBadChan = csdBadChan-shift*floor(csdBadChan/EEGnChanPerShank)-shift*ceil(csdBadChan/EEGnChanPerShank);

@@ -1,0 +1,48 @@
+% function AddSpectralTrials(fileBaseCell,newTimesFileName,timesSamp,spectAnalDir,winLen,eegSamp)
+% adds rows to time, eegSegTime, allEegSegTime, and keptTime from times in
+% newTimesFile and creates a new boolean vector file with name newTimesFile
+% inside spectAnalDir.  
+% winLen should be specified in eegSamp
+% 
+% tag:add
+% tag:spectral
+% tag:trials
+
+function AddSpectralTrials(fileBaseCell,newTimesFileName,timesSamp,spectAnalDir,winLen,eegSamp)
+
+for j=1:length(fileBaseCell)
+    fileBase = fileBaseCell{j};
+    
+    newTimesFile = [SC(fileBase) newTimesFileName];
+    newTimes = load(newTimesFile); % load newTimes
+    
+    outFile = [SC(fileBase) SC(spectAnalDir) Dot2Underscore(newTimesFileName) '.mat'];
+    
+    if exist(outFile,'file')
+        warning([mfilename ':fileExists'],['File already exists, SKIPPING: '...
+            outFile '.mat']);
+    else
+        time = LoadVar([SC(fileBase) SC(spectAnalDir) 'time']); %load spectAnalTimes
+        eegSegTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'eegSegTime']); %load spectAnalTimes
+        allEegSegTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'allEegSegTime']); %load spectAnalTimes
+        keptTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'keptTime']); %load spectAnalTimes
+        originalTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'originalTime']); %load spectAnalTimes
+
+        newTimesVec = cat(1,zeros(size(time)),ones(size(newTimes)));
+        time = cat(1,time,newTimes/timesSamp);
+        eegSegTime = cat(1,eegSegTime,round(newTimes*eegSamp/timesSamp-winLen/2));
+        allEegSegTime = cat(1,allEegSegTime,round(newTimes*eegSamp/timesSamp-winLen/2));
+        keptTime = cat(1,keptTime,ones(size(newTimes)));
+        originalTime = cat(1,originalTime,zeros(size(newTimes)));
+
+
+        fprintf('Saving: %s\n',outFile)
+        save(outFile,SaveAsV6,'newTimesVec')
+        save([SC(fileBase) SC(spectAnalDir) 'time.mat'],SaveAsV6,'time')
+        save([SC(fileBase) SC(spectAnalDir) 'eegSegTime.mat'],SaveAsV6,'eegSegTime')
+        save([SC(fileBase) SC(spectAnalDir) 'allEegSegTime.mat'],SaveAsV6,'allEegSegTime')
+        save([SC(fileBase) SC(spectAnalDir) 'keptTime.mat'],SaveAsV6,'keptTime')
+        save([SC(fileBase) SC(spectAnalDir) 'keptTime.mat'],SaveAsV6,'keptTime')
+    end
+end
+    

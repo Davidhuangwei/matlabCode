@@ -1,0 +1,37 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_gbf</title>
+
+<body><h1>gtm_gbf</h1>
+Calculates the output of Gaussian basis functions for a given set of input
+
+<h3>Synopsis</h3>
+<pre>FI = gtm_gbf(MU, sigma, X)</pre>
+<h3>Arguments</h3>
+<code>MU</code> - 
+a M-by-L matrix containing the centers of the 
+basis functions
+
+<p>
+<code>sigma</code> - 
+a scalar giving the standard deviation of the
+radii-symmetric Gaussian basis functions,
+
+<p>
+<code>X</code> - 
+the latent variable sample forming the set of
+inputs; K-by-L
+
+<h3>Return</h3>
+<code>FI</code> - 
+the matrix of basis functions output values;
+K-by-(M+1), "+1" for a bias basis function
+with a fixed value of 1.0
+
+<h3>See also</h3>
+<code><a href="./gtm_lbf.htm">gtm_lbf</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

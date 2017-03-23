@@ -1,0 +1,159 @@
+glmlab -- generalised linear modelling with MATLAB
+
+This is glmlab v2.3.1.  It was last posted in February 1999.
+
+Send comments, problems, questions, funny jokes, snide remarks or money (!)
+to Peter Dunn at:
+   dunn@usq.edu.au  OR  dunn@usq.edu.au
+or:
+   c/- Sciences, USQ, Toowoomba, QLD, AUSTRALIA, 4350
+
+--------------------------------------------------------------------
+
+I make no guarantees with glmlab:  I don't even guarantee that it works at all.
+But I use it for my own research and teaching, so maybe you'll find it helpful
+too.  If so, please write and let me know.
+   
+And while I'm here, let me say that I am no expert in MATLAB-ing, so the code
+is probably no where near optimised or vectorised as much as it could be.  
+Come to think of it, I know very little about programming in general.  But it
+works (most of the time anyhow...) and I find it useful.  I hope you do too.
+
+--------------------------------------------------------------------
+
+The following information may be useful for starting with glmlab.
+
+--------------------------------------------------------------------
+
+I have only used the Window and UNIX versions of MATLAB, and so the following
+notes only talk about these.  No doubt you can make intelligent guesses about what
+to do for other systems.  
+
+If you use the glmlab.tar or glmlab.zip files, they will create the
+directory structure and copy the files into all the appropriate places
+for you.   You can skip to the section titled 2.  CHANGING THE MATLAB PATH.
+
+If you are not using glmlab.zip or glmlab.tar, read on...
+
+1.  PUTTING THINGS WHERE THEY SHOULD BE
+
+The files that comprise glmlab at the moment come in a few directories.  
+I recommend that you create a directory called  glmlab  somewhere logical 
+(ie top level), and then create six underneath called:  fit  plotting  data   
+glmhelp  glmlog and  misc.  The  fit  directory has two subdirectories also:  
+dist  and  link
+
+That is, you'll have:
+
+DOS/WINDOWS only:
+
+c:\glmlab\fit
+c:\glmlab\fit\dist
+c:\glmlab\fit\link
+c:\glmlab\misc
+c:\glmlab\plotting
+c:\glmlab\data
+c:\glmlab\glmhelp
+c:\glmlab\glmlog
+
+UNIX only:
+
+/glmlab/fit    (starting at somewhere logical, like your home directory)
+/glmlab/fit/dist
+/glmlab/fit/link
+/glmlab/misc
+/glmlab/plotting
+/glmlab/data
+/glmlab/glmhelp
+/glmlab/glmlog
+
+Now copy the appropriate files to the appropriate directories.
+
+2.  CHANGING THE MATLAB PATH
+
+Now... after copying the files to those directories,
+you'll have to change your MATLABPATH.  If you run MATLAB from a DOS
+or WINDOWS machine, you can use  pathtool  or you can edit the 
+file called MATLABrc.m, which is usually in the directory 
+c:\MATLAB (who would have guessed?) to add the lines:
+
+(DOS/WINDOWS only)
+  'C:\glmlab',...
+  'C:\glmlab\fit',...
+  'C:\glmlab\fit\dist',...
+  'C:\glmlab\fit\link',...
+  'C:\glmlab\misc',...
+  'C:\glmlab\plotting',...
+  'C:\glmlab\data',...
+  'C:\glmlab\glmhelp',...
+  'C:\glmlab\glmlog',...
+
+For those using glmlab on UNIX,  you will need to edit the file .cshrc, which
+is in your home directory.  Add the following line to your MATLABPATH
+(or create a MATLABPATH with this information).
+
+(UNIX only)
+   * For those with a MATLABPATH in the .cshrc file:
+      Add the paths as suggested above 
+      (eg that may be /usr/local/contrib/glmlab and so on... better check)
+   * For those without a MATLABPATH in the .cshrc file:
+      Create a line in the .cshrc file that begins like this:
+            setenv MATLABPATH
+      After that, list all the directories where glmlab is stored
+      (eg that may be /usr/local/contrib/glmlab and so on... better check)
+
+Now you should be ready to run.
+
+
+3. SETTING SOME DEFAULTS
+
+
+There are two files that you may need  to place somewhere.  
+
+One is called   dummylog.m  which should be placed in a directory where
+you have WRITE access.  The log files are placed in this directory,
+as well as a file that keeps you preferenes.  If this file lives
+somewhere where you can't write, you will continue to get error
+messages.  The first time you start  glmlab  , glmlab  will create
+a file called  PARAVALS.mat  in the directory where the  dummylog.m
+files lives.  Write access is neccessary!
+
+The second file is called  dummydta.log.  This file should be
+stored where you want  glmlab  to look, by default, for your
+data files.  It can be anywhere--you don't need write access unless
+you wish to write to that directory.  If you don't move this file, 
+it will stay in the  glmlab/data  directory, which will be fine.
+
+
+4. LET'S GO...
+      
+
+To start glmlab, start MATLAB and type glmlab.
+
+The three important things to know in the first instance are:
+
+glmlab:  starts the gui window from where everything else runs
+fac:  for declaring a variable as a factor (qualitative variable)
+@     this character is used to declare the interactions between variables
+      (eg  fac(Gender)@Length  is the interaction between (qualitative) 
+       variable  Gender  and the (quantitative) variable  Length
+
+Another that the user can use is:
+
+makefac:  for making a factor that has some regularity
+
+All the functions have help screens (ie at the MATLAB prompt, you can
+type  help makefac  for some help).
+
+You can also email me (dunn@usq.edu.au) or phone (+61 7 4631 2772) or whatever.
+I'd really appreciate it of you could let me know of any bugs.  I'm sure
+there are (unfortunately!) some there.
+
+Anyway... have fun.  I hope it does all you were wanting it to do.
+
+ENJOY,
+
+Pete.
+(Peter Dunn
+dunn@usq.edu.au)
+17 December 1998

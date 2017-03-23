@@ -1,0 +1,36 @@
+function plotData = MakeBufferedPlotMat(data,buffPercent,chanMat)
+buffer = round([buffPercent(1)*size(aveWave,2) buffPercent(2)*size(aveWave,3)]);
+
+plotData = NaN*ones(size(chanMat,1)*size(data,2)+buffer(1),...
+    size(chanMat,2)*size(data,3)+buffer(2));
+
+for j=1:size(chanMat,1)
+    for k=1:size(chanMat,2)
+        plotData((j-1)*(size(data,2)+buffer(1))+round(buffer(1)/2)+1:...
+            (j-1)*(size(data,2)+buffer(1))+round(buffer(1)/2)
+
+        
+xPlotBuff = round(0.1*size(aveWave,3));
+yPlotBuff = round(0.1*size(aveWave,2));
+
+plotWave = NaN*ones(size(eegChanMat,1)*(size(aveWave,2)+yPlotBuff),...
+    size(eegChanMat,2)*(size(aveWave,3)+xPlotBuff));
+for j=1:size(eegChanMat,1)
+    for k=1:size(eegChanMat,2)
+        plotWave((j-1)*(size(aveWave,2)+yPlotBuff)+round(yPlotBuff/2)+1:...
+            (j-1)*(size(aveWave,2)+yPlotBuff)+round(yPlotBuff/2)+...
+            size(aveWave,2),...
+            (k-1)*(size(aveWave,3)+xPlotBuff)+round(xPlotBuff/2)+1:...
+            (k-1)*(size(aveWave,3)+xPlotBuff)+round(xPlotBuff/2)+...
+            size(aveWave,3)) = aveWave(eegChanMat(j,k),:,:).*repmat(fo.^2,[1,1,size(aveWave,3)]);
+    end
+end
+
+plotBuff = round(0.1*size(csdAveSeg2D,3));
+
+csdPlot = NaN*ones(size(csdAveSeg2D,1),size(csdAveSeg2D,2)*(size(csdAveSeg2D,3)+plotBuff));
+for j=1:size(csdAveSeg2D,2)
+    csdPlot(:,(j-1)*(size(csdAveSeg2D,3)+plotBuff)+round(plotBuff/2) + 1:...
+        (j-1)*(size(csdAveSeg2D,3)+plotBuff)+round(plotBuff/2) + ...
+        size(csdAveSeg2D,3)) = squeeze(csdAveSeg2D(:,j,:));
+end

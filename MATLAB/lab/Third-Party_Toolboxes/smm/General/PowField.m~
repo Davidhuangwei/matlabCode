@@ -1,0 +1,12 @@
+function [powMap occupancyMap] = PowField(powData,posData,varargin)
+
+[binSize,smoothSize] = DefaultArgs(varargin,{1,4});
+
+posData = ceil(posData/binSize);
+keyboard
+goodInd = 
+occupancyMap = Accumulate(posData);
+powMap = Accumulate(posData,powData);
+
+occupancyMap = Smooth(occupancyMap,smoothSize);
+powMap = Smooth(powMap,smoothSize);

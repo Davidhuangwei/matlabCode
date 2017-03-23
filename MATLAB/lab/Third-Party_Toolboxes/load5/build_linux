@@ -1,0 +1,29 @@
+#! /bin/sh
+#  reconfig
+#    Runs configure scripts
+
+DEFAULT_OPTS="--prefix=$HOME/load5_v1.1.2 --exec-prefix=$HOME/load5_v1.1.2"
+
+cd build-linux
+
+MATLAB_OPTS="--with-matlab=/usr/local/matlab71"
+export PKG_CONFIG_PATH="$HOME/matio_v1.1.2/lib/pkgconfig:$PKG_CONFIG_PATH"
+ARCH=64
+ARCH=32
+
+CC=gcc \
+CFLAGS="-m$ARCH -v -O3 -g -ffast-math -Wall -pedantic -fPIC -fexceptions" \
+LDFLAGS='-Wl,-s -fexceptions' \
+../configure $DEFAULT_OPTS $MATLAB_OPTS
+
+if test $? = 0
+then
+    make
+fi
+
+if test $? = 0
+then
+    make install
+fi
+
+cd ..

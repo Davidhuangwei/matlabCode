@@ -1,0 +1,70 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_trn</title>
+
+<body><h1>gtm_trn</h1>
+Optimize (train) the parameters of a GTM model, using an EM algorithm.
+
+<h3>Synopsis</h3>
+<pre>[W, beta, llhLog] = gtm_trn(T, FI, W, l, cycles, beta, m, q)</pre><pre>[W, beta] = gtm_trn(T, FI, W, l, cycles, beta)</pre>
+<h3>Arguments</h3>
+<code>T</code> - 
+matrix containing a sample of the distribution 
+to be modeled; N-by-D
+
+<p>
+<code>FI</code> - 
+matrix containing the output values from
+the basis functions, when fed the latent
+variable sample; K-by-(M+1)
+
+<p>
+<code>W</code> - 
+an initial weight matrix; (M+1)-by-D
+
+<p>
+<code>l</code> - 
+weight regularisation factor
+
+<p>
+<code>cycles</code> - 
+no of training cycles
+
+<p>
+<code>beta</code> - 
+an initial value for beta, the inverse variance of 
+the Gaussian mixture generated in the data space
+
+<p>
+<code>m</code> - 
+mode of calculation; it can be set to 0, 1 or 2 
+corresponding to increasingly elaborate 
+measure taken to reduce the amount of
+numerical errors; mode = 0 will be fast but 
+less accurate, mode = 2 will be slow but 
+more accurate; the default mode is 1 
+
+<p>
+<code>q</code> - 
+quiet execution; if q equals the string 'quiet',
+the plotting and echoing of the values of log- 
+likelihood and beta during traaining is supressed. 
+This argument is optional; if omitted the training 
+is run non-quiet.
+
+<h3>Return</h3>
+<code>W, beta</code> - 
+the corresponding weight matrix and
+inverse variance after training
+
+<p>
+<code>llhLog</code> - 
+the log-likelihood after each cycle of
+training; optional output argument
+
+
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

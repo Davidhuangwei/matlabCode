@@ -1,0 +1,188 @@
+function DetateSpikeTrigSegs(fileBaseMat,trigExt,trigNChan,molTrigChan,hilTrigChan,fileExt,nChan,varargin)
+chanInfoDir = 'ChanInfo/';
+[plotBool] = DefaultArgs(varargin,{0});
+badChans = load([chanInfoDir 'BadChan' trigExt '.txt']);
+% sm9603
+% ,eegNChan,rippDetChans,rippTrigChan,swTrigChan,fileExt,trigNChan,varargin)
+%fileBase = 'sm9603m2_206_s1_249'
+% fileBase = 'sm9603m2_247_s1_293';
+% trigNChan = 72;%
+% chanInfoDir = 'ChanInfo/';
+% trigExt = '_LinNearCSD121.csd';%
+% badChans = load([chanInfoDir 'BadChan' trigExt '.txt']);
+% molTrigChan = setdiff([24 31 32 33 34 42 43 55 56 69 70],badChans);%43;%
+% hilTrigChan = setdiff([36 46 47 59 60 72],badChans);%46;%
+% 
+% fileBase = 'sm9603m2_247_s1_293';
+% trigNChan = 84;%72;%
+% chanInfoDir = 'ChanInfo/';
+% trigExt = '_NearAveCSD1.csd';%'_LinNearCSD121.csd';%
+% badChans = load([chanInfoDir 'BadChan' trigExt '.txt']);
+% molTrigChan = setdiff([27 28 36 37 38 39 49 50 64 65 80 81],badChans);%43;%
+% hilTrigChan = setdiff([42 53 54 56 69 68 67],badChans);%46;%
+
+molTrigChan = setdiff(molTrigChan,badChans);%43;%
+hilTrigChan = setdiff(hilTrigChan,badChans);%46;%
+
+segLen = 0.1;
+bps = 2;
+trigChanMat = LoadVar([chanInfoDir 'ChanMat' trigExt '.mat']);
+offSet = load([chanInfoDir 'OffSet' trigExt '.txt']);
+eegChanMat = LoadVar([chanInfoDir 'ChanMat' '.eeg' '.mat']);
+ sampRate = 1250;
+ highPassFreq = 30;
+timeLag = 0.1;
+firfiltb = fir1(odd(5/highPassFreq*sampRate)-1,[highPassFreq/sampRate*2],'high');
+stdDev = 6;
+peakLag = 20/1000;
+
+infoStruct.trigExt = trigExt;
+infoStruct.trigNChan = trigNChan;
+infoStruct.molTrigChan = molTrigChan;
+infoStruct.hilTrigChan = hilTrigChan;
+infoStruct.fileExt = fileExt;
+infoStruct.nChan = nChan;
+infoStruct.badChans = badChans;
+infoStruct.segLen = segLen;
+infoStruct.bps = bps;
+infoStruct.trigChanMat = trigChanMat;
+infoStruct.eegChanMat = eegChanMat;
+infoStruct.sampRate = sampRate;
+infoStruct.highPassFreq = highPassFreq;
+infoStruct.timeLag = timeLag;
+infoStruct.firfiltb = firfiltb;
+infoStruct.stdDev = stdDev;
+infoStruct.peakLag = peakLag;
+infoStruct.chanInfoDir = chanInfoDir;
+infoStruct.mfilename = mfilename;
+infoStruct.date = date;
+
+for k=1:size(fileBaseMat,1)
+
+    fileBase = fileBaseMat(k,:);
+    fprintf('Reading: %s\n',fileBase);
+    
+    molTrigChanData = readmulti([fileBase '/' fileBase trigExt],trigNChan,molTrigChan);
+    hilTrigChanData = readmulti([fileBase '/' fileBase trigExt],trigNChan,hilTrigChan);
+    molFiltTrigChan = Filter0(firfiltb, molTrigChanData);
+    hilFiltTrigChan = Filter0(firfiltb, hilTrigChanData);
+    %molFiltTrigChan = mean(molFiltTrigChan,2);
+    %hilFiltTrigChan = mean(molFiltTrigChan,2);
+    molMeanTrig = mean(molFiltTrigChan);
+    hilMeanTrig = mean(hilFiltTrigChan);
+    molStdTrig = std(molFiltTrigChan);
+    hilStdTrig = std(hilFiltTrigChan);
+    molIndexes = [];
+    for j=1:size(molFiltTrigChan,2)
+        molIndexes = union(molIndexes,LocalMinima(molFiltTrigChan(:,j),round(timeLag*sampRate),molMeanTrig(j)-molStdTrig(j)*stdDev));
+    end
+    while ~isempty(find(diff(molIndexes)<round(timeLag*sampRate)))
+        junk = find(diff(molIndexes)<round(timeLag*sampRate),1);
+        if min(molFiltTrigChan(molIndexes(junk),:)) < min(molFiltTrigChan(molIndexes(junk+1),:))
+            molIndexes(junk+1) = [];
+        else
+            molIndexes(junk) = [];
+        end
+    end    
+    hilIndexes = [];
+    for j=1:size(hilFiltTrigChan,2)
+        hilIndexes = union(hilIndexes,LocalMinima(-hilFiltTrigChan(:,j),round(timeLag*sampRate),hilMeanTrig(1,j)-hilStdTrig(1,j)*stdDev));
+    end
+    while ~isempty(find(diff(hilIndexes)<round(timeLag*sampRate)))
+        junk = find(diff(hilIndexes)<round(timeLag*sampRate),1);
+        if min(-hilFiltTrigChan(hilIndexes(junk),:)) < -min(hilFiltTrigChan(hilIndexes(junk+1),:))
+            hilIndexes(junk+1) = [];
+        else
+            hilIndexes(junk) = [];
+        end
+    end    
+
+    offsets = round(-peakLag*sampRate:peakLag*sampRate);
+    hilLag = repmat(hilIndexes,size(offsets)) + repmat(offsets,length(hilIndexes),1);
+    combIndexes = intersect(molIndexes,hilLag(:));
+    segs =[];
+    for j=1:length(combIndexes)
+        try segs = bload([fileBase '/' fileBase fileExt], [nChan segLen*sampRate],...
+            (combIndexes(j)-round(segLen*sampRate/2))*nChan*bps);
+        catch
+        end   
+    end
+    time = combIndexes/sampRate;
+    infoStruct.fileBase = fileBase;
+    outName = [fileBase '/' 'DentateSpikeTrigSegs' '_TrigExt' trigExt fileExt '.mat'];
+    fprintf('Saving: %s\n',outName);
+
+    save(outName,SaveAsV6,'segs','time','infoStruct');
+    
+    if plotBool
+        figure(1)
+        clf
+        hold on
+        meanCombSegs = mean(segs,3);
+        csdPlot = MakeBufferedPlotMat(permute(meanCombSegs,[1 3 2]),trigChanMat);
+        pcolor(1:size(csdPlot,2),-1:-1:-size(csdPlot,1),csdPlot)
+        shading interp
+        PlotAnatCurvesNew([chanInfoDir 'AnatCurvesNew.mat'],[-size(eegChanMat,1) size(csdPlot,2)],[-0.5+offSet(1) 0.5]);
+        set(gca,'xlim',[1 size(csdPlot,2)], 'ylim',[-size(csdPlot,1)-1 0 ]);
+        colormap(LoadVar('ColorMapSean6.mat'));
+        set(gca,'clim',[-2000 1500])
+        colorbar
+keyboard
+    end
+
+  
+end
+return
+    
+    
+    figure(4)
+    clf
+    hold on
+    meanCombSegs = mean(combSegs,3);
+    csdPlot = MakeBufferedPlotMat(permute(meanCombSegs,[1 3 2]),trigChanMat);
+    pcolor(1:size(csdPlot,2),-1:-1:-size(csdPlot,1),csdPlot)
+    shading interp
+    PlotAnatCurvesNew([chanInfoDir 'AnatCurvesNew.mat'],[-size(eegChanMat,1) size(csdPlot,2)],[-0.5+offSet(1) 0.5]);
+    set(gca,'xlim',[1 size(csdPlot,2)], 'ylim',[-size(csdPlot,1)-1 0 ]);
+    colormap(LoadVar('ColorMapSean6.mat'));
+    set(gca,'clim',[-2000 1500])
+    colorbar
+%     molSegs =[];
+%     for j=1:length(molIndexes)
+%         try molSegs(:,:,j) = bload([fileBase '/' fileBase trigExt], [trigNChan segLen*sampRate],...
+%             (molIndexes(j)-segLen*sampRate/2)*trigNChan*bps);
+%         catch
+%         end
+%     end
+%     hilSegs =[];
+%     for j=1:length(hilIndexes)
+%         try hilSegs(:,:,j) = bload([fileBase '/' fileBase trigExt], [trigNChan segLen*sampRate],...
+%                 (hilIndexes(j)-round(segLen*sampRate/2))*trigNChan*bps);
+%         catch
+%         end
+%     end
+
+figure(5)
+    plotSegs = segs;
+    filtPlotSegs = filtCombSegs;
+    for j=1:size(plotSegs,3)
+        temp = MakeBufferedPlotMat(permute(plotSegs(:,:,j),[1 3 2]),trigChanMat);
+        clf
+        hold on
+        normFactor = abs(max(max(temp))-min(min(temp)));
+        for k=1:size(temp,1)
+            plot(1:size(temp,2),temp(k,:)/normFactor-k,'k');
+        end
+%          temp = MakeBufferedPlotMat(permute(filtPlotSegs(:,:,j),[1 3 2]),trigChanMat);
+%         for k=1:size(temp,1)
+%             plot(1:size(temp,2),temp(k,:)/normFactor-k,'b');
+%         end
+       PlotAnatCurvesNew([chanInfoDir 'AnatCurvesNew.mat'],[-size(eegChanMat,1) size(temp,2)],[-0.5+offSet(1) 0.5]);
+%         PlotAnatCurvesNew('ChanInfo/AnatCurvesNew.mat',[-nVertChan size(eegPlot,2)] ,[-0.5 0.5]);
+        set(gca,'xlim',[1 size(temp,2)], 'ylim',[-size(temp,1)-1 0 ]);
+        if ~isempty(input('any key breaks:','s')); break; end
+    end
+   
+    
+    eegTrigChanData = readmulti([fileBase '/' fileBase '.eeg'],eegNChan,eegTrigChan);
+    filtTrigChan = Filter0(firfiltb, eegTrigChanData');

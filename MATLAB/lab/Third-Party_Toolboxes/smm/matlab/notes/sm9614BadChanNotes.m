@@ -1,0 +1,43 @@
+behavior = 'rem';
+fileBaseMat = ['sm9614_002.dat'];
+beginTimeMat = 0;
+fileBaseMat = [fileBaseMat; 'sm9614_105.dat'];
+beginTimeMat = [beginTimeMat; 3*60+24];
+fileBaseMat = [fileBaseMat; 'sm9614_123.dat'];
+beginTimeMat = [beginTimeMat; 4*60+10];
+fileBaseMat = [fileBaseMat; 'sm9614_134.dat'];
+beginTimeMat = [beginTimeMat; 0*60+0];
+fileBaseMat = [fileBaseMat; 'sm9614_155.dat'];
+beginTimeMat = [beginTimeMat; 0*60+0];
+fileBaseMat = [fileBaseMat; 'sm9614_268.dat'];
+beginTimeMat = [beginTimeMat; 0*60+9];
+save(['sm9614_' behavior '_BadChanAnal_Segs.mat'],'fileBaseMat','beginTimeMat');
+
+behavior = 'sws';
+fileBaseMat = ['sm9614_002.dat'];
+beginTimeMat = 3*60+23;
+fileBaseMat = [fileBaseMat; 'sm9614_105.dat'];
+beginTimeMat = [beginTimeMat; 1*60+30];
+fileBaseMat = [fileBaseMat; 'sm9614_123.dat'];
+beginTimeMat = [beginTimeMat; 0*60+41];
+fileBaseMat = [fileBaseMat; 'sm9614_134.dat'];
+beginTimeMat = [beginTimeMat; 4*60+45];
+fileBaseMat = [fileBaseMat; 'sm9614_155.dat'];
+beginTimeMat = [beginTimeMat; 4*60+6];
+fileBaseMat = [fileBaseMat; 'sm9614_268.dat'];
+beginTimeMat = [beginTimeMat; 5*60+34];
+save(['sm9614_' behavior '_BadChanAnal_Segs.mat'],'fileBaseMat','beginTimeMat');
+
+behavior = 'maze';
+fileBaseMat = ['sm9614_099.dat'];
+beginTimeMat = 1*60+33;
+fileBaseMat = [fileBaseMat; 'sm9614_119.dat'];
+beginTimeMat = [beginTimeMat; 2*60+10];
+fileBaseMat = [fileBaseMat; 'sm9614_138.dat'];
+beginTimeMat = [beginTimeMat; 3*60+8];
+fileBaseMat = [fileBaseMat; 'sm9614_163.dat'];
+beginTimeMat = [beginTimeMat; 3*60+53];
+fileBaseMat = [fileBaseMat; 'sm9614_275.dat'];
+beginTimeMat = [beginTimeMat; 3*60+23];
+save(['sm9614_' behavior '_BadChanAnal_Segs.mat'],'fileBaseMat','beginTimeMat');
+

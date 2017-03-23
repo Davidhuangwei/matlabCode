@@ -1,0 +1,448 @@
+changes in glmlab
+
+From 2.3 to 2.4
+* Changed  plotwork  as the residual vs Fitted Values plot still had
+  no Menu Bar, when all other plots did.
+  12 July 1999
+
+* Changed structure of Web Site, and made appropriate changes to
+  glmlab to reflect these.
+  26 February 1999
+
+* Changed some aspects of Loading Data Files that should make it quicker.
+  08 February 1999
+
+* Made startup smoother and quicker.
+  05 February 1999
+
+* Added Tooltips.
+  05 February 1999
+
+* Made minor changes to problems encountered with MATLAB v5.2
+  05 February 1999
+
+* Fixed a bug that appeared in MATLAB v5.2 where MATLAB complained about
+  problems with a COLON.  Thanx J-MF.
+  04 February 1999
+
+* Fixed a problem that appeared in MATLAB v5.2 with loading models.
+  This made things better anyway.
+  04 February 1999
+
+From 2.2 to 2.3
+* Fixed a bug when loading models that sometimes ignored saved information.
+  02 November 1998
+
+* Fixed a bug in Saving Models that added a  .glg  extension even
+  when it was supplied, despite what the documentation said.
+  02 November 1998
+
+* Fixed a bug in  alias  that sometimes meant aliasing of variables
+  was reported on an initial fit only when this was not the case.
+  02 November 1998
+
+* Fixed some annoying things (not quite bugs) that occurred when the 
+  inputs were not quite right; now error messages should be fewer.
+  31 August 1998
+
+* Fixed a bug: sometimes FIT MODEL was disabled, and could only
+  be enabled by adjusting the y-variable, even when there was no
+  problem.
+  20 August 1998
+
+* Added some assistance when  glmlab  falls over on startup so that
+  the user knows that  dummylog.m  must be in a writeable directory.
+  20 August 1998
+
+* Fixed a bug with loading models; the DETAILS file path was 
+  hard coded (!).
+  20 August 1998
+
+* Fixed a bug in  findvars  that made an appearance in some
+  version of  glmlab  (Noticeably Windows version).  Thanx J-MF
+  06 August 1998
+
+* Fixed a bug using  findres  that became apparent in log-linear models.
+  Thanx Jean-Marc Fromentin.
+  30 July 1998
+
+* Fixed a bug in  addpmenu  that made the whole thing freeze
+  in some circumstances. 
+  29 June 1998
+
+* Made some changes to  glmlab.m, menuwork.m  and  addpmenu  to speed
+  glmab up slightly, especially on starting.
+  29 June 1998
+
+
+From 2.0 to 2.2
+* Fixed a bug in saving models when the glg extension wasn't given.
+  21 April 1998
+
+* Removed  saveseed  and  loadseed  to use the improved  rand.
+  19 September 1997
+
+* Fiddled to fix some errors with the plots uimenu.
+  05 September 1997
+
+* Added the capacity to save and load models--the workspace
+  and settings (in GLMLAB_INFO).
+  26 August 1997
+
+* Allowed matrices to be entered into the Covariates window,
+  though it is still *strongly* unrecommended.
+  26 August 1997
+
+* Added Labels, Gridlines, Marker Attributes and Axis Limits uimenus
+  to the residual plots prettying the plots.
+  13 August 1997
+
+* A new output display control: toggle the variable information.
+  01 August 1997
+
+* A new help window:  OUTPUT VARIABLES
+  01 August 1997
+
+* Some tidying of internal workings, including two new files,
+  extcrtgl.m  and  resetgl.m.
+  01 August 1997
+
+* Now returns the names of the X-variables and the X-matrix as the
+  variables XVARNAMES and XMATRIX (thanx to Ross Darnell) and
+  separates the parameter estimates (BETA) and their standard errors
+  (SERRORS).
+  18 July 1997, 02 March 1998
+
+
+From 1.7 to 2.0 
+The changes from version 1.* to 2.* also includes changes for 
+running  glmlab  under MATLAB 5.
+
+* Fixed a bug that meant the DETAILS file was a bit odd.  Very odd really.
+  8 July 1997
+
+* glmlab  now removes occurences of the same string in the X-variables
+  window.
+  4 July 1997
+
+* Moved Residuals Plots from being a button to a menu item, and added
+  NEW MODEL as a button.
+  11 June 1997
+
+* In interactive variable entry, only allowed `double' variables appear in the
+  variable list of choices.
+  29 May 1997
+
+* Introduced interactive variable entry (apart from interactions...)
+  No doubt this will need to be tested more thoroughly.
+  28 May 1997
+
+* Changed the X Variable Edit window to accept multi-line strings.
+  22 May 1997
+
+* Made some much needed changes to the distributions files in /dist
+  15 May 1997
+
+* Added the linear predictor as a returned variable.
+  15/05/1997
+
+* Changed  interact.m  to use  varargin  so that the number of interaction
+  terms in one interaction is unlimited.
+  09/05/1997
+
+* Changed  fhisto.m  so that an error when using some starting points
+  caused the x-axis numbering to go wonky.
+  07/05/1997
+
+* Altered  fac.m  so that fac-ing a factor with missing levels works OK.
+  (ie  fac([1 2 6]) assumes 6 levels, not three as it used to).
+  01/05/1997
+
+* Made more room for parameter estimates in output.
+  01/05/1997
+
+* Provided error windows for user defined links and distributions when the
+  files don't exist.
+  01/05/1997
+
+* Provided a separator for user defined links (as for distributions).
+  01/05/1997
+
+* Removed an annoyance in DEVLIST that showed the initial condition.
+  30/04/1997
+
+* Minor changes to  plotwork  to pretty Inv Gsn and Binoml plots
+  30/04/1997
+
+* Moved errors trapping in  glmfit  to a new file,  editerrs.
+  28/04/1997
+
+* Altered  lpower  so that zeroes don't cause the log's to fail.
+  28/04/1998
+
+* Made some minor changes to  glmlab.m  now that the new on-line manual exists.
+  23/04/1997
+
+* glmlab  now remembers the last number entered into the scale parameter
+  and power link function input dialogs.
+  23/04/1997
+
+* Dimmed the  FIT SPECIFIED MODEL  button when there is no legit model to fit.
+  21/04/1997
+
+* Moved some files from one directory to another (some were in some illogical
+  places).
+  20/04/1997
+
+* Added a demo in the  Help  menu that runs a demo on the  glmlab  screen.
+  19/04/1997
+
+* The fitting parameters can now be changed through a dialog box in the
+  Options  menu.
+  18/04/1997
+
+* Added the inverse Gaussian distribution to its box of tricks.
+  17/04/1997
+
+* Fixed a bug that crept in so that changes in deviance and df wasn't displayed.
+  17/04/1997
+
+* Fixed the output display that got confused on the first iteration if a power
+  link function was used.
+  17/04/1997
+
+* Added dialog box exit on a system window close with  CloserequestFcn  to  glmlab.m
+  and  glmplot.m
+  14/04/1997
+
+* Made a warning status option for turning off the annoying warning messages.
+  13/04/1997
+
+* Changed  glmlab.m  so that only one copy of  glmlab  could be run at any
+  one time.  A little tricky, and not ideal, but it was difficult (for me
+  anyhow) given the  HandleVisibility  property is on  callback.
+  12/04/1997
+
+* Changed just about everything and every file to use the UserData property.
+  This hides  glmlab's  internal information from the user (so they don't delete
+  or clear it accidentally (or otherwise :->) and foul it all up completely).
+  11/04/1997
+
+* Changed  HandleVisibility  properties to  callback  in  glmlab.m, 
+  glmplot.m  and help windows.
+  09/04/1997
+
+* Turned off  RESIDUAL PLOTS...  button after making important structural
+  changed to the model.  (A warning still ensues after (possible) variable
+  changes, as sometimes the routines are called incidentally.)
+  09/04/1997
+
+* Minor wording changes in  glmplot.m.
+  09/04/1997
+
+* Some more fine-tuning of the new  fixmeup.m
+  09/04/1997
+
+* Minor changes to  opterr.
+  09/04/1997
+
+* Some more fixing of  fixmeup  which failed when  glmfit  auto-added
+  the transpose character.
+  02/04/1997
+
+* Turned the watch off after error messages displayed.
+  02/04/1997
+
+* Fixed  rhisto  and  fhisto  to work in MATLAB 5--some minor changes
+  (like  XTickLabels  to  XTickLabel and so on).
+  26/03/1997
+
+* Distributions for which quantile residuals cannot be found (ie user-
+  defined) issues a dialog box warning.
+  25/03/1997
+
+* Fixed  glmfit  so that a non-finite dispersion parameter issues a 
+  warning, and hides the residuals plots button (since residuals cannot
+  be calculated).
+  25/03/1997
+
+* Ironically, had to fix up  fixmeup  after the change made below to
+  remove the  [  and  ]  that appeared in the variable names.
+  25/03/1997
+
+* Fixed up  newmodel  which somehow acquired a bug while including
+  the  GLMLAB_INFO_  variable.
+  25/03/1997
+
+* When plotting residuals vs covariates, the window asking for the
+  covariates doesn't pop up when there is only one covariate--it
+  just uses it.  (This behaviour was already part of the last version;
+  the recent fiddling, however, failed to do this.)
+  24/03/1997
+
+* Changed the plotting window so that Transformed Residual are no
+  longer an option when using the normal distribution (there is no
+  transformation is that case).
+  24/03/1997
+
+* glmlab  now reports an error when trying to fit a model with no
+  co-variates and no constant term.  (It used to shrug, and decide to
+  fit a constant term anyway).
+  24/03/1997
+
+* Used cells to hide most of the internal  glmlab  variables (like the
+  error function, link, etc...) but stashing them in the UserData
+  variable  GLMLAB_INFO_, making  who  and  whos  much cleaner (which is
+  great, of course, when trying to see what vars are loaded).
+  24/03/1997
+
+* Made sure the Residual plots didn't have plots ending up on the axis and
+  hence sometimes obscured.
+  23/03/1997
+
+* Fixed a bug in residual plotting that only plotted the first replicate
+  of residuals in a quantile equivalents plot.
+  23/03/1997
+
+* Added a dialog box to indicate that files have been successfully loaded.
+  23/03/1997
+
+* When a binomial dist is specified but the response variable
+  is not set up for it, glmlab would use the binomial, but not check
+  the binomial dist and logit link in the uimenus (though they were
+  permanently set).  Likewise when a non-binomial is specified but the
+  response is set for binomial.  Now, a dialog box appears indicating
+  the change, and the new distributions and links are checked.
+  22/03/1997
+
+* Fixed some bugs in the residual plotting when the binomial
+  distribution is used.
+  22/03/1997
+
+* Errors appearing in  opterr  now appear in dialog boxes.
+  22/03/1997
+
+* The variables when entered no longer appear with  [  and  ]  enclosing.
+  Was a dumb idea to begin with really...
+  22/03/1997
+
+* When the input variables are different lengths, dialog boxes now
+  show the error message.
+  22/03/1997
+
+* On asking for a new model, a dialog box appears giving the user a chance
+  to bail out.
+  22/03/1997
+
+* Fiddled with the pushbuttons on the main  glmlab  window, adding a CLOSE
+  button (so it looks a bit more like other windows), and hence needing to
+  shift and re-size the FIT and RESIDUALS buttons.
+  22/03/1997
+
+* Added a question dialog box so that the user can bail out after electing
+  to quit and lose settings.
+  22/03/1997
+
+* Added a plot to the RESIDUALS PLOTS menu--fitted values without the
+  constant information transformation.
+  21/03/1997
+
+* Changed  npplot  so that the legend didn't obscure the title (this only
+  occurred with MATLAB 5 for some reason).
+  21/03/1997
+
+* Changed the plotting routine so that it asks nicely for which
+  covariates to plot against residuals, rather than guessing from the
+  first five observations.
+  21/03/1997
+
+* Fixed minors bug in plotting routine: always labelled the
+  covariates as  Covariate(1)  whatever the number should have been (hmm....);
+  fixed a bug that crept in when randomised quantile residuals were calculated
+  (replicates were not asked for).
+  20/03/1997
+
+* Re-ordered res vs covar plot so that the replicates were repeated first 
+  before the covariate.
+  20/03/1997
+
+* Fixed a minor bug in plotting:  Residual vs Response when y~Binomial would plot
+  twice--once for observed counts and once for sample size.  Now plots the ratio,
+  and is labelled accordingly.
+  20/03/1997
+
+* Changed things (I hope!) to be MATLAB 5 complaint.
+  19/03/1997
+
+* Now the power link function shows the power used (don't know why
+  it took so long...!)
+  19/03/1997
+
+* Added access to on-line manual from help menu, and to MathWorks and
+  glmlab  Web pages from appropriate help windows.
+  19/03/1997
+
+* Made some of the help windows smaller and better using  textwrap.
+  19/03/1997
+
+* Placed help and demo files in their own directory:  glmhelp
+  19/03/1997
+
+* Changed/added dialog boxes using  MATLAB 5 capabilities.
+  18/03/1997
+
+
+From 1.6 to 1.7
+
+* Changed the way  paramtrs  handles the parameter values.
+  Now, the current values are written to a file named  PARAVALS.mat
+  and stored in the top directory.  This now allows the user to 
+  more easily change parameters on the run without editting the 
+  parametrs.m file.
+  06/02/1996
+
+* Changed the  plot  directory to  plotting  to stop the double-up with
+  the MATLAB function by the same name (made  help plot  ugly, and besides,
+  it was a stupid thing to do in the first place).
+
+* glmlab now tells you that it's thinking by printing dots on the screen
+  as different routines and loops are called.
+
+* Made some minor changes to some files for efficiency.
+
+
+From 1.5 to 1.6
+
+* Problems with  interact.m  were dealt with.  The algorithm now
+  also handles interactions of up to 12 variables (though a small
+  changes to the function line changes it to more if needed).
+  Thanx to Janek ....
+
+* Added accelerators to some menu items.
+
+* Deleted a lot of files not used any more.
+
+* Made some functions more efficient.
+ 
+
+------
+
+Some broad changes to earlier versions:
+
+From 1.3 to 1.4
+* Some changes to the files for efficiency reasons.
+* Also cleaned up the interface a little more.
+
+From 1.2 to 1.3
+* Changed the graphical user interface to use pull-down menus.
+  This cleaned up the interface, and made it less cluttered.
+
+From 1.1 to 1.2
+* Changed the command line interface to a graphical user interface.
+  Each option (distribution, link, ...) has a button to press 
+  giving options from which to choose.
+
+From 1.0 to 1.1
+* Changed the GLIM-like command line interface to a prompted 
+  command line interface.
+

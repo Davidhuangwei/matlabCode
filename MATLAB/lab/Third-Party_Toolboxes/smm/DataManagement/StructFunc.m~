@@ -1,0 +1,36 @@
+% function outStruct = StructFunc(funcHandle,inStruct1,inStruct2)
+% Performs: outStruct = funcHandle(inStruct1,inStruct2)
+% inStruct1 and/or inStruct2 can be a constant.
+% if inStruct
+% e.g. 5 = StructFunc(@plus,2,3)
+function outStruct = StructFunc(funcHandle,inStruct1,inStruct2)
+
+outStruct = [];
+
+if ~isstruct(inStruct1) & ~isstruct(inStruct2) % terminal condition
+    outStruct = funcHandle(inStruct1,inStruct2);
+elseif isstruct(inStruct1) & isstruct(inStruct2)
+        structFields1 = fieldnames(inStruct1);
+        structFields2 = fieldnames(inStruct2);
+        if strcmp(structFields1,structFields2)
+            for j=1:length(structFields1)
+                outStruct.(structFields1{j}) = StructFunc(funcHandle,...
+                    inStruct1.(structFields1{j}),inStruct2.(structFields1{j}));
+            end
+        else
+            ERROR_MISSING_FIELDS
+        end
+elseif isstruct(inStruct1)
+    structFields1 = fieldnames(inStruct1);
+    for j=1:length(structFields1)
+        outStruct.(structFields1{j}) = StructFunc(funcHandle,...
+            inStruct1.(structFields1{j}),inStruct2);
+    end
+else isstruct(inStruct2)
+    structFields2 = fieldnames(inStruct2);
+    for j=1:length(structFields2)
+        outStruct.(structFields2{j}) = StructFunc(funcHandle,...
+            inStruct1,inStruct2.(structFields2{j}));
+    end
+end
+return

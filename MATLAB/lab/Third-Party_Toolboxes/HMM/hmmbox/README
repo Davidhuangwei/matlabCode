@@ -1,0 +1,44 @@
+HMMBOX, version 3.2, William Penny, Imperial College, Feb 1999
+Matlab toolbox for Hidden Markov Models
+
+(Adapted from Machine Learning Toolbox
+Version 1.0  01-Apr-96
+Copyright (c) by Zoubin Ghahramani, University of Toronto)
+
+The software uses some NETLAB routines 
+(see http://neural-server.aston.ac.uk/netlab/index.html)
+so you'll need to have NETLAB on your search path
+
+See the file VERSION for what's new in this version.
+
+The following observation models have so far been implemented:
+Gaussian, Gaussian with common covariances, Likelihood, AR.
+
+DEMONSTRATIONS:
+
+demgausshmm.m       uses Gaussian observation model on AR features
+demlike.m        the time series values are themselves likelihoods
+demar.m          uses AR observation model on original time series
+
+ROUTINES:
+
+hmminit          initialise Gaussian observation HMM
+hmmtrain         train HMM
+hmmdecode        make classifications using HMM
+
+obsinit          initialise Gaussian observation model
+obslike          calculate likelihood of data given observation model
+obsupdate        update parameters of observation model
+
+rsum             row sum of matrix
+rprod            row product of matrix and vector
+rdiv             row division of matrix by vector
+
+To extend the HMM to different observation models add the required
+code into obsinit, obslike and obsupdate.
+
+DATA:
+
+Read the file DATA-STRUCTURE.
+
+

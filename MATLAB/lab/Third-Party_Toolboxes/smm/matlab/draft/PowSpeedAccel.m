@@ -1,0 +1,37 @@
+function CalcPowSpeedAccel(fileBaseMat,nChan,channels,eegSamp,winLength,nOverlap,NW)
+
+whlSamp = 39.065;
+whlWinLength = winLength/eegSamp*whlSamp;
+hanfilter = hanning(floor(whlWinLength));
+hanfilter = hanfilter./mean(hanfilter);
+
+for i=1:size(fileBaseMat,1)
+    whldat = load([fileBaseMat(i,:) '.whl']);
+    [whlSpeed whlAccel] = MazeSpeedAccel(whldat);
+    eeg = readmulti([fileBaseMat(i,:) '.eeg'],nChan,channels);
+    
+    [yo, fo, to] = mtpsg(eeg,winLength*2,eegSamp,winLength,nOverlap,NW);
+    
+ 
+    speed = -1*ones(size(to));
+    for j=1:length(to)
+        whlSpeedSeg = hanfilter.*whlSpeed(round((j-1)*whlWinLength+1):round((j-1)*whlWinLength+length(hanfilter)));
+        indexes = find(whlSpeedSeg >= 0);
+        if isempty(indexes)
+            speed(j) = -1;
+        else
+            speed(j) = mean(whlSpeedSeg(indexes));
+            %whlSpeedSeg(indexes)
+        end
+    end
+    outName = [fileBaseMat(i,:) '_Speed_mtSpect_Win_' num2str(winLength) '_NW_' num2str(NW) '.mat'];
+    fprintf('\nSaving: %s\n',outName);
+    matlabVersion = version;
+    if str2num(matlabVersion(1)) > 6
+        save(outName,'-V6','yo','fo','to','speed','channels');
+    else
+        save(outName,'yo','fo','to','speed','channels');
+    end
+end
+return
+

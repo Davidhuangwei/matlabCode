@@ -1,0 +1,73 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_rspg</title>
+
+<body><h1>gtm_rspg</h1>
+Log-likelihood and component responsibilities over a Gaussian mixture
+
+<p>
+The responsibilities are returned via the global variable
+matrix gtmGlobalR. The responsibility gtmGlobalR(k,n) is 
+the probability of a particular component in the Gaussian 
+mixture, k, having generated a particular data point, n.
+It is calculated from the distances between the data point
+n and the centres of the mixture components, 1..K, and the
+inverse variance, beta, common to all components. 
+
+<h3>Synopsis</h3>
+<pre>llh = gtm_rspg(beta, D, mode)</pre><pre>llh = gtm_rspg(beta, D)</pre>
+<h3>Arguments</h3>
+<code>beta</code> - 
+a scalar value of the inverse variance common
+to all components of the mixture.
+
+<p>
+<code>D</code> - 
+dimensionality of space where the data and
+the Gaussian mixture lives; necessary to
+calculate the correct log-likelihood.
+
+<p>
+<code>mode</code> - 
+optional argument used to control the mode 
+of calculation; it can be set to 0, 1 or 2 
+corresponding to increasingly elaborate 
+measure taken to reduce the amount of
+numerical errors; mode = 0 will be fast but 
+less accurate, mode = 2 will be slow but 
+more accurate; the default mode is 0
+
+<h3>Return</h3>
+<code>llh</code> - 
+the log-likelihood of data under a the Gaussian 
+mixture.
+
+<h3>Global variables</h3>
+<code>gtmGlobalR</code> - 
+an K-by-N responsibility matrix; 
+gtmGlobalR(k,n) is the responsa-
+bility takened by mixture component 
+k for data point n.
+
+<p>
+<code>gtmGlobalDIST</code> - 
+an K-by-N matrix in which element 
+(k,n) is the Euclidean distance 
+between the centre of component m 
+and the data point n.
+
+<p>
+<code>gtmGlobalMinDist, gtmGlobalMaxDist</code> - 
+
+vectors containing the minimum and 
+maximum of each column in DIST, 
+respectively; 1-by-N; required 
+iff m > 0.
+
+<h3>See also</h3>
+<code><a href="./gtm_resp.htm">gtm_resp</a>, <a href="./gtm_dstg.htm">gtm_dstg</a>, <a href="./gtm_dist.htm">gtm_dist</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

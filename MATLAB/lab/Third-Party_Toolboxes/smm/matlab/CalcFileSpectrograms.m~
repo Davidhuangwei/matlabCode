@@ -1,0 +1,45 @@
+function CalcFileSpectrograms(fileBaseMat,fileExt,nChan,winLength,Fs,nFFT,nOverlap,NW)
+
+outDir = 'spectrograms/';
+
+for i=1:size(fileBaseMat,1)    
+    for j=1:nChan
+        
+        data = readmulti([fileBaseMat(i,:) fileExt],nChan,j);
+        
+        [yo, fo, to] = mtpsg(data',nFFT,Fs,winLength,nOverlap,NW);
+         
+        outName = [outDir fileBaseMat(i,:) fileExt 'Win' num2str(size(yo,2)) 'Ovrlp' num2str(nOverlap) 'NW' num2str(NW) '_mtpsg_' num2str(j) '.mat'];
+        %
+        %outName = ['junk_samp_Chan' num2str(j) '_MTPSG.mat'];
+        %outNameCell = cat(1, outNameCell, {outName});
+        fprintf('Saving: %s\n',outName);
+        matlabVersion = version;
+        if str2num(matlabVersion(1)) > 6
+            save(outName,'-V6','yo','fo','to','winLength','Fs','nFFT','nOverlap','NW');
+        else
+            save(outName,'yo','fo','to','winLength','Fs','nFFT','nOverlap','NW');
+        end
+    end
+end
+
+
+return
+
+
+yo2 = [];
+load junk_samp0-20000_MTPSG.mat
+yo2 = cat(2,yo2,yo);
+load junk_samp19354-39354_MTPSG.mat
+yo2 = cat(2,yo2,yo);
+load junk_samp38708-58708_MTPSG.mat
+yo2 = cat(2,yo2,yo);               
+load junk_samp58062-78062_MTPSG.mat
+yo2 = cat(2,yo2,yo);               
+load junk_samp77416-97416_MTPSG.mat
+yo2 = cat(2,yo2,yo);               
+load junk_samp96770-100000_MTPSG.mat
+yo2 = cat(2,yo2,yo);
+
+
+load junk_samp0-100000_MTPSG.mat

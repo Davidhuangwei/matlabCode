@@ -1,0 +1,26 @@
+% function RmDupTrials(fileBaseCell,spectAnalDir)
+function RmDupTrials(fileBaseCell,spectAnalDir)
+
+for j=1:length(fileBaseCell)
+    fileBase = fileBaseCell{j};
+
+    time = LoadVar([SC(fileBase) SC(spectAnalDir) 'time']); %load spectAnalTimes
+    eegSegTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'eegSegTime']); %load spectAnalTimes
+    allEegSegTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'allEegSegTime']); %load spectAnalTimes
+    keptTime = LoadVar([SC(fileBase) SC(spectAnalDir) 'keptTime']); %load spectAnalTimes
+    delTrials = [];
+    for k=length(time):-1:1
+        if sum(time(k) == time(1:k)) > 1
+            delTrials = cat(2,delTrials,k);
+        end
+    end
+    time(delTrials) = [];
+    eegSegTime(delTrials) = [];
+    allEegSegTime(delTrials) = [];
+    keptTime(delTrials) = [];
+    fprintf([fileBase ': deleted ' num2str(length(delTrials)) ' trials\n'])
+    save([SC(fileBase) SC(spectAnalDir) 'time'],SaveAsV6,'time')
+    save([SC(fileBase) SC(spectAnalDir) 'eegSegTime'],SaveAsV6,'eegSegTime')
+    save([SC(fileBase) SC(spectAnalDir) 'allEegSegTime'],SaveAsV6,'allEegSegTime')
+    save([SC(fileBase) SC(spectAnalDir) 'keptTime'],SaveAsV6,'keptTime')
+end

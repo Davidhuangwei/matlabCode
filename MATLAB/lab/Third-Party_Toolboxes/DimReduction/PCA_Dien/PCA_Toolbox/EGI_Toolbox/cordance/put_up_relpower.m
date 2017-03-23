@@ -1,0 +1,1 @@
+function put_up_power(outputmat,imagename)figuremaxmat = ceil(10*max(max(outputmat)))/10;imagesc(outputmat,[0 0.2])colormap([hot])hold oncontour(outputmat,[0.1:0.025:1],'k-')contour(outputmat,[0.025:0.025:0.075],'y-')contour(outputmat,[0],'w-')title(imagename)axis('off')colorbar

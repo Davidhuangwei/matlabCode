@@ -1,0 +1,5 @@
+for j=1:size(chanDist,1)
+    for k=1:size(chanDist,2)
+        statCoh = cat(1,statCoh,
+        if j==k
+            

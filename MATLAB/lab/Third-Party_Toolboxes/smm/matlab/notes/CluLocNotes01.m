@@ -1,0 +1,30 @@
+numSpikes = [];
+for j=1:length(cluloc)
+    clu = load(['sm9603_228-297.clu.' num2str(cluloc(j,1))]);
+    numSpikes(cluloc(j,1),cluloc(j,2)) = length(find(clu(2:end)==cluloc(j,2)));
+end
+figure(2)
+clf
+numSpikes(numSpikes==0) = NaN;
+ImageScRmNaN(numSpikes,[0 1e4]);
+
+figure(3)
+clf
+bar(numSpikes(:))
+
+numSpikes2 = zeros(96,1);
+for j=1:length(cluloc)
+    numSpikes2(cluloc(j,3)) = numSpikes2(cluloc(j,3)) + numSpikes(cluloc(j,1),cluloc(j,2));
+end
+numSpikes2(numSpikes2==0) = NaN;
+figure(4)
+clf
+ImageScRmNaN(Make2DPlotMat(numSpikes2,MakeChanMat(6,16)),[0 1e4]);
+
+for j=1:max(cluloc(:,1))
+    figure(j)
+    clu = load(['sm9603_228-297.clu.' num2str(j)]);
+    res = load(['sm9603_228-297.res.' num2str(j)]);
+    CCG(clu(2:end),res,50/1000,1000/50,20000,'scale');
+end
+

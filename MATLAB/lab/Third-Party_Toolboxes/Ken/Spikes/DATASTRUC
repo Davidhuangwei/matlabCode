@@ -1,0 +1,35 @@
+METADATA MATLAB STRUCTURE INFO
+------------------------------
+
+DataBase: 
+	struct array of Files
+
+File: 
+	Directory		string 			eg '/u14/hajime/SRS/l12-A'
+	FileBase 		string			eg 'srs'
+	Par				structure		as provided by LoadPar
+	Epochs			structure array of Epoch
+	ElecGps			structure array of ElecGp
+	nCells			number			number of cells (not counting noise cluster)
+	Cells			structure array of Cell
+	CellMap 		nx2 array		gives ElecGp and cluster number for each cell (not counting noise cluster)
+	Name			string			eg j2102
+	
+Epcoch:
+	Type			string			Type of epoch (e.g. 'Theta');
+	Start			number			time in seconds since beginning of file
+	End				number			time in seconds since beginning of file
+	
+	NB epochs of a given type must be non-overlapping and in chronological order.
+	
+ElecGp: (i.e. tetrode)
+	Par1			structure		as provided by LoadPar1
+	Location		string			eg '1, 3, h' (see README for .des file description)
+	nCells			number			number of cells on this tetrode (not counting noise cluster)
+	FirstCell		number			number of first cell of this tetrode in overall .clu file
+	
+Cell:
+	Type			string			e.g. 'p' for pyramidal (see REAME for description of .des file)
+	SubType			string			2nd column of .des file
+	eDist			number			Cluster quality as measured by equal distance
+	bRat			number			Cluster quality as measured by burst ratio

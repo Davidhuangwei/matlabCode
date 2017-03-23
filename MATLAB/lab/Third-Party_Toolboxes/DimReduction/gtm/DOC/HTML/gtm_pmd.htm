@@ -1,0 +1,45 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_pmd</title>
+
+<body><h1>gtm_pmd</h1>
+Calculates the posterior mode projection of data into the latent space.
+
+<p>
+The posterior mode projection of a point from the target
+space, t, is the mode of the correspondig posterior 
+distribution induced in the latent space.
+
+<h3>Synopsis</h3>
+<pre>modes = gtm_pmn(T, X, FI, W)</pre>
+<h3>Arguments</h3>
+<code>T</code> - 
+data points representing the distribution
+in the target space. N-by-D
+
+<p>
+<code>X</code> - 
+data points forming a latent variable sample
+of the distribution in the latent space.
+K-by-L
+
+<p>
+<code>FI</code> - 
+activations of the basis functions when
+fed X; K-by-(M+1)
+
+<p>
+<code>W</code> - 
+a matrix of trained weights
+
+<h3>Return</h3>
+<code>modes</code> - 
+the posterior modes in latent space. N-by-L
+
+<h3>See also</h3>
+<code><a href="./gtm_ppd.htm">gtm_ppd</a>, <a href="./gtm_pmn.htm">gtm_pmn</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

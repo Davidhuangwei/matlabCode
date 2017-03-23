@@ -1,0 +1,40 @@
+
+fileExtCell = {...
+                  '.eeg',...
+                 '_LinNearCSD121.csd',...
+                }
+spectAnalDir = [spectAnalBaseCell{1} fileExtCell{1}]
+
+
+selChan = Struct2CellArray(SelChan(fileExtCell{1}))
+badChan = BadChan(fileExtCell{1})
+clear thetaCoh
+for j=1:size(selChan,1)
+    temp = LoadDesigVar(fileBaseCell,spectAnalDir,[depVarCell{1} '.' selChan{j,1}],trialDesig);
+    temp.maze(:,badChan) = [];
+    thetaCoh(j,:) = mean(temp.maze,1);
+end
+plot((thetaCoh))
+set(gca,'xlim',[0 9])
+plot(UnATanCoh(thetaCoh'))
+
+imagesc(
+
+clear diffScore
+for j=1:size(thetaCoh,1)
+    for k=1:size(thetaCoh,1)
+        diffScore(j,k) = sum(abs(thetaCoh(j,:) - thetaCoh(k,:)));
+    end
+end
+imagesc(diffScore)
+colorbar
+
+clear diffScore
+for j=1:size(thetaCoh,2)
+    for k=1:size(thetaCoh,2)
+        diffScore(j,k) = sum(abs(thetaCoh(:,j) - thetaCoh(:,k)));
+    end
+end
+imagesc(diffScore)
+colorbar
+

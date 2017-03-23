@@ -1,0 +1,14 @@
+%[ minsind, minsvalues] = LocalMinima(x)
+%
+% finds positions of all strict local minima in input array
+
+function [minsind,minsvalues] = LocalMinima(x)
+
+nPoints = length(x);
+
+Middle = x(2:(nPoints-1));
+Left = x(1:(nPoints-2));
+Right = x(3:nPoints);
+
+minsind = 1+find(Middle < Left & Middle < Right);
+minsvalues = x(minsind);

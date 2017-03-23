@@ -1,0 +1,160 @@
+function [returnarmPowMat, centerarmPowMat, choicepointPowMat, choicearmPowMat] = CalcAnatMazeRegionPow(taskType,fileBaseMat,fileExt,nchannels,badchan,lowCut,highCut,onePointBool,saveBool,fileNameFormat,plotbool,trialtypesbool)
+
+if ~exist('trialtypesbool','var')
+    trialtypesbool = [1  0  1  0  0   0   0   0   0   0   0   0  0];
+                    %cr ir cl il crp irp clp ilp crb irb clb ilb xp
+end
+if ~exist('mazelocationsbool','var')
+    mazelocationsbool = [0  0  0  1  1  1   1   1   1];
+                       %rp lp dp cp ca rca lca rra lra
+end
+% [1 0 1 0 0 0 0 0 0 0 0 0 0]
+% [0 0 0 1 1 1 1 1 1]
+
+if ~exist('plotbool','var')
+    plotbool = 0;
+end
+if ~exist('saveBool','var')
+    saveBool = 0;
+end
+if ~exist('onePointBool','var')
+    onePointBool = 0;
+end
+
+
+[numfiles n] = size(fileBaseMat);
+ntrials=0;
+
+returnarmPowMat = [];
+centerarmPowMat = [];
+choicepointPowMat = [];
+choicearmPowMat = [];
+
+for i=1:numfiles
+    
+    dspowname = [fileBaseMat(i,:) '_' num2str(lowCut) '-' num2str(highCut) 'Hz' fileExt '.100DBdspow'];
+    powerdat = 10.^((bload(dspowname,[nchannels inf],0,'int16')')/1000);
+    [dspm n] = size(powerdat);
+    
+    allMazeRegions = loadmazetrialtypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 1 1 1 1 1 1]);
+    [whlm n] = size(allMazeRegions);
+    if whlm~=dspm
+        FILES_NOT_SAME_SIZE
+    end
+    
+    atports = loadmazetrialtypes(fileBaseMat(i,:),trialtypesbool,[1 1 0 0 0 0 0 0 0]);
+    
+    choicepoint = loadmazetrialtypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 1 0 0 0 0 0]);
+    centerarm   = loadmazetrialtypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 0 1 0 0 0 0]);
+    choicearm   = loadmazetrialtypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 0 0 1 1 0 0]);
+    returnarm   = loadmazetrialtypes(fileBaseMat(i,:),trialtypesbool,[0 0 0 0 0 0 0 1 1]);
+    
+    %plot(allMazeRegions(:,1),allMazeRegions(:,2))
+    trialbegin = find(allMazeRegions(:,1)~=-1);
+    while ~isempty(trialbegin),
+        trialend = trialbegin(1) + find(atports((trialbegin(1)+1):end,1)~=-1);
+        if isempty(trialend),
+            breaking = 1
+            break;
+        end
+        
+        trialreturnarm = trialbegin(1)-1+find(returnarm(trialbegin(1):(trialend(1)-1),1)~=-1);
+        trialcenterarm = trialbegin(1)-1+find(centerarm(trialbegin(1):(trialend(1)-1),1)~=-1);
+        trialchoicepoint = trialbegin(1)-1+find(choicepoint(trialbegin(1):(trialend(1)-1),1)~=-1);
+        trialchoicearm = trialbegin(1)-1+find(choicearm(trialbegin(1):(trialend(1)-1),1)~=-1);
+        
+        trialbegin = trialend(1)-1+find(allMazeRegions(trialend(1):end,1)~=-1);
+
+        if plotbool
+            figure(3)
+            clf
+            hold on
+            plot(returnarm(trialreturnarm,1),returnarm(trialreturnarm,2),'.','color',[0 0 1],'markersize',7);
+            plot(centerarm(trialcenterarm,1),centerarm(trialcenterarm,2),'.','color',[1 0 0],'markersize',7);
+            plot(choicepoint(trialchoicepoint,1),choicepoint(trialchoicepoint,2),'.','color',[0 0 0],'markersize',7);
+            plot(choicearm(trialchoicearm,1),choicearm(trialchoicearm,2),'.','color',[0 1 1],'markersize',7);
+            set(gca,'xlim',[0 368],'ylim',[0 240]);    
+        end
+        if onePointBool
+            returnArmMidPointDist = (returnarm(trialreturnarm,1) - mean([max(returnarm(trialreturnarm,1)) min(returnarm(trialreturnarm,1))])).^2 + ...
+                (returnarm(trialreturnarm,2) - mean([max(returnarm(trialreturnarm,2)) min(returnarm(trialreturnarm,2))])).^2;
+            returnArmMidPoint = find(returnArmMidPointDist == min(returnArmMidPointDist));
+            returnarmPowMat = [returnarmPowMat; powerdat(trialreturnarm(returnArmMidPoint),:)];
+            
+            centerArmMidPointDist = (centerarm(trialcenterarm,1) - mean([max(centerarm(trialcenterarm,1)) min(centerarm(trialcenterarm,1))])).^2 + ...
+                (centerarm(trialcenterarm,2) - mean([max(centerarm(trialcenterarm,2)) min(centerarm(trialcenterarm,2))])).^2;
+            centerArmMidPoint = find(centerArmMidPointDist == min(centerArmMidPointDist));
+            centerarmPowMat = [centerarmPowMat; powerdat(trialcenterarm(centerArmMidPoint),:)];
+            
+            choicePointMidPointDist = (choicepoint(trialchoicepoint,1) - mean([max(choicepoint(trialchoicepoint,1)) min(choicepoint(trialchoicepoint,1))])).^2 + ...
+                (choicepoint(trialchoicepoint,2) - mean([max(choicepoint(trialchoicepoint,2)) min(choicepoint(trialchoicepoint,2))])).^2;
+            choicePointMidPoint = find(choicePointMidPointDist == min(choicePointMidPointDist));
+            choicepointPowMat = [choicepointPowMat; powerdat(trialchoicepoint(choicePointMidPoint),:)];
+            
+            choiceArmMidPointDist = (choicearm(trialchoicearm,1) - mean([max(choicearm(trialchoicearm,1)) min(choicearm(trialchoicearm,1))])).^2 + ...
+                (choicearm(trialchoicearm,2) - mean([max(choicearm(trialchoicearm,2)) min(choicearm(trialchoicearm,2))])).^2;
+            choiceArmMidPoint = find(choiceArmMidPointDist == min(choiceArmMidPointDist));
+            choicearmPowMat = [choicearmPowMat; powerdat(trialchoicearm(choiceArmMidPoint),:)];
+
+            
+            if plotbool
+                plot(returnarm(trialreturnarm(returnArmMidPoint),1),returnarm(trialreturnarm(returnArmMidPoint),2),'.','color',[0 1 0],'markersize',20);
+                plot(choicepoint(trialchoicepoint(choicePointMidPoint),1),choicepoint(trialchoicepoint(choicePointMidPoint),2),'.','color',[0 1 0],'markersize',20);
+                plot(centerarm(trialcenterarm(centerArmMidPoint),1),centerarm(trialcenterarm(centerArmMidPoint),2),'.','color',[0 1 0],'markersize',20);
+                plot(choicearm(trialchoicearm(choiceArmMidPoint),1),choicearm(trialchoicearm(choiceArmMidPoint),2),'.','color',[0 1 0],'markersize',15);
+                
+                keyboard
+                %plot(returnarm(round(mean(trialreturnarm)),1),returnarm(round(mean(trialreturnarm)),2),'.','color',[0 1 0],'markersize',7);
+                %plot(centerarm(round(mean(trialcenterarm)),1),centerarm(round(mean(trialcenterarm)),2),'.','color',[0 1 0],'markersize',7);
+                %plot(choicepoint(round(mean(trialchoicepoint)),1),choicepoint(round(mean(trialchoicepoint)),2),'.','color',[0 1 0],'markersize',7);
+                %plot(choicearm(round(mean(trialchoicearm)),1),choicearm(round(mean(trialchoicearm)),2),'.','color',[0 1 0],'markersize',7);
+            end
+        else
+            returnarmPowMat = [returnarmPowMat; mean(powerdat(trialreturnarm,:),1)];
+            centerarmPowMat = [centerarmPowMat; mean(powerdat(trialcenterarm,:),1)];
+            choicepointPowMat = [choicepointPowMat; mean(powerdat(trialchoicepoint,:),1)];
+            choicearmPowMat = [choicearmPowMat; mean(powerdat(trialchoicearm,:),1)];
+        end
+        ntrials = ntrials + 1;
+        if plotbool
+            fprintf('n=%d : ',ntrials);
+            input('next?');
+        end
+
+        
+    end
+end
+
+fprintf('total n=%d : ',ntrials);
+if saveBool
+    if fileNameFormat == 1,
+        ERROR_fileNameFormat_NOT_READY
+        outname = [tasktype '_' fileBaseMat(1,1) fileBaseMat(1,2:4) fileBaseMat(1,5) fileBaseMat(1,6:8) ...
+            '-' fileBaseMat(end,1) fileBaseMat(end,2:4) fileBaseMat(end,5) fileBaseMat(end,6:8)...
+            fileExt '_' num2str(lowCut) '-' num2str(highCut) 'Hz_pos_pow_sum.mat'];
+    end
+    if fileNameFormat == 2,
+        ERROR_fileNameFormat_NOT_READY
+        outname = [tasktype '_' fileBaseMat(1,7) fileBaseMat(1,10:12) fileBaseMat(1,14) fileBaseMat(1,17:19) ...
+            '-' fileBaseMat(end,7) fileBaseMat(end,10:12) fileBaseMat(end,14) fileBaseMat(end,17:19) ...
+            fileExt '_' num2str(lowCut) '-' num2str(highCut) 'Hz_pos_pow_sum.mat'];
+    end
+    if fileNameFormat == 0,
+        if onePointBool
+        outname = [taskType '_' fileBaseMat(1,[1:7 10:12 14 17:19]) '-' fileBaseMat(end,[7 10:12 14 17:19]) ...
+            fileExt '_' num2str(lowCut) '-' num2str(highCut) 'Hz_point_AnatMazeRegionPow.mat'];
+        else
+                    outname = [taskType '_' fileBaseMat(1,[1:7 10:12 14 17:19]) '-' fileBaseMat(end,[7 10:12 14 17:19]) ...
+            fileExt '_' num2str(lowCut) '-' num2str(highCut) 'Hz_mean_AnatMazeRegionPow.mat'];
+        end
+    end
+    fprintf('Saving %s\n', outname);
+    matlabVersion = version;
+    if str2num(matlabVersion(1)) > 6
+        save(outname,'-V6','returnarmPowMat','centerarmPowMat','choicepointPowMat','choicearmPowMat');
+    else
+        save(outname,'returnarmPowMat','centerarmPowMat','choicepointPowMat','choicearmPowMat');
+    end
+end
+
+return

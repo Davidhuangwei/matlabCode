@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>
+Netlab Reference Manual knn
+</title>
+</head>
+<body>
+<H1> knn
+</H1>
+<h2>
+Purpose
+</h2>
+Creates a K-nearest-neighbour classifier.
+
+<p><h2>
+Synopsis
+</h2>
+<PRE>
+
+y = knn(xtrain, xtest, t, kmax)
+</PRE>
+
+
+<p><h2>
+Description
+</h2>
+<CODE>y = knn(xtrain, xtest, t, kmax)</CODE> takes a matrix <CODE>xtrain</CODE>
+of input vectors (one vector per row) with corresponding 1-of-N coded class
+labels in the matrix <CODE>t</CODE> and uses the <CODE>k</CODE>-nearest-neighbour rule to 
+produce 
+a matrix <CODE>y</CODE> of classifications for a new input matrix <CODE>xtest</CODE>.
+The nearest neighbours are determined using Euclidean distance.
+The <CODE>k</CODE>th column of the matrix <CODE>y</CODE> contains the predicted class labels
+(as an index 1..N, not as 1-of-N coding)
+using <CODE>k</CODE> nearest neighbours, where <CODE>k</CODE> runs from 1 to <CODE>kmax</CODE>.
+
+<p><h2>
+Example
+</h2>
+<PRE>
+
+y = knn(xtrain, xtest, targets, 2);
+</PRE>
+
+Puts in the first column of <CODE>y</CODE> the classification of each vector in 
+<CODE>xtest</CODE> according to
+the nearest neighbour rule.  The second column of <CODE>y</CODE> contains the
+classification of each vector according to the 2 nearest neighbour rule.
+
+<p><h2>
+See Also
+</h2>
+<CODE><a href="kmeans.htm">kmeans</a></CODE><hr>
+<b>Pages:</b>
+<a href="index.htm">Index</a>
+<hr>
+<p>Copyright (c) Ian T Nabney (1996-9)
+
+
+</body>
+</html>

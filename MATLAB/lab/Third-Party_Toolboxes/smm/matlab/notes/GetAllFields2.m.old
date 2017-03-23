@@ -1,0 +1,17 @@
+function [outCell] = GetAllFields2(categIndepStruct)
+% given a struct returns the data from all branches of the struct and a cell
+% array deliniating the branch matrix
+
+outCell = {};
+if isstruct(categIndepStruct)
+    names = fieldnames(categIndepStruct);
+    for i=1:length(names)
+        [tempOutCell] = GetAllFields2(getfield(categIndepStruct,names{i}));
+        %size(tempData,1)
+        groupCell = cat(1,groupCell,cat(2,repmat(names(i),size(tempOutCell,1),1),)tempOutCell);
+        %data = cat(1,data,tempData);
+    end
+else
+    data = {categIndepStruct};
+end
+return

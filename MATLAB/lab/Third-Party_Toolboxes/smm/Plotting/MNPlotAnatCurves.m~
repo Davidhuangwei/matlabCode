@@ -1,0 +1,26 @@
+function MNPlotAnatCurves(anatCurvesFiles, axesHandles, curvesColor, lineWidth)
+% Input: MxN Cell array with filenames for AnatCurves files to be overlain on
+% the MxN subplots in the current figure window
+if ~exist('curvesColor','var') | isempty(curvesColor)
+    curvesColor = [0.65, 0.65, 0.65];
+end
+if ~exist('lineWidth','var') | isempty(lineWidth)
+    lineWidth = 2;
+end
+
+if ~exist('anatCurvesFiles') | isempty(anatCurvesFiles)
+    fprintf('No Anat Curves File specified');
+else
+    [m, n] = size(anatCurvesFiles);
+    for i=1:m
+        for j=1:n
+            if ~exist('axesHandles') | isempty(axesHandles)
+                subplot(m,n,(i-1)*n+j);
+            else
+                axes(axesHandles{i,j});
+            end
+            PlotAnatCurves(anatCurvesFiles{i,j});
+        end
+    end
+end
+

@@ -1,0 +1,185 @@
+function whldat = LoadMazeTrialTypes(fileBase,trialTypesBool,mazeLocationsBool)
+
+if ~exist('trialTypesBool')
+    trialTypesBool = [1  0  1  0  0   0   0   0   0   0   0   0  0];
+                   % LR RR RL LL LRP RRP RLP LLP LRB RRB RLB LLB XP
+end
+if ~exist('mazeLocationsBool')
+    mazeLocationsBool = [0  0  0  1  1  1   1   1   1];
+                      % rp lp dp cp ca rca lca rra lra
+end
+% [1 0 1 0 0 0 0 0 0 0 0 0 0]
+% [0 0 0 1 1 1 1 1 1]
+
+
+numtrials = 0; % for counting trials
+nXP = 0;
+nLR = 0;
+nRR = 0;
+nRL = 0;
+nLL = 0;
+nLRP = 0;
+nRRP = 0;
+nRLP = 0;
+nLLP = 0;
+nLRB = 0;
+nRRB = 0;
+nRLB = 0;
+nLLB = 0;
+
+fprintf('\nFile: %s,\n',fileBase);
+whldat = load([fileBase '.whl']);
+[whlm n]=size(whldat);
+included = zeros(whlm,1);
+if exist([fileBase '_whl_indexes.mat'],'file'),
+    fprintf('Including: ');
+    load([fileBase '_whl_indexes.mat']);
+    if trialTypesBool(1), 
+        included(LeftRight & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + LR;
+        nLR = nLR + LR;
+        fprintf('LR n=%i, ', nLR);
+    end
+    if trialTypesBool(2), 
+        included(RightRight & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + RR;
+        nRR = nRR + RR;
+        fprintf('RR n=%i, ', nRR);
+    end
+    if trialTypesBool(3), 
+        included(RightLeft & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + RL;
+        nRL = nRL + RL;
+        fprintf('RL n=%i, ', nRL);
+    end
+    if trialTypesBool(4), 
+        included(LeftLeft & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + LL;
+        nLL = nLL + LL;
+        fprintf('LL n=%i, ', nLL);
+    end
+    if trialTypesBool(5), 
+        included(ponderLeftRight & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + LRP;
+        nLRP = nLRP + LRP;
+        fprintf('LRP n=%i, ', nLRP);
+    end
+    if trialTypesBool(6), 
+        included(ponderRightRight & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + RRP;
+        nRRP = nRRP + RRP;
+        fprintf('RRP n=%i, ', nRRP);
+    end
+    if trialTypesBool(7), 
+        included(ponderRightLeft & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + RLP;
+        nRLP = nRLP + RLP;
+        fprintf('RLP n=%i, ', nRLP);
+    end
+    if trialTypesBool(8), 
+        included(ponderLeftLeft & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + LLP;
+        nLLP = nLLP + LLP;
+        fprintf('LLP n=%i, ', nLLP);
+    end
+    if trialTypesBool(9), 
+        included(badLeftRight & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + LRB;
+        nLRB = nLRB + LRB;
+        fprintf('LRB n=%i, ', nLRB);
+    end
+    if trialTypesBool(10), 
+        included(badRightRight & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + RRB;
+        nRRB = nRRB + RRB;
+        fprintf('RRB n=%i, ', nRRB);
+    end
+    if trialTypesBool(11), 
+        included(badRightLeft & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + RLB;
+        nRLB = nRLB + RLB;
+        fprintf('RLB n=%i, ', nRLB);
+    end
+    if trialTypesBool(12), 
+        included(badLeftLeft & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + LLB;
+        nLLB = nLLB + LLB;
+        fprintf('LLB n=%i, ', nLLB);
+    end
+    if trialTypesBool(13), 
+        included(exploration & whldat(:,1)~=-1)=1;
+        numtrials = numtrials + XP;
+        nXP = nXP + XP;
+        fprintf('XP n=%i, ', nXP);
+    end
+    fprintf('total n=%i ', numtrials);
+    fprintf('\nRemoved:')
+            
+    whldat(find(~included),:) = -1;
+    
+    if mazeLocationsBool(1)==0,
+        if exist('rWaterPort','var'),
+            whldat(find(rWaterPort),:) = -1;
+            fprintf(' rp,');
+        end
+    end
+    if mazeLocationsBool(2)==0,
+        if exist('lWaterPort','var'),
+            whldat(find(lWaterPort),:) = -1;
+            fprintf(' lp,');
+        end
+    end
+   
+    if mazeLocationsBool(3)==0,
+        if exist('delayArea','var'),
+            whldat(find(delayArea),:) = -1;
+            fprintf(' da,');
+        end
+    end
+    if mazeLocationsBool(4)==0,
+        if exist('Tjunction','var'),
+            whldat(find(Tjunction),:) = -1;
+            fprintf(' cp,');
+        end
+    end
+    if mazeLocationsBool(5)==0,
+        if exist('centerArm','var'),
+            whldat(find(centerArm),:) = -1;
+            fprintf(' ca,');
+        end
+    end
+    if mazeLocationsBool(6)==0,
+        if exist('rGoalArm','var'),
+            whldat(find(Rchoicearm),:) = -1;
+            fprintf(' rca,');
+        end
+    end
+    if mazeLocationsBool(7)==0,
+        if exist('Lchoicearm','var'),
+            whldat(find(Lchoicearm),:) = -1;
+            fprintf(' lca,');
+        end
+    end
+    if mazeLocationsBool(8)==0,
+        if exist('rReturnArm','var'),
+            whldat(find(rReturnArm),:) = -1;
+            fprintf(' rra,');
+        end
+    end
+    if mazeLocationsBool(9)==0,
+        if exist('lReturnArm','var'),
+            whldat(find(lReturnArm),:) = -1;
+            fprintf(' lra,');
+        end
+    end
+    fprintf('\n');
+else
+    fprintf('All trial types included\n');
+end
+return
+
+            save([filebase '_whl_indexes.mat'],'exploration','LeftRight','RightRight','RightLeft','LeftLeft',...
+                'ponderLeftRight','ponderRightRight','ponderRightLeft','ponderLeftLeft',...
+                'badLeftRight','badRightRight','badRightLeft','badLeftLeft','delayArea','rWaterPort',...
+                'lWaterPort','Tjunction','centerArm','rGoalArm','lGoalArm','rReturnArm','lReturnArm',...
+                'XP','LR', 'RR', 'RL', 'LL', 'LRP', 'RRP', 'RLP', 'LLP', 'LRB', 'RRB', 'RLB', 'LLB','taskType');

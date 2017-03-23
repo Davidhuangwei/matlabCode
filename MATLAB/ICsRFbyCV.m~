@@ -1,0 +1,33 @@
+function [mA,mW,As,Ws,normAs,nWs]=ICsRFbyCV(lfp,w,ns)
+[nt,nch]=size(lfp);
+[ncomp,nchw]=size(w);
+if nt<nch
+    lfp=lfp';
+    [nt,nch]=size(lfp);
+end
+if nchw~=nch
+    if ncomp==nch
+        w=w';
+        ncomp=size(w,1);
+    else
+        error('data and unmixing matrix dimention mismatch.')
+    end
+end
+if isempty(ns);ns=20;end
+if isempty(tt);tt=nt-fix(nt/ns);end
+W=cell(ns);
+A=cell(ns);
+J=zeros(ns,1);
+for k=1:ns
+    [~,st]=sort(rand(nt,1));
+    [~, A{k}, W{k}, J(k)]=wKDICA(lfp(st(1:tt),:)',ncomp,0,0,0);%
+end
+[As,Ws,normAs,nWs]=ClustICbasic(pinv(w),A,W);
+mA=normAs{1};
+mW=nWs{1};
+for k=2:ns
+mA=mA+normAs{k};
+mW=mW+nWs{1};
+end
+mA=mA/ns;
+mW=mW/ns;

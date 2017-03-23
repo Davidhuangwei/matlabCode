@@ -1,0 +1,14 @@
+function [res clu] = LoadResClu(fileBase,varargin)
+[clusters epochs] = DefaultArgs(varargin,{[],[]});
+
+res = load([fileBase '.res']);
+clu = load([fileBase '.clu']);
+firstClu = clu(1);
+clu = clu(2:end);
+if ~isempty(clusters)
+    ind = ismember(clu,clusters);
+    res = res(ind);
+    clu = clu(ind);
+end
+if ~isempty
+    

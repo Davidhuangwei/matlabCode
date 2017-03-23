@@ -1,0 +1,95 @@
+function RecalcThetaGammaRange(fileBaseMat,extCell,thetaFreqRange,gammaFreqRange);
+
+dirBaseName = 'CalcRunningSpectra9_noExp_MidPoints_MinSpeed0Win626';
+
+% oldDirBase = 'CalcRunningSpectra8';
+% newDirBase = 'CalcRunningSpectra9';
+
+%dirExtCell = {'_noExp_MidPoints_MinSpeed0Win626_LinNear.eeg'}
+
+% dirExtCell = {'_noExp_MidPoints_MinSpeed0Win626.eeg';...
+%           '_noExp_MidPoints_MinSpeed0Win626_LinNearCSD121.csd';...
+%           %'_noExp_MidPoints_MinSpeed0Win626_NearAveCSD1.csd';...
+%           '_noExp_MidPoints_MinSpeed0Win626_LinNear.eeg'};
+currDir = pwd;
+for j=1:size(fileBaseMat,1)
+    fprintf('%s\n',fileBaseMat(j,:));
+    for k=1:length(extCell)
+        selectedChannels = load(['ChanInfo/SelectedChannels' extCell{k} '.txt'])';
+        
+        cd(fileBaseMat(j,:))
+        dirName = [dirBaseName extCell{k}];
+        if ~exist(dirName,'dir')
+            fprintf('\nERROR: %s not found\n',dirName)
+        else
+            cd(dirName);
+            load('powSpec.mat','-mat')
+            powSpec.yo = 10.^(powSpec.yo./10);
+            fo = powSpec.fo;
+
+            if ~isempty(thetaFreqRange)
+                thetaPowPeak = squeeze(10.*log10(max(powSpec.yo(:,:,find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2))),[],3)));
+                thetaPowIntg = squeeze(10.*log10(sum(powSpec.yo(:,:,find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2))),3)));
+            end
+            if ~isempty(gammaFreqRange)
+                gammaPowPeak = squeeze(10.*log10(max(powSpec.yo(:,:,find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2))),[],3)));
+                gammaPowIntg = squeeze(10.*log10(sum(powSpec.yo(:,:,find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2))),3)));
+            end
+                                   
+            load('cohSpec.mat','-mat')
+            load('phaseSpec.mat','-mat')
+            fo = cohSpec.fo;
+
+            for m=1:length(selectedChannels)
+                selChanName = ['ch' num2str(selectedChannels(m))];
+                waveCoh = cohSpec.yo.(selChanName);
+                wavePhase = phaseSpec.yo.(selChanName);
+                                
+                if ~isempty(thetaFreqRange)
+                    thetaCohMedian.(selChanName) = squeeze(median(waveCoh(:,:,find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2))),3));
+                    thetaCohMean.(selChanName) = squeeze(mean(waveCoh(:,:,find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2))),3));
+                    thetaPhaseMean.(selChanName) = squeeze(mean(wavePhase(:,:,find(fo>=thetaFreqRange(1) & fo<=thetaFreqRange(2))),3));
+                end
+                if ~isempty(gammaFreqRange)
+                    gammaCohMedian.(selChanName) = squeeze(median(waveCoh(:,:,find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2))),3));
+                    gammaCohMean.(selChanName) = squeeze(mean(waveCoh(:,:,find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2))),3));
+                    gammaPhaseMean.(selChanName) = squeeze(mean(wavePhase(:,:,find(fo>=gammaFreqRange(1) & fo<=gammaFreqRange(2))),3));
+                end
+
+            end
+            saveDir = 'Test_';
+            if ~isempty(thetaFreqRange)
+                save([saveDir 'thetaPowPeak' num2str(thetaFreqRange(1)) '-' num2str(thetaFreqRange(2)) 'Hz.mat'],SaveAsV6,'thetaPowPeak');
+                save([saveDir 'thetaPowIntg' num2str(thetaFreqRange(1)) '-' num2str(thetaFreqRange(2)) 'Hz.mat'],SaveAsV6,'thetaPowIntg');
+                save([saveDir 'thetaCohMedian' num2str(thetaFreqRange(1)) '-' num2str(thetaFreqRange(2)) 'Hz.mat'],SaveAsV6,'thetaCohMedian');
+                save([saveDir 'thetaCohMean' num2str(thetaFreqRange(1)) '-' num2str(thetaFreqRange(2)) 'Hz.mat'],SaveAsV6,'thetaCohMean');
+                save([saveDir 'thetaPhaseMean' num2str(thetaFreqRange(1)) '-' num2str(thetaFreqRange(2)) 'Hz.mat'],SaveAsV6,'thetaPhaseMean');
+            end
+            if ~isempty(gammaFreqRange)
+                save([saveDir 'gammaPowPeak' num2str(gammaFreqRange(1)) '-' num2str(gammaFreqRange(2)) 'Hz.mat'],SaveAsV6,'gammaPowPeak');
+                save([saveDir 'gammaPowIntg' num2str(gammaFreqRange(1)) '-' num2str(gammaFreqRange(2)) 'Hz.mat'],SaveAsV6,'gammaPowIntg');
+                save([saveDir 'gammaCohMedian' num2str(gammaFreqRange(1)) '-' num2str(gammaFreqRange(2)) 'Hz.mat'],SaveAsV6,'gammaCohMedian');
+                save([saveDir 'gammaCohMean' num2str(gammaFreqRange(1)) '-' num2str(gammaFreqRange(2)) 'Hz.mat'],SaveAsV6,'gammaCohMean');
+                save([saveDir 'gammaPhaseMean' num2str(gammaFreqRange(1)) '-' num2str(gammaFreqRange(2)) 'Hz.mat'],SaveAsV6,'gammaPhaseMean');
+            end
+        end
+    end
+    cd(currDir)
+end
+return
+
+baseNames = {'thetaPowPeak','thetaPowIntg','thetaCohMedian','thetaCohMean','thetaPhaseMean','gammaPowPeak','gammaPowIntg','gammaCohMedian','gammaCohMean','gammaPhaseMean'};
+for j=1:length(baseNames)
+    test = LoadVar(['Test_' baseNames{j} '65-100Hz.mat']);
+    old = LoadVar([baseNames{j} '65-100Hz.mat']);
+    if ~isstruct(test)
+        
+    else
+        if test-old > 10e-10
+            fprintf('ERROR: %s failed 10e-10',baseNames{j});
+        end
+    end
+end
+
+
+

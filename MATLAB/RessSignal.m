@@ -1,0 +1,7 @@
+function x=RessSignal(x)
+if size(x,2)<size(x,1)
+    x=x';
+end
+x=bsxfun(@minus,x,mean(x,2));
+x=x(:,2:end)'-x(:,1:(end-1))'/(x(:,1:(end-1))*x(:,1:(end-1))'+.00001)*(x(:,1:(end-1))*x(:,2:end)');
+x=x';

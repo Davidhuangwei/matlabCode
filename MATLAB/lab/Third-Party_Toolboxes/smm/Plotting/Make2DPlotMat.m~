@@ -1,0 +1,26 @@
+function outputMat = Make2DPlotMat(inputVector,chanMat,badChan,interpFunc)
+% function outputMat = Make2DPlotMat(inputVector,chanMat,badChan,interpFunc)
+% Turns inputVector into a 2D matrix according the the arrangement specified by chanMat.
+% Channels specified by badChan are given a value of NaN;
+% interpFunc determines by what method bad channels are interpolated (see
+% interp1)
+
+if ~exist('badChan','var') | isempty(badChan)
+    badChan = -1;
+end
+
+outputMat = NaN*zeros(size(chanMat));
+
+[nChanY nChanX] = size(chanMat);
+for x=1:nChanX
+    for y=1:nChanY
+        if isempty(find(badChan==chanMat(y,x))), % if the channel isn't bad
+            outputMat(y,x) = inputVector(chanMat(y,x));
+        end
+    end
+end
+if exist('interpFunc','var') & ~isempty(interpFunc)
+    for x=1:nChanX
+        outputMat(:,x) = interp1(find(~isNaNoutputMat(:,x)),outputMat(find(~isNaNoutputMat(:,x)),x),[1:nChanY],interpFunc);
+    end
+end

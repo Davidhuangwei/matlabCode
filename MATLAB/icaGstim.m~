@@ -1,0 +1,796 @@
+% clear all
+% cd /home/weiwei/data/data/5314-all/
+% FileBase = '5314-all';
+% load chanLoc.mat
+% Layers=fieldnames(chanLoc);
+% layer_show=zeros(16,1);
+% for n=1:length(Layers)
+%     layer_show(chanLoc.(Layers{n}))=n;
+% end
+% Par = LoadXml([FileBase '.xml']);
+% % LFP = LoadBinary([FileBase '.LFP'],[1:16],Par.nChannels)';
+% 
+% Period = load([FileBase '.sts.sws']);
+% myLFP= LoadBinary([FileBase '.LFP'],[1:16],Par.nChannels,2,[],[],Period)';
+% oPeriod=Period;
+% Period=ReshapePeriod(Period);
+% %%
+% % myLFP = SelectPeriods(LFP, Periods,'c',1);
+% 
+% 
+% [icasig, A, W] = fastica(myLFP(:,:)', 'interactivePCA', 'gui', 'numOfIC', 6);
+% krn = gausswin(5);
+% krn = krn/sum(krn);
+% sA = Filter0(krn,A);
+% figure
+% plot(1:16,bsxfun(@plus,A*500,2*[1:size(W,2)]),'o-')
+% axis tight
+% grid on
+% set(gca,'XTick',1:16,'XTickLabel',layer_show)
+% 
+% ric = resample(icasig', 1, 50);
+% [icspec, f,t ] = mtcsglong(ric, 2^8, 25, 2^8, [], 3, 'linear', [],[0.1 10]);
+% figure;
+% for k=1:6
+%     subplot(6,1,k);
+%     imagesc(t,f,log10(icspec(:,:,k))'); axis xy
+% end
+
+% %% wide band
+% 
+% [icasig, A, W] = fastica((myLFP(:,:))', 'lastEig', 6, 'numOfIC', 6);
+% 
+% 
+% [icasigf, Af, Wf] = fastica(ButFilter(myLFP,2,[15 100]/625,'bandpass')', 'lastEig', 6, 'numOfIC', 6);
+% 
+% 
+% CC = corrcoef([A, Af]);
+% SimMat = CC(1:6,7:end);
+% 
+% 
+% [icasig, A, W] = fastica(WhitenSignal(myLFP(1:1250*500,:))', 'interactivePCA', 'gui', 'numOfIC', 6);
+% 
+% 
+% 
+% %figure; mtchglong(WhitenSignal((myLFP(1:1250*100,:)
+% 
+% [weights,sphere,activations,bias,signs,lrates] = runica(myLFP(1:1250*500,:)','pca',6, 'ncomps',6);
+% 
+
+
+%% %%%%%%% gerrit stimulation session more see ica_testG.m
+close all
+% cd /home/weiwei/data/g10-20130528/
+cd /storage/gerrit/data/prep/g10/g10-20130528
+FileBase = 'g10-20130528';
+Par = LoadXml([FileBase '.xml']);
+%
+% load chanLoc.mat
+HP=33:64;
+%%
+prd=1*12500;
+Periods=[Periods(1):prd:(Periods(2)-prd);(Periods(1)+prd):prd:Periods(2)]';
+oPeriod=Periods;
+Periods=ReshapePeriod(Periods);
+luP=size(Periods,1);
+Layers=fieldnames(chanLoc);
+% layer_show=zeros(8,4);
+Channels =[33:48];
+% for n=1:length(Layers)
+%     layer_show(chanLoc.(Layers{n})-32)=n;
+% end
+% figure;imagesc(reshape(layer_show,[],4))
+
+% if 1
+% for k=1:luP
+% [tLFP, ARmodel] = WhitenSignal([mean(LFP(Periods(k,1):Periods(k,2),:),2),LFP(Periods(k,1):Periods(k,2),:)], [],[],[], 3);
+% LFP(Periods(k,1):Periods(k,2),:)=centersig(tLFP(:,2:end));
+% end
+% clear tLFP
+% end
+%
+FreqB=[4 200];%[4 30];
+jdfr=[7 17 27];%45 65 85
+[LFP,b,a]=ButFilter(LFP,4,FreqB/625,'bandpass');
+%%
+% addpath /storage/antsiro/code/matlab/DimReduction/FastICA
+luP=12;%size(Periods,1);
+k=1;
+t=Periods(k,1):Periods(k,2);
+Period=Periods;
+hkA=cell(luP,2);
+hkW=cell(luP,2);
+combw=cell(luP,1);
+% thr=6;%.985;%1:15;.982:11
+% SpecICA=cell(luP,1);
+nfcomp=zeros(luP,2);
+corr=cell(luP,1);
+wcomp=cell(luP,1);
+s=cell(luP,1);
+bp=0;
+for k=2:luP
+    icasig=cell(2,1);
+    for n=1:2
+        chn=8*(n-1)+[1:24];
+        [icasig{n},hkA{k,n},hkW{k,n},nfcomp(k,n)]=wKDICA(LFP(Period(bp+k,1):Period(bp+k,2),chn)',.99,[],0,1);%,'numOfIC', 5
+        %     ncomp=size(icasig,1);
+    end
+%     [combw{k},ss,~]=svd(cov(cell2mat(icasig)'));
+%     s{k}=diag(ss);
+% %     corr{k}=xcorr(icasig',30,'coeff');
+%     m=0;
+%     wcomp{k}=zeros(16,2,size(combw{k},1));
+%     for n=1:2
+%         om=m+1;
+%         m=m+size(hkA{k,n},2);
+%         wcomp{k}(:,n,:)=hkA{k,n}*combw{k}(:,om:m)';
+%     end
+end
+
+for k=2:10;figure(k);for n=1:2;subplot(1,2,n);imagesc(reshape(hkA{k,n},8,[]));colorbar('northoutside');end;end
+%%
+[icacomp,gkA,gkW]=wKDICA(LFP(Period(bp+1,1):Period(bp+luP,2),1:24)',.99,[],0,0);%,'numOfI
+hkA=hkA(:,1);
+hkW=hkW(:,1);
+
+%%
+[anm, mD, id]=ClusterComp(gkA,cell2mat(hkA'),.5,1);
+LSA=[gkA,cell2mat(hkA')];KLSA=LSA(:,~id);
+LSW=[gkW;cell2mat(hkW)]';
+KLSW=LSW(:,~id);
+lanm=size(anm,2);
+figure(224)
+for k=1:lanm
+    subplot(3,21,k);
+    imagesc(reshape(anm(:,k),8,[]));
+     nmD=mD==k;
+%     w(:,k)=mean(bsxfun(@times,bsxfun(@rdivide,KLSW(:,nmD),sqrt(sum(KLSW(:,nmD).^2,1))),sign(anm(:,k)'*KLSA(:,nmD))),2);
+    colorbar('northoutside')
+    xlabel([num2str(sum(mD==k)), '|', num2str(luP+1)])
+end
+return
+% [cu, clags]=xcorr(centersig(LFP)*pinv(gkA)',30,'coeff');
+% figure(1)
+% for row = 1:lanm
+%     for col = 1:lanm
+%         nm = lanm*(row-1)+col;
+%         subplot(lanm,lanm,nm)
+%         stem(clags,cu(:,nm),'.')
+%         title(sprintf('c_{%d%d}',row,col))
+%         axis tight
+%         ylim([-1 1])
+%     end
+% end
+% jdfr=[7,17,27];
+% B=cell(luP,1);
+% sA=cell(luP,1);
+% c=cell(luP,1);
+% chn=HP;%(1:2:end)HP;%[5:2:60];
+% %
+% for k=1:luP
+%     [lambda,~,~,~,tlfp]=factoran(LFP(Period(k,1):Period(k,2),:),nfcomp(k));
+% [B{k}, cc]=SSpecJAJD(tlfp,400,400,1250,jdfr,100,1,[]);
+% c{k}=zeros(nfcomp(k),length(jdfr),size(cc,4));
+% for n=1:nfcomp(k)
+%     c{k}(n,:,:)=cc(n,n,:,:);
+% end
+% sA{k}=lambda/B{k};
+% fprintf('%d-',k)
+% end 
+% % for k=1:luP
+% %     sA{k}=pinv(B{k});
+% % end
+% [~,lp]=max(Period(:,2)-Period(:,1));
+%%
+[lambda,~,~,~,tlfp]=factoran(LFP,size(gkA,2));
+[gB, gc]=SSpecJAJD(tlfp,400,400,1250,jdfr,100,1,[]);
+gsA=lambda/gB;
+%
+% [nm, mD, id]=ClusterComp(gsA,cell2mat(sA'),5,0);
+lnm=size(gsA,2);
+figure(224)
+for k=1:lnm
+    subplot(2,lnm,k+lnm);
+    imagesc(reshape(gsA(:,k),8,[]));
+    colorbar('northoutside')
+%     xlabel([num2str(sum(mD==k)), '|', num2str(luP+1)])
+end
+[cu, clags]=xcorr(centersig(LFP)*pinv(gsA)',30,'coeff');
+lanm=size(gsA,2);
+figure
+for row = 1:lanm
+    for col = 1:lanm
+        nm = lanm*(row-1)+col;
+        subplot(lanm,lanm,nm)
+        stem(clags,cu(:,nm),'.')
+        title(sprintf('c_{%d%d}',row,col))
+        axis tight
+        ylim([-1 1])
+    end
+end
+%%
+[u,v,~]=svd(cov(LFP(t,Channels)));
+tracev=trace(v);
+% if lcompn
+    temp_d=1:6;
+% else
+% temp_d=diag(v)'/tracev*triu(ones(nhp-2))<cth ;%| [true(1,size(wo,1)),false(1,14-size(wo,1))];
+% end
+
+activity_new=LFP(t,Channels)*u(:,temp_d);
+tic
+% for kk=1:10
+W=KDICA(activity_new');%,'W0',wo
+% wo=W;
+W_in=u(:,temp_d)/W;
+figure
+for k=1:6
+    subplot(2,3,k);
+    imagesc(reshape(W_in(:,k),8,4));
+end
+
+% %%
+% Channels1 =GoodChEc;
+% [icasig1, A1, W1] = fastica(LFP(:,Channels1)', 'interactivePCA', 'gui', 'numOfIC', 6);
+% %  uiwait(hndl_win); to select how many pcs to compute: first and the last
+% %   firstEig = str2num(get(e_first, 'String'));
+% %   lastEig = str2num(get(e_last, 'String'));
+% %%
+% figure
+% Mat1 = NaN(32,6); Mat1(Channels1,:) = A1;
+% clf
+% for k=1:6
+%     subplot(2,3,k);
+%     imagesc(reshape(Mat1(:,k),16,2));
+% end
+
+
+
+
+%% let me try 10 and 14
+% now training on stimulation data
+clear all
+cd /storage/gerrit/data/project/GammaBursts/g10-20130528
+%   load('g10-20130528-StimulationResults-2.mat');
+filen=2;% 2 is MEC and 3 is LEC
+s2=load(['g10-20130528-StimulationResults-', num2str(filen), '.mat']);
+filen=3;% 2 is MEC and 3 is LEC
+s3=load(['g10-20130528-StimulationResults-', num2str(filen), '.mat']);
+%%
+ HP=33:48;
+ nch=length(HP);
+ sts=[5:8,12:16;3:11];%1:11
+ myLFP2=permute(s2.StimSegsLfp,[4,1,3,2]); %
+[bsn,nt,nst,~]=size(myLFP2);
+ myLFP3=permute(s3.StimSegsLfp,[4,1,3,2]); %figure;plot(1:1955,sum(reshape(myLFP(:,:,:,40),1955,50*33),2)); 
+ myLFP=permute(reshape([reshape(myLFP2(sts(1,:),:,:,HP),9,nt*nst*nch);reshape(myLFP3(sts(2,:),:,:,HP),9,nt*nst*nch)],18,nt,nst,nch),[2,3,1,4]);
+ Period=400:1801;
+ [~,nst,bsn,nch]=size(myLFP);
+ nt=length(Period)-1;
+ lfp=reshape(myLFP(Period(1:(end-1)),:,:,:),nt*nst*bsn,nch);
+ lfp=lfp/sqrt(var(lfp(:)));
+ dlfp=reshape(myLFP(Period(2:end),:,:,:)-myLFP(Period(1:(end-1)),:,:,:),nt*nst*bsn,nch);
+ dlfp=dlfp/sqrt(var(dlfp(:)));
+ %%
+ fA=cell(nch,1);
+ Ress=zeros(nt*nst*bsn,nch);
+ for k=1:nch
+     if mod(k,8)>1
+         [Ress(:,k),fA{k}]=BasicRegression([ones(nt*nst*bsn,1),lfp(:,k),lfp(:,k+1)-lfp(:,k),lfp(:,k-1)-lfp(:,k)],dlfp(:,k));
+     end
+ end
+ %%
+ nRess=Ress(:,mod(1:nch,8)>1);
+ rA=cell(100,1);
+ rW=cell(100,1);
+ A=cell(100,3);
+ W=cell(100,3);
+ tt=false(nt,nst,bsn);
+ infos=cell(12,12);
+ for k=1:100
+     [~,rbs]=sort(rand(nst,1));
+     ttake=tt;
+     ttake(:,rbs(1:30),:)=true;
+     ttake=ttake(:);
+     fprinf('\n-')
+     for od=1:4
+         if od==1
+     [oricasig, rA{k}, rW{k}, rm]=wKDICA(nRess(ttake,1:(end))',12,0,0,0);
+
+     ricasig=rW{k}*nRess(~ttake,1:(end))';
+         else
+     [oicasig, A{k,od-1}, W{k,od-1}, m]=wKDICA(WhitenSignal(lfp(ttake,mod(HP,8)>1),[],[],[],od-1)',12,0,0,0);%
+     icasig=W{k,od-1}*WhitenSignal(lfp(~ttake,mod(HP,8)>1),[],[],[],od-1)';
+         end
+         fprinf('i')
+     for n=1:11
+         for m=(n+1):12
+             if od==1
+             infos{n,m}(od,k)=information(ricasig(n,:),ricasig(m,:));
+             infos{m,n}(od,k)=information(oricasig(n,:),oricasig(m,:));
+             else
+                 infos{n,m}(od,k)=information(icasig(n,:),icasig(m,:));
+                 infos{m,n}(od,k)=information(oicasig(n,:),oicasig(m,:));
+             end
+         end
+     end
+     fprinf('finish %d-%d.',od)
+     end
+ end
+ cd /storage/weiwei/data/g10-20130528/
+ save('g10-20130528.stim.cW.mat','A','W','rW','rA','infos');
+ 
+ %%
+ nRess=Ress(:,mod(1:nch,8)>1);
+ [ricasig, rA, rW, rm]=wKDICA(nRess(:,1:(end))',12,0,0,0);%
+%  [icasig, A, W, m]=wKDICA(nRess',4,0,0,0);%
+ %
+ ncomp=size(rA,2);
+ ricasig=reshape(ricasig',nt,nst,bsn,ncomp);
+ %
+ for k=1:ncomp
+     figure(459)
+     subplot(2,ceil(ncomp/2),k)
+     tm=sq(mean(ricasig(:,:,:,k),2));
+     for n=1:bsn
+         tm(:,n)=filter(exp(-[-10:10].^2/36/2)/6-exp(-[-10:10].^2/100/2)/10,1,tm(:,n));
+     end
+%      tm=tm-median(tm(:,end));
+     imagesc(Period,1:bsn,tm',max(abs(tm(:)))*[-1 1])
+     set(gca,'YTick',1:bsn,'YTicklabel',sts)
+%      title('0')
+ end
+ for k=1:ncomp
+     figure(458)
+     subplot(2,ceil(ncomp/2),k)
+     tA=reshape(rA(:,k),6,[]);
+     imagesc(1:4,34:39,tA,max(abs(tA(:)))*[-1 1])
+ end
+ for k=1:ncomp
+     figure(457)
+     subplot(2,ceil(ncomp/2),k)
+     tA=reshape(rA(:,k),6,[]);
+     imagesc(1:4,34:39,tA)
+ end
+ %
+  [icasig, A, W, m]=wKDICA(WhitenSignal(lfp(:,mod(HP,8)>1),[],[],[],1)',12,0,0,0);%
+%  [icasig, A, W, m]=wKDICA(nRess',4,0,0,0);%
+ %
+ ncomp=size(A,2);
+ icasig=reshape(icasig',nt,nst,bsn,ncomp);
+ %
+ for k=1:ncomp
+     figure(559)
+     subplot(2,ceil(ncomp/2),k)
+     tm=sq(mean(icasig(:,:,:,k),2));
+     for n=1:bsn
+         tm(:,n)=filter(exp(-[-10:10].^2/36/2)/6-exp(-[-10:10].^2/100/2)/10,1,tm(:,n));
+     end
+     tm=tm(10:(end-10),:);
+%      tm=tm-median(tm(:,end));
+     imagesc(Period,1:bsn,tm',max(abs(tm(:)))*[-1 1])
+     set(gca,'YTick',1:bsn,'YTicklabel',sts)
+%      title('0')
+ end
+ for k=1:ncomp
+     figure(558)
+     subplot(2,ceil(ncomp/2),k)
+     tA=reshape(A(:,k),6,[]);
+     imagesc(1:4,34:39,tA,max(abs(tA(:)))*[-1 1])
+ end
+ for k=1:ncomp
+     figure(557)
+     subplot(2,ceil(ncomp/2),k)
+     tA=reshape(A(:,k),6,[]);
+     imagesc(1:4,34:39,tA)
+ end
+ mamari(rW,W)
+ %%
+ tncomp=12;
+ nlg=150;
+ bc=0;
+ for k=bc+[1:tncomp];%5
+     for n=k:(bc+tncomp);%5
+     figure(456-bc)
+     subplot(tncomp,tncomp,(k-1-bc)*tncomp+n-bc)
+     x=icasig(:,:,:,k);
+     y=icasig(:,:,:,n);
+     plot(xcorr(x(:),y(:),nlg,'coeff'))
+     hold on
+     plot([nlg nlg],[-.01 0.01],'r')
+     axis tight
+     hold off
+     axis off
+     end
+ end
+% load chanLoc.mat
+% Layers=fieldnames(chanLoc);
+% layer_show=zeros(nst,1);
+% for n=1:length(Layers)
+%     layer_show(chanLoc.(Layers{n}))=n;
+% end
+%% here I try to check whether we can see the "consistent pattern" they get.
+% A=cell(nst,4);
+kA=cell(nst,4);
+% W=cell(nst,4);
+kW=cell(nst,4);
+t=[432:1200];%400648 814 900 648;%432:;326:650;%[10:20]*32.552;326488    1:1955;
+thr=.98;
+% bstn=100;
+rtrail=1:bsn;    %randi(bsn,bstn,1);% I need to keep this the same for all the conditions.
+%% compute for far-away signals.
+for k=12:nst
+sec=[k,mod(k+1,16)+1,mod(k+2,16)+1]%k;[k,mod(k+4,16)];%[k,k+4,k+8,k+12];%1:16;%[10,14];[9 12];;[9 12]
+for n=1:4;
+HP=(24+8*n+[1:8])';%64
+lfp = reshape(centersig(permute(StimSegsLfp(t,HP,rtrail,sec),[1 3 4 2]),1),[],length(HP));%
+% here I still emplore fastICA and KDICA
+% [~,A{k,n},W{k,n}]=fastica(lfp','g','skew');%,'numOfIC', 4,'numOfIC', 5
+[~,kA{k,n},kW{k,n}]=wKDICA(lfp',thr);%,'numOfIC', 5
+end
+end
+%% get groble one.
+sec=[1:nst];
+% gA=cell(1,4);
+gkA=cell(1,4);
+% gW=cell(1,4);
+gkW=cell(1,4);
+% gicasig=cell(1,4);
+gkicasig=cell(1,4);
+for n=1:4
+HP=(24+8*n+[1:8])';%64
+lfp = reshape(permute(StimSegsLfp(t,HP,rtrail,sec),[1 3 4 2]),[],length(HP));%
+% here I still emplore fastICA and KDICA
+% [gicasig{n},gA{n},gW{n}]=fastica(lfp');%,'numOfIC', 5
+[gkicasig{n},gkA{n},gkW{n}]=wKDICA(lfp',thr);%,'numOfIC', 5
+end
+%%
+% [nu,or]=sort(rtrail);
+lt=length(t);
+% tt=or([1;find(diff(nu))+1]);
+tt=rtrail';
+tt=bsxfun(@plus,(tt+1100)*lt,1:lt);%;(tt-1)+200;(tt-1)+300;(tt-1)+900
+
+%%
+% sigA=CorrComp(gicasig,[200 25],tt(:));
+sigkA=CorrComp(gkicasig,[200 25],tt(:));
+figure
+for k=1:4
+    subplot(4,1,k)
+    imagesc(gkicasig{k})
+end
+%%
+% for k=1:nst
+%         figure(k)
+%     for n=k:4
+%         [nx, ny, nz]=size(sigA{k,n});
+%         for cx=1:nx
+%         subplot(nx, 4,(cx-1)*4+n)
+%         imagesc(-200:25:200,1:ny,abs(sq(sigA{k,n}(cx,:,:))),[0 1]);
+%         title(['fast', num2str([k -cx -n])])
+%         end
+%     end
+% end
+for k=1:4
+        figure(20+k)
+    for n=k:4
+        [nx, ny, nz]=size(sigkA{k,n});
+        for cx=1:nx
+        subplot(nx, 4,(cx-1)*4+n)
+        imagesc(-200:25:200,1:ny,abs(sq(sigkA{k,n}(cx,:,:))),[0 1]);
+        title(['fast', num2str([k -cx -n])])
+        end
+    end
+end
+%%
+figure(227+filen)
+% imagesc(sortrows(zscore(cell2mat(reshape(kA,1,nst)))',8))
+for k=1:4
+subplot(2,4,k)
+        HP=(24+8*k+[1:8])';%64
+        plot(HP,bsxfun(@plus,bsxfun(@rdivide,gkA{k},sqrt(sum(gkA{k}.^2,1))),1:size(gkA{k},2)),'Linewidth',2)
+        grid on
+        axis tight
+subplot(2,4,k+4)
+        HP=(24+8*k+[2:7])';%64
+gkAcsd=diff(gkA{k},2,1);
+        plot(HP,bsxfun(@plus,bsxfun(@rdivide,gkAcsd,sqrt(sum(gkA{k}.^2,1))),1:size(gkA{k},2)),'Linewidth',2)
+        grid on
+        axis tight
+end
+% %% fastica
+% figure(226)
+% % imagesc(sortrows(zscore(cell2mat(reshape(kA,1,nst)))',8))
+% for k=1:4
+% subplot(2,4,k)
+%         HP=(24+8*k+[1:8])';%64
+%         plot(HP,bsxfun(@plus,bsxfun(@rdivide,gA{k},sqrt(sum(gA{k}.^2,1))),1:size(gA{k},2)),'Linewidth',2)
+%         grid on
+%         axis tight
+% subplot(2,4,4+k)
+%         HP=(24+8*k+[2:7])';%64
+% gAcsd=diff(gA{k},2,1);
+%         plot(HP,bsxfun(@plus,bsxfun(@rdivide,gAcsd,sqrt(sum(gA{k}.^2,1))),1:size(gA{k},2)),'Linewidth',2)
+%         grid on
+%         axis tight
+% end
+
+
+%% check
+% figure(224)
+% % imagesc(sortrows(zscore(cell2mat(reshape(kA,1,nst)))',8))
+% for k=1:nst
+%     for n=1:4
+%         HP=(24+8*n+[1:8])';%64
+%         subplot(nst,4,(k-1)*4+n)
+%         [~,order]=sort(var(A{k,n}),'descend');
+%         plot(HP,bsxfun(@plus,bsxfun(@rdivide,A{k,n}(:,order),sqrt(sum(A{k,n}(:,order).^2,1))),1:size(A{k,n},2)),'Linewidth',2)
+%         grid on
+%         axis tight
+%     end
+% end
+figure(224)
+% imagesc(sortrows(zscore(cell2mat(reshape(kA,1,nst)))',8))
+for k=1:nst
+    for n=1:4
+        HP=(24+8*n+[1:8])';%64
+        subplot(4,nst,(n-1)*nst+k)
+        [~,order]=sort(var(kA{k,n}),'descend');
+        plot(HP,bsxfun(@plus,bsxfun(@rdivide,kA{k,n}(:,order),sqrt(sum(kA{k,n}(:,order).^2,1))),1:size(kA{k,n},2)),'Linewidth',2)
+        grid on
+        axis tight
+    end
+end
+%%
+subplot(212)
+CSKA
+plot(HP(2:(end-1)),bsxfun(@plus,bsxfun(@rdivide,CSKA{k}(:,order),sqrt(sum(CSKA{k}(:,order).^2,1))),1:size(CSKA{k},2)),'Linewidth',2)
+grid on
+axis tight
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% the very old tests
+sec=[9:16];%1:16;%[10,14];[9 12];;[9 12]
+t=[432:814];%648;%432:;326:650;%[10:20]*32.552;326488    1:1955;
+bstn=50;
+HP=[33:48]';%64randi(50,bstn,1)
+matlec = reshape(permute(StimSegsLfp(t,HP,:,sec),[1 3 4 2]),[],length(HP));%
+
+method_a=0;
+if method_a
+    %%
+    ICN=10;
+[ics2 As2 Ws2] = fastica(matlec', 'interactivePCA', 'gui', 'numOfIC', ICN);
+ics2r = reshape(ics2, [ICN,length(t),50,length(sec)]);
+ics2rm = sq(mean(ics2r,3));
+figure
+for k=1:ICN
+    subplot(3,4,k);
+    imagesc(t/32.552-10,[],abs(sq(ics2rm(k,:,:)))');%[1:1955]/32.552-10
+end
+figure
+for k=1:ICN
+    subplot(3,4,k);
+    imagesc(abs(reshape(sq(As2(:,k)),8, 4)));   
+end
+else
+    %%
+    [u,v,~]=svd(cov(matlec));
+tracev=trace(v);
+if 0
+    temp_d=1:2;
+else
+temp_d=diag(v)'/tracev*triu(ones(length(HP)))<.98;%| [true(1,size(wo,1)),false(1,14-size(wo,1))];
+end
+activity_new=matlec*u(:,temp_d);
+tic
+% for kk=1:10
+W=KDICA(activity_new');%,'W0',wo
+% wo=W;
+W_in=u(:,temp_d)/W;
+[A, W2]=fastica(activity_new');
+W_in2=u(:,temp_d)/W2;
+
+ics2=W*activity_new';
+ics2r = reshape(ics2, [size(W,1),length(t),bstn,length(sec)]);
+ics2rm = sq(mean(ics2r,3));
+ics22=W2*activity_new';
+ics22r = reshape(ics22, [size(W2,1),length(t),bstn,length(sec)]);
+ics22rm = sq(mean(ics22r,3));
+%%
+figure
+for k=1:size(W,1)
+    subplot(3,4,k);
+    imagesc(t/32.552-10,1:length(sec),abs(sq(ics2rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+if length(u(:))>64
+    figure
+    for k=1:size(W_in,2)
+        subplot(3,4,k);
+        imagesc(abs(reshape(sq(W_in(:,k)),8, [])));
+    end
+    figure
+    for k=1:size(W_in2,2)
+        subplot(3,4,k);
+        imagesc(abs(reshape(sq(W_in2(:,k)),8, [])));
+    end
+else
+    figure;
+    plot(HP,W_in/1000,'o-')%bsxfun(@plus,0,2*[1:size(W_in,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+    figure;
+    plot(HP,W_in2/1000,'o-')%bsxfun(@plus,,2*[1:size(W_in2,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+end
+
+
+figure
+for k=1:size(W2,1)
+    subplot(3,4,k);
+    imagesc(t/32.552-10,1:length(sec),abs(sq(ics22rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+%%
+close all
+figure
+for k=1:size(W,1)
+    subplot(3,4,k);
+    imagesc(t/32.552-10,1:length(sec),(sq(ics2rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+if length(u(:))>64
+    figure
+    for k=1:size(W_in,2)
+        subplot(3,4,k);
+        imagesc((reshape(sq(W_in(:,k)),8, [])));
+    end
+    figure
+    for k=1:size(W_in2,2)
+        subplot(3,4,k);
+        imagesc((reshape(sq(W_in2(:,k)),8, [])));
+    end
+else
+    figure;
+    plot(HP,W_in/1000,'o-')%bsxfun(@plus,0,2*[1:size(W_in,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+    figure;
+    plot(HP,W_in2/1000,'o-')%bsxfun(@plus,,2*[1:size(W_in2,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+end
+
+
+figure
+for k=1:size(W2,1)
+    subplot(3,4,k);
+    imagesc(t/32.552-10,1:length(sec),(sq(ics22rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+%%
+figure(1)
+for k=1:size(W,1)
+    subplot(4,3,k);
+    imagesc(t/32.552-10,1:length(sec),(sq(ics2rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+if length(u(:))>64
+    figure(1)
+    for k=1:size(W_in,2)
+        subplot(4,3,3+k);
+        imagesc((reshape(sq(W_in(:,k)),8, [])));
+    end
+    figure
+    for k=1:size(W_in2,2)
+        subplot(3,4,k);
+        imagesc((reshape(sq(W_in2(:,k)),8, [])));
+    end
+else
+    figure;
+    plot(HP,W_in/1000,'o-')%bsxfun(@plus,0,2*[1:size(W_in,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+    figure;
+    plot(HP,W_in2/1000,'o-')%bsxfun(@plus,,2*[1:size(W_in2,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+end
+
+figure(1)
+for k=1:size(W,1)
+    subplot(4,3,6+k);
+    imagesc(t/32.552-10,1:length(sec),abs(sq(ics2rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+    figure(1)
+    for k=1:size(W_in,2)
+        subplot(4,3,9+k);
+        imagesc(abs(reshape(sq(W_in(:,k)),8, [])));
+    end
+%%
+figure(2)
+for k=1:size(W2,1)
+    subplot(4,3,k);
+    imagesc(t/32.552-10,1:length(sec),(sq(ics22rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+if length(u(:))>64
+    figure(1)
+    for k=1:size(W_in2,2)
+        subplot(4,3,3+k);
+        imagesc((reshape(sq(W_in(:,k)),8, [])));
+    end
+    figure
+    for k=1:size(W_in2,2)
+        subplot(3,4,k);
+        imagesc((reshape(sq(W_in2(:,k)),8, [])));
+    end
+else
+    figure;
+    plot(HP,W_in/1000,'o-')%bsxfun(@plus,0,2*[1:size(W_in,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+    figure;
+    plot(HP,W_in2/1000,'o-')%bsxfun(@plus,,2*[1:size(W_in2,2)])
+    axis tight
+    grid on
+    set(gca,'XTick',HP,'XTickLabel',HP)
+end
+
+figure(1)
+for k=1:size(W,1)
+    subplot(4,3,6+k);
+    imagesc(t/32.552-10,1:length(sec),abs(sq(ics2rm(k,:,:)))');%[1:1955]/32.552-10
+set(gca,'YTick',1:length(sec),'YTicklabel',sec)
+end
+    figure(1)
+    for k=1:size(W_in,2)
+        subplot(4,3,9+k);
+        imagesc(abs(reshape(sq(W_in(:,k)),8, [])));
+    end
+%%
+end
+%%

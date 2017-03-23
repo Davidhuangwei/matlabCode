@@ -1,0 +1,53 @@
+function textOut = SaveTheUnderscores(textIn)
+%pass a text string or a cell array of text strings and all "." will be
+%replaced by "_" and returned
+
+textOut = textIn;
+
+if iscell(textOut)
+    for j=1:length(textOut(:))
+        textX = textOut{j}
+    textX(find(textX=='.')) = '_';
+    textOut{j}
+    end
+else
+    
+
+
+if iscell(textIn)
+    for j=1:length(textIn)
+        newTextIn = textIn{j};
+        underscorePos = find(newTextIn == '.');
+        if isempty(underscorePos)
+            textOut = newTextIn;
+        else
+            textOut = [];
+            beginPos = 1;
+            for i=1:length(underscorePos)
+                textOut = [textOut newTextIn(beginPos:underscorePos(i)-1) '\'];
+                beginPos = underscorePos(i);
+            end
+            if length(newTextIn) > underscorePos(end)
+                textOut = [textOut newTextIn(underscorePos(end):end)];
+            end
+        end
+        newTextOut{j} = textOut;
+    end
+    textOut = newTextOut;
+else
+    underscorePos = find(textIn == '.');
+    if isempty(underscorePos)
+        textOut = textIn;
+    else
+        textOut = [];
+        beginPos = 1;
+        for i=1:length(underscorePos)
+            textOut = [textOut textIn(beginPos:underscorePos(i)-1) '\'];
+            beginPos = underscorePos(i);
+        end
+        if length(textIn) > underscorePos(end)
+            textOut = [textOut textIn(underscorePos(end):end)];
+        end
+    end
+end
+return

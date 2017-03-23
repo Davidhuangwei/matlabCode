@@ -1,0 +1,32 @@
+              .            .        .
+        ___  /|   . _  _  /|  __   /| __
+       /  \   |  /|/ \/ \  |  __\   |/  \
+       \__/   |   |  |  |  | /  |   |    )
+       /__    |   |  |  |  | \__|_  |___/
+    == /  \ ===================================
+       \__/ 
+
+glmlab is a set of m-files for using  MATLAB  for analysing generalised linear
+models.  It originally was developed to replace GLIM in a small way at the 
+University where I work (the University of Southern Queensland, Australia).
+It has since grown, and now contains quite a lot of the features found in GLIM.
+It enables models such as multiple regression, probit models, logistic
+regression and log-linear models (among others) to be fitted.
+
+glmlab has these features:
+* a graphical user interface with drop down menu to select distribution, link, etc...
+* a choice of error distribution (normal, gamma, inverse Gaussian, Possion, binomial)
+* a choice of links (identity, log, reciprocal, square root, power, logistic,
+  probit, complementary log-log)
+* a choice of errors to calculate (Pearson, deviance, quantile)
+* some residual plots
+* the ability to define your own error distributions and link functions
+* prior weights, offsets and interactions
+* the ability to save models between sessions
+
+glmlab can be obtained from the MathWorks user-contributed files page
+(http://www/mathworks.com/ftp/statv5.shtml), or indirectly from the 
+glmlab home page (http://www.sci.usq.edu.au/staff/dunn/glmlab.html)
+
+Peter Dunn
+02 March 1998

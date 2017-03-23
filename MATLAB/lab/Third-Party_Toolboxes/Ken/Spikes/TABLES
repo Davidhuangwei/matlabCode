@@ -1,0 +1,68 @@
+METADATA RELATIONAL DATABASE TABLE INFO
+---------------------------------------
+
+Metadata phase 2 moves over to a relational database ... this should make
+things easier in the long run ...
+
+Here's a description of the tables:
+
+Files - contains one entry per .dat file
+-----
+INT FileID; primary key
+VARCHAR FileBase; FileBase - e.g. '/u15/xaj/Awake/l23-01/f3'
+INT nCh; number of channels in the whole file (whether or not they are used)
+INT nBits; usually 12 or 16
+INT SampleRate; Sample rate in Hz
+DOUBLE HiPassFreq; Frequency at which the file was digitally hi-pass filtered
+VARCHAR Description; description of the type of experiment (eg 'Awake', 'SRS', etc)
+
+ElecGps - contains one entry per electrode group (eg tetrode)
+-------
+INT ElecGpID; primary key
+INT FileID; which file did it come from?
+VARCHAR Location; electrode location: '1' means CA1, etc.  Not often used yet
+INT GpNo; tetrode number as found in the .par file
+VARCHAR Unit; unit of measurement (e.g. mV, nA)
+DOUBLE Gain; 1 sample = this many units
+VARCHAR Type; e.g. 'Extracellular', 'Intracellular', 'Current'
+
+Channels - tells you which channels belong in which tetrodes
+--------
+INT ChannelID; primary key
+// INT FileID; which .dat file the channel belongs to
+INT ChannelNo; number of the channel within the .dat file
+INT ElecGpID; which tetrode the channel is assigned to
+
+NB only channels that are assigned to an electrode group are put in here.  Database
+afficionados will know that FileID should not be there, because it is available
+from ElecGps
+
+Cells
+-----
+INT CellID; primary key
+INT ElecGpID; tetrode this cell was recorded from
+VARCHAR Type; Cell type: 'p'=pyramidal, 'b'=interneuron
+VARCHAR SubType; not often used
+INT BigCluNo; cluster number in the .clu file
+INT SmallCluNo; cluster number in the .clu.n file
+DOUBLE eDist; isolation distance measure
+DOUBLE bRat; burst ratio qualtiy measure
+DOUBLE fRate; firing rate in Hz
+
+for the future...
+
+Epochs - says which time periods fall into which epoch descriptors
+------
+INT EpochID; primary key
+VARCHAR Type; epoch type (eg 'NonTheta', 'Theta', 'Ripple', 'Run', 'Sleep1', 'Sleep2');
+DOUBLE Start; start time in seconds
+DOUBLE End; end time in seconds
+
+CellEquivs - for identifying single cells across files
+----------
+EquivNo - identifies equivalence classes
+CellID - Cell number
+
+so if one cell was recorded in 3 files, as cell 34, cell 40, and cell 57, there would
+be 3 entries in this table: (N,34), (N,40), and (N,57) where N is the equivalence number.
+There is no primary key field; instead EquivNo and CellID form a joint primary key

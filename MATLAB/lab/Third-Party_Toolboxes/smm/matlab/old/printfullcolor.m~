@@ -1,0 +1,47 @@
+function printfullcolor(figureNumMat,colorBool,plotSize,portrait)
+% function printfullcolor(figureNumMat,colorBool,plotSize,portrait)
+% DEFAULTS:
+% figureNumMat = gcf
+% colorBool = 0 (print in BW)
+% plotSize = default
+% portrait = 1 (portrait)
+
+if ~exist('figureNumMat', 'var') | isempty(figureNumMat)
+    figureNumMat = gcf;
+end
+if ~exist('portrait', 'var') | isempty(portrait)
+    portrait = 1;
+end
+
+if ~exist('colorBool', 'var') | isempty(colorBool)
+    colorBool = 0;
+end
+
+for i=1:length(figureNumMat)
+    figure(figureNumMat(i));
+    
+    if ~exist('pageSize', 'var') | isempty(pageSize)
+        if portrait == 1
+            set(gcf,'PaperOrientation','portrait');
+            set(gcf,'PaperPosition',[0,0,pageSize(1),11]);
+            set(gcf, 'Units', 'inches')       
+            set(gcf, 'Position', [0 0 8.5 11])
+        else
+            set(gcf,'PaperOrientation','landscape');
+            set(gcf,'PaperPosition',[0,0,11,8.5]);
+            set(gcf, 'Units', 'inches')       
+            set(gcf, 'Position', [0 0 11 8.5])
+        end
+    end
+    if colorBool
+        set(gcf, 'inverthardcopy', 'off')
+        oldcolor = get(gcf, 'color');
+        set(gcf, 'color', [1 1 1]);
+        
+        print -Pbuzphaser -dpsc2
+        
+        set(gcf, 'color', oldcolor);
+    else
+        print -Pbuzphaser -dps2
+    end
+end

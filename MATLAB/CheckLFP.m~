@@ -1,0 +1,37 @@
+function CheckLFP(lfp,varargin)
+[nt, nch]=size(lfp);
+if nargin<2 || isempty(varargin{2})
+    Period=1:1250:(nt-1250);
+    Period=[Period;Period+1250]';
+% Period=[1 nt];
+else
+    
+    Period=varargin{1};
+    if isempty(Period)
+        Period=1:1250:(nt-1250);
+    Period=[Period;Period+1250]';
+    end
+end
+if nargin<3|| isempty(varargin{3}); HP=1:nch;else HP=varargin{2};end
+nPeriod=size(Period,1);
+rscales=median(median(abs(lfp)));
+lfp=lfp/rscales/100;%centersig(lfp,1)
+figure
+if nargin>3
+    bt=varargin{4};
+    bt=bt(:);
+    ist=true;
+else 
+    ist=false;
+end
+for k=1:nPeriod
+    t=Period(k,1):Period(k,2);
+clim=max(max(abs(lfp(t,:))));
+%     imagesc(t,HP,lfp(t,:)',clim*[-1 1]);
+    plot(t,bsxfun(@plus,lfp(t,:)/clim*2,1:nch))
+    if ist
+        btt=(bt<=Period(k,2))&(bt>=Period(k,1));
+        plot(bt(btt)-Period(k,1)+1)
+    axis tight
+    pause(.5)
+end

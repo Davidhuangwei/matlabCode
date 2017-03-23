@@ -1,0 +1,31 @@
+function [vMI, R, rMI]=UniqICtest(W,lfp,varargin)
+% function [vMI, R, rMI]=UniqICtest(W,lfp) 
+% test the uniqueness of IC components. 
+% W is ncomp*nch
+% lfp=nt*nch
+% rMI return the MI at each theta
+if nargin<3
+    theta=linspace(0,pi/2,150);
+else
+    theta=varargin{1};
+    theta=reshape(theta,1,[]);
+end
+ntheta=length(theta);
+ncomp=size(W,1);
+icasig=lfp*W';
+rMI=zeros(ncomp,ncomp,ntheta);
+for kt=1:ntheta
+    rot=[cos(theta(kt)), -sin(theta(kt));sin(theta(kt)),cos(theta(kt))];
+    for k=1:(ncomp-1)
+        for n=(k+1):ncomp
+            x=icasig(:,[k,n])*rot;
+            rMI(k,n,kt)=information(x(:,1)',x(:,2)');
+            rMI(n,k,ntheta-kt+1)=rMI(k,n,kt);
+        end
+    end
+end
+MI=reshape(rMI,[],ntheta);
+mMI=mean(MI,2);
+vMI=reshape(sum(bsxfun(@minus,MI,mMI).^2,2)/ntheta,ncomp,ncomp);
+[~,R]=min(MI,[],2);
+R=triu(theta(R));

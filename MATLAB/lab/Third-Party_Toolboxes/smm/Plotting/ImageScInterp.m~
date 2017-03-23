@@ -1,0 +1,24 @@
+% function ImageScInterp(data,varargin)
+% [nTimes interpMethod] = DefaultArgs(varargin,{5,'linear'});
+% uses interp2 and imagesc to replace pcolor 
+% (because pcolor sucks in so many ways)
+% note: y-axis orientation is similar to imagessc, not pcolor
+function ImageScInterp(data,varargin)
+[nTimes interpMethod] = DefaultArgs(varargin,{5,'linear'});
+if iscell(data)
+    oldXVals = data{1};
+    oldYVals = data{1};
+   data = data{3};
+   specXYBool = 1;
+end
+
+interpData = interp2(data,nTimes,interpMethod);
+if specXYBool
+    xVals = interp1(oldXVals,
+else
+    yVals = 1:1/nTimes:size(data,1);
+    xVals = 1:1/nTimes:size(data,2);
+end
+
+imagesc(xVals,yVals,interpData);
+return

@@ -1,0 +1,16 @@
+% function RmSpectAnalFiles(fileBaseCell,SpectAnalDir,regExp,varargin)
+% rmOptions = DefaultArgs(varargin,{''});
+%     evalText = ['!rm ' rmOptions ' ' SC(fileBaseCell{k}) SC(SpectAnalDir) regExp];
+function RmSpectAnalFiles(fileBaseCell,SpectAnalBaseCell,fileExtCell,regExp,varargin)
+rmOptions = DefaultArgs(varargin,{''});
+
+for k=1:length(fileBaseCell)
+    for m=1:length(SpectAnalBaseCell)
+        for n=1:length(fileExtCell)
+
+            evalText = ['!rm ' rmOptions ' ' SC(fileBaseCell{k}) SC([SpectAnalDir{m} fileExtCell{n}]) regExp];
+            EvalPrint(evalText,1)
+        end
+    end
+end
+

@@ -1,0 +1,22 @@
+% function outData = ExpSmooth(data,smoother,smoothStep)
+% Provides exponential smoothing of data. Useful for power spectral
+% density of brain activity.
+% Convolves data with smoother a number of times
+function outData = ExpSmooth(data,smoother,smoothStep)
+
+if ~mod(length(smoother),2)
+    error([mfilename ':smootherMustHaveOddLength'],...
+        'smoother should have odd length for function to work properly')
+end
+
+
+for j=1:smoothStep:length(data)
+    data = ConvTrim(data,smoother);
+    outData(j:min([j+smoothStep-1, length(data)])) = ...
+        data(j:min([j+smoothStep-1, length(data)]));
+end
+% outData(j+smoothStep:length(data)) = data(j+smoothStep:length(data));
+
+
+
+    

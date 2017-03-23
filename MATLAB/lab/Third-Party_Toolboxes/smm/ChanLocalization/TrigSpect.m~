@@ -1,0 +1,86 @@
+function TrigSpect(fileBaseCell,trigFileName,trigFs,segLen,fileExtCell,nChanCell,varargin)
+[Fs,bps] = ...
+    DefaultArgs(varargin,{1250,2});
+
+infoStruct.trigFileName = trigFileName;
+infoStruct.trigFs = trigFs;
+infoStruct.segLen = segLen;
+infoStruct.Fs = Fs;
+infoStruct.bps = bps;
+infoStruct.date = date;
+
+for m=1:length(fileBaseCell)
+    for k=1:length(fileExtCell)
+        fileExt = fileExtCell{k};
+        nChan = nChanCell{k};
+        infoStruct.fileBase = fileBaseCell{m};
+        infoStruct.fileExt = fileExt;
+        infoStruct.nChan = nChan;
+        
+        fprintf('processing: %s\n',[SC(fileBaseCell{m}) trigFileName])
+        powSpec.yo = [];
+
+        time = load([SC(fileBaseCell{m}) trigFileName]);
+        segs = zeros([size(time,1) nChan round(segLen*Fs)]);
+        for n = 1:size(time,1)
+            seg = bload([SC(fileBaseCell{m}) fileBaseCell{m} fileExt],...
+                [nChan round(segLen*Fs)],...
+                round(time(n)*trigFs*nChan*bps));
+                
+            for ch=1:size(seg,1)
+                [yoTemp period junk coi] = xwt(squeeze(seg(ch,:)),squeeze(seg(ch,:)));
+                
+                if isempty(powSpec.yo)
+                    powSpec.yo = zeros([size(seg,1),size(yoTemp)]);
+                end
+                powSpec.yo(ch,:,:) = squeeze(powSpec.yo(ch,:,:)) + 10*log10(yoTemp)/size(time,1);
+            end
+        end
+        if isempty(time)
+            powSpec.coi = [];
+            powSpec.fo = [];
+        else
+            powSpec.coi = coi;
+            powSpec.fo = eegSamp./period;
+        end
+        powSpec.to = [-floor(segLen*Fs/1000/2):ceil(segLen*Fs/1000/2)-1]*1000/Fs;
+        powSpec.numSeg = size(time,1);
+        outFile = [fileBaseCell{m} '/TrigAveSpect' num2str(segLen) 's' fileExt ...
+            '_' trigFileName '.mat'];
+        fprintf('Saving: %s\n',outFile)
+        save(outFile,SaveAsV6,'powSpec');
+        
+                
+               for n=1:size(segs,1)
+                    for ch=1:size(ripp.segs,1)
+                        [yoTemp period junk coi] = xwt(squeeze(ripp.segs(ch,:,n)),squeeze(ripp.segs(ch,:,n)));
+
+                        if isempty(powSpec.yo)
+                            powSpec.yo = zeros([size(ripp.segs,1),size(yoTemp)]);
+                        end
+                        powSpec.yo(ch,:,:) = squeeze(powSpec.yo(ch,:,:)) + 10*log10(yoTemp)/size(ripp.segs,3);
+                    end
+                end
+                if isempty(ripp.time)
+                    powSpec.coi = [];
+                    powSpec.fo = [];
+                else
+                    powSpec.coi = coi;
+                    powSpec.fo = eegSamp./period;
+                end
+                powSpec.to = [-floor(segLen*eegSamp/1000/2):ceil(segLen*eegSamp/1000/2)-1]*1000/eegSamp;
+                powSpec.numSeg = size(ripp.segs,3);
+%                 powSpec.yo = 10*log10(powSpec.yo);
+                outFile = [fileBaseCell{m} '/RippTrigAveSpec_' segRestrictionCell{p} num2str(segLen) fileExt '.mat'];
+                fprintf('Saving: %s\n',outFile)
+                save(outFile,SaveAsV6,'powSpec');
+
+            
+            
+        end
+        outFileName = [ 'TrigSegs' num2str(segLen) 's' fileExt '_' trigFileName '.mat'];
+        fprintf(['Saving: ' outFileName '\n']);
+        save([SC(fileBaseCell{m}) outFileName],SaveAsV6,'segs','time','infoStruct')
+
+    end
+end

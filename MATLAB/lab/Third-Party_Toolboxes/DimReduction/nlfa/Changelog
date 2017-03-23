@@ -1,0 +1,31 @@
+Change History of NLFA Matlab package
+-------------------------------------
+
+This file contains a summary of all the changes since initial
+released version 0.9.
+
+
+nlfa-0.9.4 (2001-11-01)
+-----------------------
+  - Fixed a minor bug in the gradient computations in feedback.m.
+    Thanks to Janne Kujala for finding the error.
+
+
+nlfa-0.9.3 (2000-11-28)
+-----------------------
+  - Changed cost function computation so that the values reported
+    in the middle of iterations are exact.  Previously there was
+    a minor approximation because of efficiency, but it proved to
+    cause too much trouble otherwise.  The change only affects the
+    reported values of the cost function, not the values of any of
+    the estimated parameters.
+
+
+nlfa-0.9.2 (2000-08-03)
+-----------------------
+  - More fixes for one-dimensional data.
+
+
+nlfa-0.9.1 (2000-08-02)
+-----------------------
+  - Source updates now work with one-dimensional data.

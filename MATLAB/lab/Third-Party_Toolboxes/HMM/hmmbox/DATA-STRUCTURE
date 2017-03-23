@@ -1,0 +1,42 @@
+The routines use a common data structure 'hmm' with fields:
+
+hmm.obsmodel		name of observation model
+			'Gauss'		- Gaussian
+			'GaussCom'	- Gaussian with common cov
+			'AR'		- Autoregressive
+			'LIKE'          - observations are likelihoods
+
+hmm.train.obsupdate	update observation model (1 or 0)
+	 .pupdate	update transition matrix (1 or 0)
+	 .init		initialised (1 or 0)
+	 .cyc		max number of cycles through data
+	 .tol		termination tolerance of likelihood
+
+hmm.data.Xtrain		training data
+	.T		length of training sequence		
+	.Xtest		testing data
+
+hmm.K			number of hidden states
+   .Pi 			initial state probability
+   .P			state transition probabilities
+   .LLtrain		training log likelihood
+   .LLtest		testing log likelihood
+
+hmm.gmmll		loglikelihood of gmm model used for initialisation
+hmm.mix			gaussian mixture model trained on same data
+
+
+For 'Gauss' and 'GaussCom' observation models we also have:
+
+hmm.state(k).Mu		mean vector for state k
+            .Cov	mean covariance matrix for state k
+            .a		ar coefficients for state k
+
+For 'AR' observation models we have:
+
+hmm.state(k).p          order of AR model
+hmm.state(k).a          parameter vector for AR model
+hmm.state(k).v          noise variance for AR model
+
+For 'LIKE' observation models, there are no extra parameters.
+

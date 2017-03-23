@@ -1,0 +1,22 @@
+function reddif(GoodSpots, spots, GSD,thresh)
+figure(3); hold on
+[m,n]=size(GSD);
+linemat = zeros(2,2);
+lastDist = 0;
+for i=1:m
+  if (GSD(i)>=thresh),
+    if (lastDist >=thresh),
+      linmat(1,1) = spots(GoodSpots(max(1,i-1)),3);
+      linmat(1,2) = spots(GoodSpots(max(1,i-1)),4);
+      linmat(2,1) = spots(GoodSpots(i),3);
+      linmat(2,2) = spots(GoodSpots(i),4);
+      plot(linmat(:,1),linmat(:,2),'MarkerFaceColor', 'r');
+      %line(spots(GoodSpots(max(1,i-1),3)), spots(GoodSpots(max(1,i-1),4)) );
+      %  line(spots(GoodSpots(i),3), spots(GoodSpots(i),4) );
+    end
+
+  else
+   % plot(spots(GoodSpots(i),3), spots(GoodSpots(i),4),'markersize',1,'MarkerEdgeColor','r');
+  end    
+  lastDist = GSD(i);
+end

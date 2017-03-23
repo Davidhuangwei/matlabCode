@@ -1,0 +1,37 @@
+% function outStruct = MeanDesigVar(meanDim,fileBaseCell,spectAnalDir,depVar,trialDesig)
+% saves memory by summing then dividing
+
+function outStruct = MeanDesigUnitFieldCoh(fileBaseCell,spectAnalDir,depVar,trialDesig)
+
+sumTemp = {};
+for k=1:length(fileBaseCell)
+%     try 
+        temp = Struct2CellArray(LoadDesigVar(fileBaseCell(k),spectAnalDir,[depVar '.yo'],trialDesig),[],1);
+        zerosp = Struct2CellArray(LoadDesigVar(fileBaseCell(k),spectAnalDir,[depVar '.zerosp',trialDesig),[],1);
+    fieldNames = temp(:,1:end-1);
+    for m=1:size(fieldNames,1)
+        if ~isempty(temp{m,end})
+            for n=1:size(zerosp{m,end},2)
+                %             temp{m,end}(isnan(temp{m,end}(:))) = 0;
+                if length(sumTemp)>=m & ~isempty(sumTemp{m})
+                    sumTemp{m}(n,:,:) = sumTemp{m}(n,:,:) + sum(temp{m,end}(~zerosp(:,n),n,:,:),1);
+                    num(m,n) = num(m,n) + size(temp{m,end}(~zerosp(:,n),n,:,:),1);
+                else
+                    sumTemp{m}(n,:,:) = sum(temp{m,end}(~zerosp(:,n),n,:,:),1);
+                    num(m,n) = size(temp{m,end}(~zerosp(:,n),n,:,:),1);
+                end
+        end
+    end
+%     catch
+%         fprintf(['%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n'...
+%         'SKIPPING %s\n'...
+%         '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'],fileBaseCell{k});
+%     end
+end
+outCell = cell(size(fieldNames)+[0 1]);
+outCell(:,1:end-1) = fieldNames(:,1:end);
+for m=1:size(fieldNames,1)
+    outCell{m,end} = sumTemp{m} / num(m);
+end
+outStruct = CellArray2Struct(outCell);
+return

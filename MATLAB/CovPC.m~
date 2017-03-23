@@ -1,0 +1,31 @@
+function [eg,egv]=CovPC(Y,X,lags,tobs)
+[nobs, nvar]=size(X);
+[yobs, yvar]=size(Y);
+if nobs~=yobs
+    error('check dimension')
+end
+if isempty(tobs)
+    if lags(end)<0
+        tobs=1:(nobs+min(lags));
+    else
+        tobs=(max(lags)+1):nobs;
+    end
+end
+tobs=tobs(:);
+nlags=length(lags);
+nX=bsxfun(@minus,X,mean(X,1));
+% sX=cov(X);
+nY=zscore(Y);
+oX=bsxfun(@minus,tobs,lags);
+Y=repmat(nY(tobs),nlags,1);
+X=nX(oX(:),:);
+
+X_white = sqrtm(pdinv(cov(X)));
+Y_new = Y*U_white';
+Y_Kx_Y = Y_new' * Kx * Y_new;
+
+% eigenvalue decomposition
+[eY, egY,~]=svd((Y_Kx_Y+Y_Kx_Y')/2);%cov(Y_new)
+figure(226);plot((diag(egY)/trace(egY))'*triu(ones(size(Y,2))))
+% [eig_Y, eiY] = eigdec((Y_Kx_Y+Y_Kx_Y')/2, 20); % /2
+Personality_f = Y_new * eY;

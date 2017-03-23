@@ -1,0 +1,54 @@
+load5 Matlab .MAT file version 5 load function
+
+load5 is an open-source "load" function for Matlab .MAT version 5 files.  In
+addition to most standard features of the load function, load5 adds some
+additional features including Partial I/O and reading substructures without
+reading the entire structure.
+
+Contact:
+    You can contact me (Christopher Hulbert) through email at cch@isl-inc.com
+
+Contributing:
+    If you make changes, I would appreciate your contributions and more than
+likely will include them in future releases.  If you are interested in
+collaborations, contact me via email at cch@isl-inc.com.  See the file COPYING
+for information on reproducing and distributing the code or binaries.
+
+Binaries:
+    Precompiled sources are located in the binaries folder.  Distributed
+binaries include versions for 32 and 64 bit linux, and 32 bit windows.  32 bit
+versions are built against Matlab 6.5 (R13), 64 bit linux is built against
+Matlab 7.1 (R14 SP3).
+
+Building:
+    Four of the five builds currently supported make use of the GNU autotools,
+and thus you should have them.  There is a build script in the top-level
+directory for the four builds including the following supported platforms:
+cygwin, mingw, linux, and solaris.  You can of course configure and build
+your own way.  Recently, a Visual C 7 Solution has been created in the
+build-vc7 direcotry.  You should change the paths for include files and
+libraries where appropriate.  Before building load5, you will need to obtain
+and build libmatio (the Matlab .MAT file I/O library).  You can download this
+on the Matlab fle exchange:
+http://www.mathworks.com/matlabcentral/fileexchange/loadAuthor.do?objectType=author&objectId=1094569.
+
+Targets:
+    The library has been tested/used on linux and windows little-endian
+architectures, as well as solarix big-endian.
+
+Copyright Notice:
+    (C) 2005  Christopher C. Hulbert
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA

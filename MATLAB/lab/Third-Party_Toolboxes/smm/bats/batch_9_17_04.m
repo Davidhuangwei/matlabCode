@@ -1,0 +1,9 @@
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^12,1250,2^11,2,1000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^12,1250,2^11,1.5,1000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^12,1250,2^11,1,1000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^11,1250,2^10,2,2000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^11,1250,2^10,1.5,2000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^11,1250,2^10,1,2000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^10,1250,2^9,1.5,2000)
+calcAndSaveSpectrogram('sm9608_301','.eeg',97,1:96,2^10,1250,2^9,1,2000)
+exit

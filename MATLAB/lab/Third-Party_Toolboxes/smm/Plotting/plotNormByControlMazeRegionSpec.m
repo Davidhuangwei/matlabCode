@@ -1,0 +1,347 @@
+function plotNormByControlMazeRegionSpec(expTaskName,expBaseMat,controlTaskName,controlBaseMat,fileext,fileNameFormat,chanMat,badChannels,WinLength,NW,includePortsBool,samescale,dbscale,removeexp,plotVar)
+
+
+if ~exist('samescale','var') | isempty(samescale)
+    samescale = 1;
+end
+if ~exist('badChannels','var') | isempty(badChannels)
+   badChannels  = 0;
+end
+if ~exist('dbscale','var') | isempty(dbscale)
+    dbscale = 0;
+end
+if ~exist('removeexp','var') | isempty(removeexp)
+    removeexp = 0;
+end
+if ~exist('includePortsBool','var') | isempty(includePortsBool)
+    includePortsBool = 0;
+end
+if ~exist('percentageBool','var') | isempty(percentageBool)
+    percentageBool = 0;
+end
+
+
+if fileNameFormat == 2,
+    expFileName = [expTaskName '_' expBaseMat(1,:) '-' expBaseMat(end,8:10) ...
+        fileext '_MazeRegionsSpectra_Win' num2str(WinLength) '_NW' num2str(NW) '.mat'];
+    controlFileName = [controlTaskName '_' controlBaseMat(1,:) '-' controlBaseMat(end,8:10) ...
+        fileext '_MazeRegionsSpectra_Win' num2str(WinLength) '_NW' num2str(NW) '.mat'];
+end
+
+if exist(expFileName,'file')
+    load(expFileName)
+else
+    YOU_NEED_TO_RUN_calcMazeRegionSpectrum
+end
+
+Fexp = F;
+caYexp = caY;
+cpYexp = cpY;
+rewYexp = rewY;
+retYexp = retY;
+%xpYexp = xpY;
+wpYexp = wpY;
+dpYexp = dpY;
+allYexp = allY;
+allNoPortsYexp = allNoPortsY;
+
+if exist(controlFileName,'file')
+    load(controlFileName)
+else
+    YOU_NEED_TO_RUN_calcMazeRegionSpectrum
+end
+
+Fcontrol = F;
+caYcontrol = caY;
+cpYcontrol = cpY;
+rewYcontrol = rewY;
+retYcontrol = retY;
+%xpYcontrol = xpY;
+wpYcontrol = wpY;
+dpYcontrol = dpY;
+allYcontrol = allY;
+allNoPortsYcontrol = allNoPortsY;
+
+
+for i=1:size(chanMat,3)
+    figure(i);
+    clf;
+end
+
+lineWidth = 0.01;
+switch (plotVar)
+    case 1
+        Y = allYexp./allYcontrol;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = allNoPortsYexp./allNoPortsYcontrol;
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 2
+        Y = allYexp;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = allYcontrol;
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 3   
+        Y = allNoPortsYexp;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = allNoPortsYcontrol;
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 3.5
+        Y = caYexp;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = caYcontrol;
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 3.6
+        Y = caYexp./caYcontrol;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 3.7
+        Y = log10(caYexp)-log10(caYcontrol);
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 4
+        Y = caYexp./caYcontrol;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = cpYexp./cpYcontrol;
+        color = [0 1 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = rewYexp./rewYcontrol;
+        color = [0.5 0.5 0.5];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = retYexp./retYcontrol;
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 5
+        Y = caYexp./caYcontrol;
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = cpYexp./cpYcontrol;
+        color = [0 1 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = rewYexp./rewYcontrol;
+        color = [0.5 0.5 0.5];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = retYexp./retYcontrol;
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = xpYexp./xpYcontrol;
+        color = [1 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = wpYexp./wpYcontrol;
+        color = [0.85 0.85 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = dpYexp./dpYcontrol;
+        color = [0 1 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 6
+        Y = (caYexp./allNoPortsYexp)./(caYcontrol./allNoPortsYcontrol);
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (cpYexp./allNoPortsYexp)./(cpYcontrol./allNoPortsYcontrol);
+        color = [0 1 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (rewYexp./allNoPortsYexp)./(rewYcontrol./allNoPortsYcontrol);
+        color = [0.5 0.5 0.5];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (retYexp./allNoPortsYexp)./(retYcontrol./allNoPortsYcontrol);
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+    case 7
+        Y = (caYexp./allNoPortsYexp)./(caYcontrol./allNoPortsYcontrol);
+        color = [1 0 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (cpYexp./allNoPortsYexp)./(cpYcontrol./allNoPortsYcontrol);
+        color = [0 1 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (rewYexp./allNoPortsYexp)./(rewYcontrol./allNoPortsYcontrol);
+        color = [0.5 0.5 0.5];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (retYexp./allNoPortsYexp)./(retYcontrol./allNoPortsYcontrol);
+        color = [0 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)        
+        Y = (xpYexp./allNoPortsYexp)./(xpYcontrol./allNoPortsYcontrol);
+        color = [1 0 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (wpYexp./allNoPortsYexp)./(wpYcontrol./allNoPortsYcontrol);
+        color = [0.85 0.85 0];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+        Y = (dpYexp./allNoPortsYexp)./(dpYcontrol./allNoPortsYcontrol);
+        color = [0 1 1];
+        plotchanspectrum(F,Y,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+
+end
+
+for i=1:size(chanMat,3)
+    figure(i);
+    text(-0,0,{expBaseMat(1,1:6),[expBaseMat(1,8:10) '-' expBaseMat(end,8:10)],'rl,lr trials','',...
+        'xp removed','',fileext,'red=center','green=chcpnt','gray=rewarm','blue=retarm','gold=rewports',...
+        'cyan=delayports','','mtcsd','nOverlap=0',['window=' num2str(WinLength)],['NW=' num2str(NW)],...
+        'One segment','per region','per trial'})
+end
+
+
+return
+% includePortsBool,percentageBool,samescale,dbscale,removeexp,plotVar)
+    color = [1 0 1]; %pink
+    plotchanspectrum(F,xpY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+    color = [0.85 0.85 0]; %gold
+    plotchanspectrum(F,wpY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+    color = [0 1 1]; %cyan
+
+if percentageBool
+    if ~includePortsBool,
+        cpY = cpY./allNoPortsY;
+        caY = caY./allNoPortsY;
+        rewY = rewY./allNoPortsY;
+        retY = retY./allNoPortsY;
+        xpY = xpY./allNoPortsY;
+        wpY = wpY./allNoPortsY;
+        dpY = dpY./allNoPortsY;
+    else
+        cpY = cpY./allY;
+        caY = caY./allY;
+        rewY = rewY./allY;
+        retY = retY./allY;
+        xpY = xpY./allY;
+        wpY = wpY./allY;
+        dpY = dpY./allY;
+    end
+end
+
+
+
+figure(1);
+clf;
+figure(2);
+clf;
+lineWidth = 0.01;
+
+color = [0 1 0];
+plotchanspectrum(F,cpY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+color = [.5 .5 .5];
+plotchanspectrum(F,rewY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+color = [0 0 1];
+plotchanspectrum(F,retY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+color = [1 0 0];
+plotchanspectrum(F,caY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+if includePortsBool
+    color = [0.5 0.5 0]; %brown
+    plotchanspectrum(F,xpY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+    color = [0.5 0.5 1]; %light purple
+    plotchanspectrum(F,wpY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+
+    color = [0.5 0 0.5]; %dark purple
+    plotchanspectrum(F,dpY,chanMat,badChannels,samescale,dbscale,removeexp,color)
+end
+
+return
+
+
+if ~exist('trialTypesBool','var') | isempty(trialTypesBool)
+    trialTypesBool = [1  0  1  0  0   0   0   0   0   0   0   0  0];
+                   % lr rr rl ll lrp rrp rlp llp lrb rrb rlb llb xp
+end
+if ~exist('removeexp', 'var') | isempty(removeexp)
+    removeexp = 0;
+end
+samescale=1;
+dbscale=0;
+
+figure(1);
+clf;
+figure(2);
+clf;
+
+mazeLocationsBool = [0  0  0  0  1  0   0   0   0 ];
+                  % rp lp dp cp ca rca lca rra lra
+[expY, expF]=calcchanspectrum8(expBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+[controlY, controlF]=calcchanspectrum8(controlBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+if expF ~= controlF
+    CONTROL_EXP_FREQS_NOT_SAME
+end
+y = log10(expY)-log10(controlY);
+whos
+f = controlF;
+color = [1 0 0];
+lineWidth = 0.01;
+plotchanspectrum(f,y,chanMat,badchannels,samescale,0,color)
+y = (controlY);
+color = [0 0 1];
+%plotchanspectrum(f,y,chanMat,badchannels,samescale,0,color)
+
+return
+
+
+
+
+mazeLocationsBool = [0  0  0  1  0  0   0   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+[expY, expF]=calcchanspectrum8(expBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+[controlY, controlF]=calcchanspectrum8(controlBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+if expF ~= controlF
+    CONTROL_EXP_FREQS_NOT_SAME
+end
+y = (expY)./(controlY);
+f = controlF;
+color = [0 1 0];
+lineWidth = 0.01;
+plotchanspectrum(f,y,chanMat,badchannels,samescale,dbscale,color)
+
+mazeLocationsBool = [0  0  0  0  1  0   0   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+[expY, expF]=calcchanspectrum8(expBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+[controlY, controlF]=calcchanspectrum8(controlBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+if expF ~= controlF
+    CONTROL_EXP_FREQS_NOT_SAME
+end
+y = (expY)./(controlY);
+f = controlF;
+color = [1 0 0];
+lineWidth = 0.01;
+plotchanspectrum(f,y,chanMat,badchannels,samescale,dbscale,color)
+
+                  
+mazeLocationsBool = [0  0  0  0  0  1   1   0   0];
+                  % rp lp dp cp ca rca lca rra lra
+[expY, expF]=calcchanspectrum8(expBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+[controlY, controlF]=calcchanspectrum8(controlBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+if expF ~= controlF
+    CONTROL_EXP_FREQS_NOT_SAME
+end
+y = (expY)./(controlY);
+f = controlF;
+color = [.5 .5 .5];
+lineWidth = 0.01;
+plotchanspectrum(f,y,chanMat,badchannels,samescale,dbscale,color)
+               
+
+mazeLocationsBool = [0  0  0  0  0  0   0   1   1];
+                  % rp lp dp cp ca rca lca rra lra
+[expY, expF]=calcchanspectrum8(expBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+[controlY, controlF]=calcchanspectrum8(controlBaseMat,fileext,nchannels,channels,nFFT,nOverlap,WinLength,Fs,NW,removeexp,0,trialTypesBool,mazeLocationsBool);
+if expF ~= controlF
+    CONTROL_EXP_FREQS_NOT_SAME
+end
+y = (expY)./(controlY);
+f = controlF;
+color = [0 0 1];
+lineWidth = 0.01;
+plotchanspectrum(f,y,chanMat,badchannels,samescale,dbscale,color)
+
+return

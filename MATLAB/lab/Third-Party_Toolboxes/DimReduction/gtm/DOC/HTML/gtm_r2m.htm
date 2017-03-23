@@ -1,0 +1,49 @@
+<html>
+
+<head>
+<title>The GTM Toolbox: gtm_r2m</title>
+
+<body><h1>gtm_r2m</h1>
+Convert data from column vector to a mesh-matrix representation
+
+<p>
+The mesh-matrices are filled columnwise, starting from the
+top left corner, with the elements from the corresponding 
+column vectors. The exact (cX, cY, cZ) - (X, Y, Z) 
+relationship being:
+
+<p>
+X(i,j) = cX(meshRows*(i-1)+j)
+
+<p>
+Y(i,j) = cY(meshRows*(i-1)+j)
+
+<p>
+Z(i,j) = cZ(meshRows*(i-1)+j)
+
+<p>
+
+<p>
+
+<h3>Synopsis</h3>
+<pre>[X, Y, Z] = gtm_r2m(cX, cY, cZ, meshRows, meshCols)</pre><pre>[X, Y] = gtm_r2m(cX, cY, meshRows, meshCols)</pre><pre>X = gtm_r2m(cX, meshRows, meshCols)</pre>
+<h3>Arguments</h3>
+<code>cX, cY, cZ</code> - 
+column vectors with x-, y-, and x-data
+respectively; N-by-1
+
+<p>
+<code>meshRows, meshCols</code> - 
+number of rows and colmuns of the mesh
+matrices; meshRows*meshCols = N
+
+<h3>Return</h3>
+<code>X, Y, Z</code> - 
+mesh matrices; meshRows-by-meshCols
+
+<h3>See also</h3>
+<code><a href="./gtm_m2r.htm">gtm_m2r</a></code>
+<hr>
+<a href="./Contents.htm"><em>The GTM Toolbox: Contents</em></a>
+</body>
+</html>

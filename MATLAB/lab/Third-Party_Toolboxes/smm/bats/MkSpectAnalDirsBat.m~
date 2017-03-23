@@ -1,0 +1,9 @@
+function MkSpectAnalDirsBat(fileBaseCell,spectAnalDirName)
+
+for j=1:length(fileBaseCell)
+    mkdir([fileBaseCell{j} '/' spectAnalDirName])
+end
+
+for j=1:length(remFiles)
+    eval(['!rmdir ' remFiles{j} '/CalcRunningSpectra15_allTheta_MinSpeed0wavParam6Win1250.csd1' ])
+end

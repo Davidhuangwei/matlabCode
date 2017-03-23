@@ -1,0 +1,58 @@
+<TITLE>/</TITLE>
+<BODY>
+<A HREF = "index.html">[Index for .]</A>
+<A HREF = "../index.html">[Return to Master Index]</A>
+<H1>embed</H1>
+<H2>(./embed.m)</H2>
+<HR><H3>Function Synopsis</H3>
+<pre>[U] = embed(x,embd,lag)</pre>
+<HR><H3>Help text</H3>
+<pre>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	[U] = embed(x,embd,lag)
+
+	Creates an embedding matrix using the values of vector x 
+	at lags &lt;lag&gt;. Embedding matrix U has embedding 
+	dimension &lt;embd&gt;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+</pre>
+<HR><H3>Cross-Reference Information</H3>This function is called by
+<pre><UL>
+<LI><A HREF = "../html/arembed.html">arembed</A>        ./arembed.m</LI>
+</UL></pre>
+<HR><H3>Listing of function </H3>
+<pre>
+function  [U] = embed(x,embd,lag)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%	[U] = embed(x,embd,lag)
+%
+%	Creates an embedding matrix using the values of vector x 
+%	at lags &lt;lag&gt;. Embedding matrix U has embedding 
+%	dimension &lt;embd&gt;
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% need column vector;
+  x=x(:);
+  N=size(x,1);
+
+% embed data sequence for embedding dimension &lt;embd&gt; and lag &lt;lag&gt;
+
+  hindex=1:lag:embd*lag;	% horizontal vector
+  hindex=hindex-1;
+  vindex=1:N-(embd-1)*lag;vindex=vindex';	% vertical vector
+  Nv=max(size(vindex));	
+
+  U=x(:,ones(1,embd));
+  U=U(hindex(ones(Nv,1),:)+vindex(:,ones(embd,1)));
+
+</pre>
+<HR>
+Produced by <A HREF="">mat2html</A> on Thu Feb  1 11:33:45 2001
+<BR>
+Cross-Directory links are: OFF<BR>
+</BODY>

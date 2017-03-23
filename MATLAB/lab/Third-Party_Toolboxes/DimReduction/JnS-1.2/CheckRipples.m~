@@ -1,0 +1,70 @@
+function CheckRipples(FileBase,varargin)
+
+[fMode ] = DefaultArgs(varargin,{'compute'});
+Channel =4;
+eFs =1250;
+FreqRange = [80 250];
+Par = LoadXml(FileBase);
+switch fMode
+    case 'compute'
+        rip_sdet = load([FileBase '.spw']);
+        %load([FileBase '.DetectPeaks.mat']);
+        %rip_detpk = OutArgs.Bursts(:,1);
+
+        eeg = LoadBinary([FileBase '.eeg'],Channel,Par.nChannels,[],[],'double')';
+        feeg = ButFilter(eeg,2,FreqRange/625,'bandpass');
+        pow = log(Filter0(ones(50,1),abs(eeg)));
+        pow = resample(pow,1,25);
+        
+        weeg = WhitenSignal(eeg);
+        vm = bload([FileBase '.vm'],[1 inf])';
+        segs = GetSegs([eeg vm weeg],rip_sdet(:,1)-2^7,2^8,[]);
+        %    segs2 = GetSegs(eeg,rip_detpk-2^7,2^8,[]);
+
+        mat1 = reshape(sq(segs(:,:,3)),[],1);
+        %   mat2 = reshape(segs2,[],1);
+        [out.y,out.f,t] = mtchglong(mat1,2^11,eFs,2^8,0,5,'linear',[],[40 300]);
+        %  [y2,f,t2] = mtchglong(mat2,2^11,eFs,2^8,0,5,'linear',[],[40 300]);
+
+        out.pps = sq(PowerPeakStats(out.y,out.f,[80 200]));
+
+        [out.yh, out.by] = SpectralDistr(out.y,out.f,t,[],0,[], 30);
+        %   [yh2, by2] = SpectralDistr(y2,f,t2,[],0,[], 30);
+
+          out.segs = sq(segs(:,:,1:2));
+
+        %  keyboard
+        if 0
+            ExamSegs('init',segs1,rip_sdet(:,[1 3]));
+
+            ExamSegs('init',segs2,OutArgs.Bursts(:,[2 3 4 7]));
+        end
+    keyboard
+
+
+    case 'display'
+        pps = sq(PowerPeakStats(OutArgs.y,Outf,FreqRange));
+        [s si ] = sort(pps(:,5),'descend');
+        nrip = size(OutArgs.y,1);
+        subplot(211)
+        imagesc([1:nrip],OutArgs.f,log(OutArgs.y(si,:))');axis xy
+
+        while 1
+            subplot(211)
+            [x,y,b] = PointInput(1);
+            ind = max(1,round(x))
+            subplot(212)
+            plot(unity(sq(OutArgs.segs(:,si(ind),:))));axis tight
+            if b==2
+                break;
+            end
+        end
+%         figure(714);clf
+%         subplot(211)
+%         imagesc(f,by1,yh1);
+% 
+%         subplot(212)
+%         imagesc(f,by2,yh2);
+
+
+end

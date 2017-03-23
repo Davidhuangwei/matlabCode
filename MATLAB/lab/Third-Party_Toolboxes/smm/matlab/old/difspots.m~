@@ -1,0 +1,7 @@
+function difspots()
+     [m,n]=size(GoodSpots);
+     GoodSpotsDif = zeros(m)
+     for i=1:m
+     GoodSpotsDif(m) = ((Spots(GoodSpots(m),3)-Spots(GoodSpots(max(m-1,1)),3))^2
+			+ (Spots(GoodSpots(m),4)-Spots(GoodSpots(max(m-1,1)),4))^2)^(1/2);
+end

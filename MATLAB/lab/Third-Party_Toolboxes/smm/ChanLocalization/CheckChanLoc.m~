@@ -1,0 +1,49 @@
+function CheckChanLoc(fileExt,chanLocVersion,numberBool)
+chanInfoDir = 'ChanInfo/';
+chanMat = LoadVar([chanInfoDir 'ChanMat' fileExt '.mat']);
+badChans = load([chanInfoDir 'BadChan' fileExt '.txt']);
+if exist([chanInfoDir 'ChanLoc_' chanLocVersion fileExt '.mat'],'file')
+    chanLoc = LoadVar([chanInfoDir 'ChanLoc_' chanLocVersion fileExt '.mat']);
+else
+    chanLoc.none = 0;
+end
+plotAnatBool = 1;
+anatOverlayName = [chanInfoDir 'AnatCurves.mat'];
+plotSize = [16.5,6.5];
+plotOffset = load([chanInfoDir 'OffSet' fileExt '.txt']);
+ 
+plotMat(odd(chanMat(:,odd(1:size(chanMat,2)-1))-1)+1) = 0;
+plotMat(odd(chanMat(:,odd(1:size(chanMat,2)-1))-1)) = 1;
+plotMat(odd(chanMat(:,odd(1:size(chanMat,2)-1)+1)-1)) = 0;
+plotMat(odd(chanMat(:,odd(1:size(chanMat,2)-1)+1)-1)+1) = 1;
+
+figure(1)
+clf
+fields = fieldnames(chanLoc);
+for j=1:length(fields)
+    h = subplot(1,length(fields),j);
+    %hold on
+    keyboard
+    temp = Make2DPlotMat(plotMat,chanMat,chanLoc.(fields{j}));
+    temp = temp(:);
+    temp(isnan(temp)) = 2;
+    imagesc(Make2DPlotMat(temp,chanMat,badChans));
+    set(gca,'clim',[-1 2])
+    XYPlotAnatCurves({anatOverlayName},h,plotSize,plotOffset);
+    title(fields{j})
+    if numberBool
+        for m=1:size(chanMat,2)
+            for k=1:size(chanMat,1)
+                %fprintf('%i ',chanMat(k,m));
+                text(m,k+.4,num2str(chanMat(k,m)),'color','w');
+            end
+        end
+
+    end
+    set(gca,'ytick',1:size(chanMat,1))
+    grid on
+end
+
+% for j=1:max(max(chanMat))
+%     text(floor((j-1)/size(chanMat,1))+1,mod(j,size(chanMat,1))+1,num2str(j));
+% end

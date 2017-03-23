@@ -1,0 +1,19 @@
+function names = getdatfilenames(orderbool,index1,index2)
+% returns a matrix with each row containing the basename of each .eeg file in the current directory 
+eval(['ls --quoting-style=c ' ]);
+ls --quoting-style=c *.dat
+a = ans;
+f = find(a=='"');
+numentries = length(f);
+for i=1:2:numentries;
+    names((i+1)/2,:) = a(f(i)+1:f(i+1)-5);
+end
+
+if exist('orderbool', 'var')
+    [m n] = size(names);
+    numbers = str2num(names(:,index1:index2));
+    [junk orderindex] = sort(numbers);
+    names = names(orderindex,:);
+end
+    
+return

@@ -1,0 +1,151 @@
+glmlab  BASIC
+=============
+
+The background to glmlab is simple:  The uni where I work (The University of
+Southern Queensland) needed something like GLIM for a course we offer. But for
+what we were doing, GLIM was annoying---and expensive.  So I wrote glmlab to 
+do two things:
+(i) Something my students can use as a tool and something not too difficult to
+    learn.  Because our department uses  MATLAB  in a lot of other units also,
+    it seemed logical to use  MATLAB  here as well---students were generally
+    familiar with it, and would either have a copy (student edition) or access
+    to a copy (on our campus workstation).
+(ii) Something flexible enough with enough bells and whistles that I can use 
+     it in my own research too.
+So now we have  glmlab.
+
+I have tried to make  glmlab  as obvious to use as possible.  I have probably
+only succeeded in making it very obvious to me.  Anyway, I hope it is easy
+to use, but here are some comments that you may find helpful.
+
+1.  VERY BASICS
+
+1.1 Starting Off
+
+To use  glmlab, type  glmlab  at the  MATLAB  prompt.  This will open a gui
+window with a lot of stuff on it, mainly to do with the names of the
+variables to use.  So... in the  MATLAB  window, declare some variables
+(by loading from a file (using  load, or File, LOAD in the menu), or  MATLAB
+statements such as y=[1.3 2.2 1.4 5.6]';).  Then, in the  glmlab  window, enter
+the names of the variables in the appropriate window.
+
+If  glmlab  requires information that you haven't supplied, it will let
+you know.  I have tried to make it pretty flexible---it tries to make do
+with mixes of row vectors and column vectors for example.  But don't push
+it too hard---it ain't foolproof!  (Nor are fools!)
+
+After supplying names for variables, whack the FIT MODEL button, and the
+specified model will be fitted.  On the  MATLAB  screen, some stuff will
+appear about the fit---the parameter estimates, the names of the variables
+and things like that.
+
+1.2  Declaring Variables as Qualitative
+
+By default,  glmlab  assumes all variables are quantitative.  To declare
+that a variable is qualitative, use the  fac  command.  In other words,
+you can have a variable with three levels thus:
+
+   >> x=[1 1 1 1 2 2 2 2 2 3 3 3]';
+ 
+This can be entered as a covariate as  fac(x)  in the covariates section.
+
+1.3  Interactions
+
+To indicate to  glmlab  that you wish to include interaction terms, use
+the  @  character.  For example, suppose we have qualitative variables
+f1  and  f2  and quantitative variables  x1  and  x2.  These types of
+interactions could be declared in the Covariate section of the Main
+glmlab Window:
+ *  fac(f1)@fac(f2)  is the interaction between  f1  and  f2
+ *  x1@x2  is the interaction between  x1  and  x2
+ *  x1@fac(f2)  is the interaction between  x1  and  f2
+Notice that the  fac  command is still required for qualitative variables.
+
+1.4 Using the  makefac  Command
+
+You can also use the  makefac  command, which is like the GLIM %gl command.
+It is used to generate a regular factor.  Suppose we have variables of length
+20.  Suppose there are four levels of the factor (A, B, C and D say) and they
+occur in blocks of 5:  A A A A A B B B B B C C C C C D D D D D.  To define the
+variable, we have two options:
+
+(i)  Define a numerical vector:
+
+        >> f1= [1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5];
+
+(ii)  Use  makefac:
+
+        >> f1=makefac(20,4,5);
+
+The second way is obviously easier.  In the above use then, we created  f1
+as a vector of length 20, with four levels, each in blocks of 5.
+
+1.5 Using the Binomial Distribution
+
+When using the binomial distribution, the response variables must consist
+of two columns:  the first being the observed number of responses, and the
+second column the corresponding sample sizes.  If there is only one column
+entered when a binomial distribution is being used, two things will happen:
+If all the numbers in the column are between zero and one (is proportions),
+it will happily proceed.  If the numbers are not all between zero and one,
+glmlab  will think you made an error and revert back to a normal distribution 
+and identity link function.  Be careful with using a binomial distribution.
+To make  glmlab  use a binomial distribution rather than the default normal
+distribution, see the  next section.
+
+And that's most of the basics.
+
+2.  A BIT TRICKIER...
+
+So you don't like something, or wish for something else?  Try clicking the
+menu items on the top of the screen.  They will produce menus of items that can
+make changes in the following ways:
+ *  you can change the error distribution (`normal' is the default)
+ *  you can change the link function (`id' is the default)
+ *  you can change the scale parameter (`Mean Deviance' is the default)
+ *  you can change the type of residuals calculated (`Pearson' is the default)
+ *  you can determine what information  glmlab  spits back at you after
+    it has fitted a model.  By default, it shows the parameter estimates and
+    their standard errors, but not some of the fitting information.
+ *  you can decide to recycle the fitted values as the starting values for
+    the next fit if you so desire.
+ *  you can change what output is displayed
+ *  you can reset the defaults
+ *  you can declare a new model
+ *  you can load data files
+
+There is a Help button that gives some basic instructions.
+Just click on the menu buttons and see what's there.
+
+3.  NOT REALLY THAT TRICKY...
+
+So you've fitted a model?  Want to play with the residuals?  Well, click 
+the  PLOTS  menu item, and choose the plot you would like.  glmlab will 
+provide what you asked for annotated as best it can---but please 
+provide contextual information of your own.
+
+4.  PRETTY TRICKY...
+
+If you want to be really smart, you can define your own error distribution
+and link functions.  It's not _that_ hard I guess (but then again, I know
+what the program is about!).  Have a look at the files dstyle.m and
+dlist.m (and lstyle.m and llist.m in the /link directory) in the /dist
+directory.  That should give you some idea of what is happening and what to do.
+
+5.  A REALLY GOOD IDEA...
+
+Let me know what you think---any comments very much appreciated.  Like 
+suggestions for improvement, how easy you find it to use, etc.
+
+You can find me at:
+
+dunn@sci.usq.edu.au
+OR:
+dunn@usq.edu.au
+
+ENJOY,
+
+Pete.
+(Peter Dunn
+dunn@sci.usq.edu.au)
+02 March 1998

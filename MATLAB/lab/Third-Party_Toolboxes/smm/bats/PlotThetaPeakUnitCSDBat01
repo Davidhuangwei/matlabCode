@@ -1,0 +1,20 @@
+ cd /BEEF01/smm/sm9601_Analysis/2-16-04/analysis/
+PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1)
+ PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1,[],'_LinNearCSD121.csd')
+ 
+ cd /BEEF01/smm/sm9603_Analysis/3-21-04/analysis/
+%  PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1)
+ PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1,[],'_LinNearCSD121.csd')
+
+ 
+ cd /BEEF02/smm/sm9608_Analysis/7-17-04/analysis/
+PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1)
+ PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1,[],'_LinNearCSD121.csd')
+ 
+ 
+  cd /BEEF02/smm/sm9614_Analysis/4-17-05/analysis/
+PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1)
+ PlotUnitTrigAveStd(spectAnalDir,analRoutine{1},0.3,1,[],'_LinNearCSD121.csd')
+  
+  
+  

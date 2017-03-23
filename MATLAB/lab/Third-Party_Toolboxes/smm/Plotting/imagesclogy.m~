@@ -1,0 +1,18 @@
+function imagesclogy(x,y,c,varargin)
+keyboard
+base = 2.5;
+yTickLabel = DefaultArgs(varargin,{base*2.^[0:log2(max(y)/base)]});
+
+imagesc(x,1:size(c,1),c);
+
+for j=1:length(yTickLabel)
+    yTick(j) = find(abs(y-yTickLabel(j))==min(abs(y-yTickLabel(j))));
+end
+yTickLabel = round(y(yTick)*10)/10;
+
+if diff(yTick) < 0
+    yTick = fliplr(yTick);
+    yTickLabel = fliplr(yTickLabel);
+end
+set(gca,'ytick',yTick,'yticklabel',yTickLabel)
+

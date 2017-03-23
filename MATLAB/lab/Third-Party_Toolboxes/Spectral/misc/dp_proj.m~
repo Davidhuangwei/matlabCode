@@ -1,0 +1,30 @@
+function pr_op=dp_proj(tapers, sampling, f0)
+%DP_PROJ Generate a prolate projection operator
+%
+%  PR_OP = DP_PROJ(TAPERS, SAMPLING, F0)
+%
+
+%   Author: Bijan Pesaran, version date 3/12/98.
+
+
+if nargin < 2 	sampling = 1;  end
+if nargin < 3   f0 = 0; end
+
+if length(tapers) < 4
+  tapers(1)=round(tapers(1)*sampling);
+end
+
+% set up the tapers
+e=dpsschk(tapers);
+
+% determine parameters and assign matrices
+K=size(e,2);
+N=size(e,1);
+pr_op=zeros(N,K);
+
+shifter=exp(-2.*pi.*j.*f0.*[1:N]./sampling);
+for i=1:K
+	pr_op(:,i)=shifter'.*e(:,i);
+end
+
+

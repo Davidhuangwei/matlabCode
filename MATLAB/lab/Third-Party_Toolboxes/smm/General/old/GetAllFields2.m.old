@@ -1,0 +1,14 @@
+function [data, groupCell] = GetAllFields(categIndepStruct)
+data = [];
+groupCell = {};
+if isstruct(categIndepStruct)
+    names = fieldnames(categIndepStruct);
+    for i=1:length(names)
+        [tempData, tempNameCell] = GetAllFields2(getfield(categIndepStruct,names{i})); 
+        groupCell = cat(1,groupCell,cat(2,repmat(names(i),size(tempData,1),1),tempNameCell));
+        data = cat(1,data,tempData);
+    end
+else
+    data = categIndepStruct;
+end
+return

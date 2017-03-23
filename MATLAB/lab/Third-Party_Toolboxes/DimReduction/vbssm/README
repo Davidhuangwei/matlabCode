@@ -1,0 +1,134 @@
+/------------------------------------------------------------------\
+|                                                                  |
+|             Variational Bayesian State-Space models              |
+|                (aka VB Linear Dynamical Systems)                 |
+|                                                                  |
+|    Copyright Matthew J. Beal 22/05/01 version 3.0 (11/08/03)     |
+|          http://www.cs.toronto.edu/~beal/software.html           |
+|                                                                  |
+|             README file for version 3.0 (11/08/03)               |
+|                                                                  |
+| Please notify me, and include an acknowledgement/citation in any |
+| publications/research that use this code.  Thank you.            |
+|                                                                  |
+\------------------------------------------------------------------/
+
+o Also in this tar file are the matlab .m functions:-
+
+    trigamma,fixedpointsolver,klgamma, lndet, Fcalc, getmarginals, 
+    backwardpass, forwardpass, digamma, the script sinus,
+    and miscellaneous other .m files.
+
+o This version v3.0 of the code is bug-free as far as I can tell.
+
+o Works with multiple, variable length, multi-dimensional sequences.
+
+o Support: none provided just yet, aside from this extended help file for
+vssminpn.m (see bottom of this README), and the demo script sinus.m.
+
+0 Please make sure you check chapter 5 of my thesis before emailing me
+with requests for help.
+
+o I am very interested in collaborating with people who have in mind
+exceedingly interesting and important applications of this model!
+
+o For reference material you are directed to:
+
+    Ghahramani, Z. and Beal, M.J. (2001)
+    Propagation Algorithms for Variational Bayesian Learning.
+    In Adv. Neur. Inf. Proc. Sys. 13. MIT Press, Cambridge, MA, 2001.
+    available from  http://www.cs.toronto.edu/~beal/papers.html
+
+   and chapter 2 and especially chapter 5 of my thesis:
+
+    Beal, M.J. (2003)
+    Variational Algorithms for Approximate Bayesian Inference.
+    PhD. Thesis, Gatsby Computational Neuroscience Unit, UCL.
+    available from  http://www.cs.toronto.edu/~beal/papers.html
+
+o Your feedback is always welcome!
+
+  Good luck!
+
+  -Matthew Beal  12/08/03             email: beal [at] cs.toronto.edu
+
+o Known bugs: none so far at v3.0.
+
+------------------------------------------------------------------
+function net = vssminpn(Yn,inpn,k,its,dispopt,cFbool,hypit,net);
+------------------------------------------------------------------
+
+o type 'help vssminpn' at the prompt.  An expanded help follows below:-
+
+REQUIRED arguments:-
+
+ Yn is a (1 by N) cell array of observation sequences, with each entry in
+ the array a (p by Tn) matrix of observations, where p is the
+ dimensionality of the data, and Tn is the length of the n'th sequence.
+ Thus the sequences are allowed to be different lengths.
+
+ inpn has the same form as Yn, with each cell being a (pinp by Tn) input
+ sequence, where pinp is the dimensionality of the driving inputs to the
+ state-space model.  You are allowed to specify just a single input
+ sequence, and it is replicated as many times as needed for each of the N
+ training sequences; then inpn is a (1 by 1) cell array, with the entry
+ being a matrix which must have second dimension at least max_n(Tn).
+
+OPTIONAL arguments:
+
+ k is the dimension of the hidden state-space.  The default k is p, the
+ dimensionality of the observation sequence.
+
+ its is the number of iterations of VBEM required, default 100.
+
+ dispopt is the degree of visual output verbosity during learning, there
+ are 4 degrees: 0-nothing; 1-info+progress; 2-printout of F (if cFbool
+ set); 3-graphical progress (if cFbool set).
+
+ cFbool is an option whether or not to calculate the lower bound after
+ each iteration.  It is nice to calculate it, to be sure that the lower
+ bound is monotonically increasing (the function will produce an error
+ message if F does not increase at every iteration).  However, in all the
+ data and scenarios that I have tested in this version (v3.0), F increases
+ monotonically, as it should.  Since calculating F may be costly, and we
+ do not need it to learn the model, you can set cFbool to zero, which is
+ the default.  Dispopt 2 and 3 are (mostly) redundant if cFbool is false.
+
+ hypit is an option to specify the iterations at which different
+ hyperparameter optimisations begin, and is a three-component row vector,
+ defaulting to [10 20 30].  These are, respectively, the iterations where
+ algorithm begins dynamics-related optimisations (i.e. alpha and beta
+ hyperparameters), output-related optimisations (i.e. gamma and delta
+ hyperparameters), and the remaining hyperparameters (pa,pb for the noise,
+ and X0m_p and X0ci_p for the hyperparameters of the initial state prior
+ distribution).
+
+ net is a pre-learnt network, which can be specified if one wants to
+ continue training where the last run left off, or even if you want to
+ train on a new set of observation and input sequences, but starting from
+ the posterior over parameters and hyperparameters settings obtained on
+ the original data set.  Note that by specifying this, any specified k is
+ overwritten by that specified in the net, and also the net must be
+ expected to see the same dimensionalities of each of input and
+ observations sequences.
+
+OUTPUT structure 'net'
+
+ The network structure returned is very rich in information, for example,
+ to display the:-
+
+ o final hyperparam alpha, type net.hyp.alpha
+ o history of the bound F, type net.hist.F (last column!)
+ o cov. of the inputs-to-state matrix's rows, type net.param.SigB **
+ o posterior mean of the inputs-to-state matrix, type net.exp.B
+ o the expected natural parameters of the model, type net.exp
+
+ et cetera. Explore around the structure - many good things.
+
+** I would STRONGLY advise you to read chapter 5 of my thesis, which
+** explains the code using almost identical symbols and naming
+** conventions, and provides algorithms to show you exactly what the code
+** is doing.  For example, net.param.SigC is *not* the covariance of the C
+** matrix rows, as one might naively think --- it is related though.
+
+------------------------------------------------------------------
